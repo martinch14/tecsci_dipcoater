@@ -17,4 +17,6 @@ int main(void) {
 //	appcfg.uart1.baud= 9600;
 
 	return app_main();
+
+	lala
 }
