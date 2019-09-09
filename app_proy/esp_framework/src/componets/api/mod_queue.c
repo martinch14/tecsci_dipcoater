@@ -27,7 +27,7 @@
  * expressed or implied, of Sebastián Pablo Bedín <sebabedin@gmail.com>.
  */
 
-#include "mod/inc/mod_queue.h"
+#include "include/mod_queue.h"
 
 int8_t modQueue_Init(mod_queue_t *queue, uint8_t *buffer, uint32_t bufferLen, uint32_t itemSize){
 	return modRingBuffer_Init(&(queue->rb), buffer, bufferLen, itemSize);

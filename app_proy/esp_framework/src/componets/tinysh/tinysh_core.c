@@ -21,7 +21,7 @@
  */
 
 //#include "tinysh/inc/tinysh_core.h"
-#include "tinysh_core.h"
+#include "include/tinysh_core.h"
 
 
 #ifndef BUFFER_SIZE

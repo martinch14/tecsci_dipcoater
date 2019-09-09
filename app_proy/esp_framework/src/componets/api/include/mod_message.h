@@ -32,7 +32,7 @@
 
 #include <stdint.h>
 
-#include "mod/inc/mod_queue.h"
+#include "mod_queue.h"
 
 /*
  * Config

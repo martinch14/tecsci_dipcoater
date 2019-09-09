@@ -10,11 +10,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "app_main.h"
+#include "../main/app_main.h"
 
 int main(void) {
 
-	appcfg.uart1.baud= 9600;
+//	appcfg.uart1.baud= 9600;
 
 	return app_main();
 }

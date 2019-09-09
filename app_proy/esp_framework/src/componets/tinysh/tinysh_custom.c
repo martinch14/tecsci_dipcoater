@@ -5,7 +5,7 @@
 //#include <unistd.h>
 //#include <fcntl.h>
 //#endif
-#include "tinysh.h"
+#include "include/tinysh.h"
 
 //#if _EPITKL_CFG_ARCH__x86 == _EPITKL_CFG_ARCH
 /*--- stuff for single character input entry --------------------------------*/

@@ -27,7 +27,7 @@
  * expressed or implied, of Sebastián Pablo Bedín <sebabedin@gmail.com>.
  */
 
-#include "mod/inc/mod_stack.h"
+#include "include/mod_stack.h"
 
 int8_t modStack_Init(mod_stack_t *stack, uint8_t *buffer, uint32_t bufferLen, uint32_t itemSize){
 	return modRingBuffer_Init(&(stack->rb), buffer, bufferLen, itemSize);

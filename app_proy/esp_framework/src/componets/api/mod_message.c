@@ -28,8 +28,8 @@
  */
 
 #include <stdint.h>
-#include "mod/inc/mod_queue.h"
-#include "mod/inc/mod_message.h"
+#include "include/mod_queue.h"
+#include "include/mod_message.h"
 
 struct mod_message_service_s{
 	mod_message_channel_t *channels;

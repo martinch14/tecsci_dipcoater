@@ -33,7 +33,7 @@
 #include <string.h>
 #include <stdint.h>
 
-#include "mod/inc/mod_ringbuffer.h"
+#include "mod_ringbuffer.h"
 
 typedef struct mod_stack_s mod_stack_t;
 
