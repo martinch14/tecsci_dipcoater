@@ -23,11 +23,4 @@
 		<nature>org.eclipse.cdt.managedbuilder.core.managedBuildNature</nature>
 		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
 	</natures>
-	<linkedResources>
-		<link>
-			<name>src/components/tinysh</name>
-			<type>2</type>
-			<location>/home/martin/Escritorio/EspEmbebidos/ESP32_DipCoater/proyectos/app_proy/esp_framework/src/componets/tinysh</location>
-		</link>
-	</linkedResources>
 </projectDescription>

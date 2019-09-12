@@ -12,6 +12,7 @@
 #include <stdint.h>
 #define _FLAG_ERROR          1<< 8;
 
+
 typedef struct {
 	float values[4];
 } processCommandArg4Float_t;
@@ -81,34 +82,6 @@ void ProcessInit(process_t *process);
 void ProcessNextCommand(process_t *process);
 void ProcessCommandAdd(process_t *process, processCommand_t *cmd);
 void handlerEmpty(void);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 #endif /* COMPONENTS_API_INCLUDE_PROCESS_H_ */

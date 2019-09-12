@@ -32,12 +32,13 @@ static void commandHolahanlder(int argc, char **argv){
 	}
 }
 
-static tinysh_cmd_t commandDOWN = {NULL,"DOWN"				, NULL, NULL, commandHolahanlder, NULL, NULL, NULL};
-static tinysh_cmd_t commandUP = {NULL,"UP"					, NULL, NULL, commandHolahanlder, NULL, NULL, NULL};
-static tinysh_cmd_t commandSPIN = {NULL,"SPIN"				, NULL, NULL, commandHolahanlder, NULL, NULL, NULL};
-static tinysh_cmd_t commandWAIT = {NULL,"WAIT"				, NULL, NULL, commandHolahanlder, NULL, NULL, NULL};
-static tinysh_cmd_t commandSTOP = {NULL,"STOP"				, NULL, NULL, commandHolahanlder, NULL, NULL, NULL};
-static tinysh_cmd_t commandCEROMACHINE = {NULL,"CEROMACHINE", NULL, NULL, commandHolahanlder, NULL, NULL, NULL};
+static tinysh_cmd_t commandDOWN = 	{NULL,"DOWN"				, NULL, NULL, commandHolahanlder, NULL, NULL, NULL};
+static tinysh_cmd_t commandUP = 	{NULL,"UP"					, NULL, NULL, commandHolahanlder, NULL, NULL, NULL};
+static tinysh_cmd_t commandSPIN = 	{NULL,"SPIN"				, NULL, NULL, commandHolahanlder, NULL, NULL, NULL};
+static tinysh_cmd_t commandWAIT = 	{NULL,"WAIT"				, NULL, NULL, commandHolahanlder, NULL, NULL, NULL};
+static tinysh_cmd_t commandSTOP = 	{NULL,"STOP"				, NULL, NULL, commandHolahanlder, NULL, NULL, NULL};
+static tinysh_cmd_t commandCEROMACHINE = {NULL,"CEROMACHINE"	, NULL, NULL, commandHolahanlder, NULL, NULL, NULL};
+static tinysh_cmd_t commandSTART = {NULL,"START"				, NULL, NULL, commandHolahanlder, NULL, NULL, NULL};
 
 
 void HandlerConsolePutchar(unsigned char c){
@@ -61,6 +62,7 @@ int app_main(void) {
 	tinysh_add_command(&commandWAIT);
 	tinysh_add_command(&commandSTOP);
 	tinysh_add_command(&commandCEROMACHINE);
+	tinysh_add_command(&commandSTART);
 
 	tinysh_set_putchar(HandlerConsolePutchar);
 
