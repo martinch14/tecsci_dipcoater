@@ -1,4 +1,12 @@
 eclipse.preferences.version=1
+environment/project/cdt.managedbuild.toolchain.gnu.cross.base.196728631/BATCH_BUILD/delimiter=\:
+environment/project/cdt.managedbuild.toolchain.gnu.cross.base.196728631/BATCH_BUILD/operation=append
+environment/project/cdt.managedbuild.toolchain.gnu.cross.base.196728631/BATCH_BUILD/value=1
+environment/project/cdt.managedbuild.toolchain.gnu.cross.base.196728631/IDF_PATH/delimiter=\:
+environment/project/cdt.managedbuild.toolchain.gnu.cross.base.196728631/IDF_PATH/operation=append
+environment/project/cdt.managedbuild.toolchain.gnu.cross.base.196728631/IDF_PATH/value=/home/martin/Programas/esp/esp-idf
+environment/project/cdt.managedbuild.toolchain.gnu.cross.base.196728631/append=true
+environment/project/cdt.managedbuild.toolchain.gnu.cross.base.196728631/appendContributed=true
 environment/project/ilg.gnuarmeclipse.managedbuild.cross.toolchain.base.1748626911/BATCH_BUILD/delimiter=\:
 environment/project/ilg.gnuarmeclipse.managedbuild.cross.toolchain.base.1748626911/BATCH_BUILD/operation=append
 environment/project/ilg.gnuarmeclipse.managedbuild.cross.toolchain.base.1748626911/BATCH_BUILD/value=1
