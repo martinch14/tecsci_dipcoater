@@ -40,14 +40,25 @@ processCommand_t cmd_dinamic[] = {
 		{ },
 };
 
-/*Definiciones de comandos y handler para el tiny*/
 
+/*Definiciones de colas y buffer  para la mensajeria*/
+
+mod_queue_t queueconsolareception,queueconsolatransmit;
+uint8_t bufferreception[10];
+uint8_t buffertransmit[10];
+
+
+
+/*Definiciones de comandos y handler para el tiny*/
 
 static void CommandReadHandler(int argc, char **argv){
 	if(4 <= argc){
-		char* 	name = 	tinysh_get_arg_string(argc, argv, 0);
+		char* 	name = 			tinysh_get_arg_string(argc, argv, 0);
 		int		velocity 	= 	tinysh_get_arg_int(argc, argv, 1);
 		int 	acceleration = 	tinysh_get_arg_int(argc, argv, 2);
+
+		modQueue_Write(&queueconsolareception,&velocity);
+		modQueue_Write(&queueconsolareception,&acceleration);
 
 	}
 }
@@ -64,15 +75,10 @@ static tinysh_cmd_t commandSPIN = 			{NULL,"SPIN", NULL, NULL, CommandReadHandle
 static tinysh_cmd_t commandCEROMACHINE = 	{NULL,"CEROMACHINE", NULL, NULL, CommandReadHandler, NULL, NULL, NULL};
 
 
-/*Definiciones de colas y buffer  para la mensajeria*/
-
-mod_queue_t queueconsolareception,queueconsolatransmit;
-uint8_t bufferreception[10];
-uint8_t buffertransmit[10];
 
 
 int app_main_dipcoater(void) {
-	char c;
+	char c=0;
 
 //	Inicialicion de los comandos
 	tinysh_add_command(&commandDOWN);
@@ -83,7 +89,7 @@ int app_main_dipcoater(void) {
 	tinysh_add_command(&commandCEROMACHINE);
 	tinysh_add_command(&commandSTART);
 
-	tinysh_set_putchar(HandlerConsolePutchar);
+//	tinysh_set_putchar(HandlerConsolePutchar);
 
 	tinysh_init();
 
@@ -92,12 +98,17 @@ int app_main_dipcoater(void) {
 	modQueue_Init(&queueconsolareception,bufferreception, 10, sizeof(int));
 	modQueue_Init(&queueconsolatransmit,buffertransmit, 10, sizeof(int));
 
-//	Inicializacion del modulo de procesamiento
+//	Inicializacion del modulo de procesamiento de comandos
+	process_t processDipCoating;
+	processDipCoating.command= cmdProcesoEstandar; // le cargo el proceso definido en el archivo estatico
+	ProcessInit(&processDipCoating);
+
 
 
 	while (1){
-		c = getchar();
-		tinysh_char_in(c);
+		tinysh_update(c);
+		ProcessCommandUpdate(&processDipCoating, cmdProcesoEstandar);
+
 
 	}
 
@@ -111,8 +122,10 @@ int app_main_dipcoater(void) {
 
 
 
-
-
+void tinysh_update(char c){
+	c = getchar();
+	tinysh_char_in(c);
+}
 
 
 

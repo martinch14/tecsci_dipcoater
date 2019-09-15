@@ -48,7 +48,7 @@ int InitCommand(void) {
 //arrayHandlers[PROCESS_COMMAND__N];
 
 
-processReturn_t  ProcessRun(process_t *process) {
+processReturn_e  ProcessRun(process_t *process) {
 //	uint8_t ci = process->state.commandIndex; 				// command index
 //	processCommand_t *cmd = &process->command[ci];
 	processCommand_t *cmd = process->command ;
@@ -92,3 +92,27 @@ processReturn_t  ProcessRun(process_t *process) {
 	}
 	return PROCESS_RET_OK;
 }
+
+void ProcessCommandUpdate(process_t *processDipCoating,processCommand_t* cmdProcesoEstandar){
+	uint8_t index=0;
+
+	//TODO:
+	//Cargar con los valores que vienen de la cola de mensajeria   queueconsolareception    (luego se podría reportar estado en cola queueconsolatransmit)
+	//ejecutar
+	//termiar proceso
+	//cargar de nuevo o repetir
+
+
+	while (processDipCoating->state.commandIndex < 9){
+		processDipCoating->command->commandnumber = cmdProcesoEstandar[index].commandnumber;
+		processDipCoating->command->argument.spin.velocity = cmdProcesoEstandar[index].argument.spin.velocity;
+		processDipCoating->command->argument.spin.acceleration = cmdProcesoEstandar[index].argument.spin.acceleration;
+		ProcessRun(processDipCoating);
+		processDipCoating->state.commandIndex++;
+		index++;
+	}
+	processDipCoating->state.commandIndex=0;
+	index=0;
+}
+
+

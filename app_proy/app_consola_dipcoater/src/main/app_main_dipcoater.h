@@ -20,5 +20,11 @@
 #include "../components/tinysh/include/tinysh.h"
 
 int app_main_dipcoater(void);
+void HandlerConsolePutchar(unsigned char c);
+void tinysh_update(char c);
+
+
+
+
 
 #endif /* MAIN_APP_MAIN_DIPCOATER_H_ */

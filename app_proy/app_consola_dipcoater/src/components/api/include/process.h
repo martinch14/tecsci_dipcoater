@@ -73,15 +73,16 @@ typedef struct {
 typedef enum {
 	PROCESS_RET_OK,
 	PROCESS_RET_ERROR,
-}processReturn_t;
+}processReturn_e;
 
 
-processReturn_t  ProcessRun(process_t *process);
+processReturn_e  ProcessRun(process_t *process);
 
 void ProcessInit(process_t *process);
 void ProcessNextCommand(process_t *process);
 void ProcessCommandAdd(process_t *process, processCommand_t *cmd);
 void handlerEmpty(void);
+void ProcessCommandUpdate(process_t *process,processCommand_t *cmdProcesoEstandar);
 
 
 #endif /* COMPONENTS_API_INCLUDE_PROCESS_H_ */
