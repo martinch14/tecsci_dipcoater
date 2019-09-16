@@ -15,38 +15,12 @@
 #include <stdbool.h>
 
 #include "app_main_dipcoater.h"
-#define MAX_ESTATIC_COMMAND 9
+#include "../components/api/include/processStandar.h"
+
 
 
 //flag para ejecucion del procesamiento de datos
 uint8_t entry =0;
-
-
-/*Definicion del Proceso Estático Comando Velocidad Aceleracion */
-processCommand_t cmdProcesoEstandar[MAX_ESTATIC_COMMAND] = {
-		{ .commandnumber = PROCESS_COMMAND_CERO_MACHINE,.argument.spin.velocity = 5,	.argument.spin.acceleration = 10 },
-		{ .commandnumber = PROCESS_COMMAND_DOWN, 		.argument.spin.velocity = -2,	.argument.spin.acceleration = 1 },
-		{ .commandnumber = PROCESS_COMMAND_WAIT, 		.argument.spin.velocity = 0,	.argument.spin.acceleration = 1 },
-		{ .commandnumber = PROCESS_COMMAND_DOWN, 		.argument.spin.velocity = -2,	.argument.spin.acceleration = 1 },
-		{ .commandnumber = PROCESS_COMMAND_WAIT, 		.argument.spin.velocity = 0,	.argument.spin.acceleration = 1 },
-		{ .commandnumber = PROCESS_COMMAND_UP, 			.argument.spin.velocity = 2,	.argument.spin.acceleration = 1 },
-		{ .commandnumber = PROCESS_COMMAND_WAIT, 		.argument.spin.velocity = 0,	.argument.spin.acceleration = 1 },
-		{ .commandnumber = PROCESS_COMMAND_DOWN, 		.argument.spin.velocity = -2,	.argument.spin.acceleration = 1 },
-		{ .commandnumber = PROCESS_COMMAND_CERO_MACHINE,.argument.spin.velocity = 5,	.argument.spin.acceleration = 10 },
-
-
-		/*Agregar comando LOOP */
-
-};
-
-/*Definicion del Proceso Dinámico - recibe parametros de configuracion desde el módulo de mensajería */
-processCommand_t cmd_dinamic[] = {
-		{ .commandnumber = PROCESS_COMMAND_SPIN,.argument.spin.velocity = 0.1 },
-		{ },
-		{ },
-		{ },
-};
-
 
 
 
@@ -61,9 +35,9 @@ static void CommandReadHandler(int argc, char **argv){
 		float	velocity =	 	tinysh_get_arg_float(argc, argv, 1);
 		float 	acceleration = 	tinysh_get_arg_float(argc, argv, 2);
 
-		struct{}
-		comando.velocidad =
-
+//		struct{
+//		comando.velocidad =
+//		}
 		modQueue_Write(&queueconsolareception,&velocity);
 		modQueue_Write(&queueconsolareception,&acceleration);
 		printf("%s_CommandReadHandler",name);
@@ -107,35 +81,26 @@ int app_main_dipcoater(void) {
 
 //  Inicializacion de la colas de mensajerias
 
-	modQueue_Init(&queueconsolareception, (*uint8_t)bufferreception, 10, sizeof(float));
-	modQueue_Init(&queueconsolatransmit, (*uint8_t)buffertransmit, 10, sizeof(float));
+	modQueue_Init(&queueconsolareception, (uint8_t)bufferreception, 10, sizeof(float));
+	modQueue_Init(&queueconsolatransmit, (uint8_t)buffertransmit, 10, sizeof(float));
 
 //	Inicializacion del modulo de procesamiento de comandos
 	process_t processDipCoating;
-	processDipCoating.command= cmdProcesoEstandar; // le cargo el proceso definido en el archivo estatico
+	processDipCoating.command= cmdProcesoEstandar2; // le cargo el proceso definido en el archivo estatico
 	ProcessInit(&processDipCoating);
-
 
 
 	while (1){
 		tinysh_update(c);
 		if (entry){
-		ProcessCommandUpdate(&processDipCoating, cmdProcesoEstandar);
+		ProcessCommandUpdate(&processDipCoating, cmdProcesoEstandar2);
 		entry=0;
 		}
-
 		/*ProcesoActivarMotor*/
-
 	}
 
 	return EXIT_SUCCESS;
 }
-
-
-
-
-
-
 
 
 void tinysh_update(char c){
