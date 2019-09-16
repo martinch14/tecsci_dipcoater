@@ -19,6 +19,14 @@
 
 #include "../components/tinysh/include/tinysh.h"
 
+
+/*Definiciones de colas y buffer  para la mensajeria*/
+
+mod_queue_t queueconsolareception,queueconsolatransmit;
+float bufferreception[10];
+float buffertransmit[10];
+
+
 int app_main_dipcoater(void);
 void HandlerConsolePutchar(unsigned char c);
 void tinysh_update(char c);

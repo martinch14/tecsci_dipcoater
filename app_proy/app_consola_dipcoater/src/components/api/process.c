@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include "../../components/api/include/process.h"
 #include "../../components/api/include/handlers.h"
+#include "../../components/api/include/mod_queue.h"
+#include "../../main/app_main_dipcoater.h"
+
 
 
 
@@ -95,6 +98,7 @@ processReturn_e  ProcessRun(process_t *process) {
 
 void ProcessCommandUpdate(process_t *processDipCoating,processCommand_t* cmdProcesoEstandar){
 	uint8_t index=0;
+	float vel;
 
 	//TODO:
 	//Cargar con los valores que vienen de la cola de mensajeria   queueconsolareception    (luego se podría reportar estado en cola queueconsolatransmit)
@@ -105,7 +109,9 @@ void ProcessCommandUpdate(process_t *processDipCoating,processCommand_t* cmdProc
 
 	while (processDipCoating->state.commandIndex < 9){
 		processDipCoating->command->commandnumber = cmdProcesoEstandar[index].commandnumber;
-		processDipCoating->command->argument.spin.velocity = cmdProcesoEstandar[index].argument.spin.velocity;
+//		processDipCoating->command->argument.spin.velocity = cmdProcesoEstandar[index].argument.spin.velocity;
+		modQueue_Read(&queueconsolareception,&vel);
+		processDipCoating->command->argument.spin.velocity = vel;
 		processDipCoating->command->argument.spin.acceleration = cmdProcesoEstandar[index].argument.spin.acceleration;
 		ProcessRun(processDipCoating);
 		processDipCoating->state.commandIndex++;
@@ -114,5 +120,35 @@ void ProcessCommandUpdate(process_t *processDipCoating,processCommand_t* cmdProc
 	processDipCoating->state.commandIndex=0;
 	index=0;
 }
+
+
+/*
+ *
+ * Cargar  el proceso
+ *
+ *
+ * load()*/
+
+
+
+
+/*
+ * Que sea una tarea que ejecute funciones del módulo process.c    ; podría estar en el app_main_dipcoater.c
+ * podria ser  Taskprocess
+ * processProcesarr
+ *
+ * switch ()
+ *
+ * 	case UPDATE;
+ *
+ *
+ *
+ * 	case RUN;
+
+ *
+ *
+ * */
+
+
 
 

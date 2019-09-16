@@ -53,6 +53,9 @@ typedef struct {
 
 typedef struct {
 
+	/*Largo con la cantidad de comandos del cada proceso*/
+
+
 } processConfig_t;
 
 typedef struct {
@@ -83,6 +86,14 @@ void ProcessNextCommand(process_t *process);
 void ProcessCommandAdd(process_t *process, processCommand_t *cmd);
 void handlerEmpty(void);
 void ProcessCommandUpdate(process_t *process,processCommand_t *cmdProcesoEstandar);
+
+
+/* Proceso_cargar_configuracion   */
+/* Proceso_leer_configuracion   */
+/*Estructura con la configuracion del usuario para cargar sobre el proceso*/
+
+
+
 
 
 #endif /* COMPONENTS_API_INCLUDE_PROCESS_H_ */
