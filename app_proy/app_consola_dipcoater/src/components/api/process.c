@@ -10,7 +10,22 @@
 
 /*Definicion del Proceso Estático Comando Velocidad Aceleracion */
 processCommand_t cmdProcesoEstandar[MAX_ESTATIC_COMMAND] = {
-		{ .commandnumber = PROCESS_COMMAND_CERO_MACHINE,.argument.spin.velocity = 5,	.argument.spin.acceleration = 10 },
+		{ .commandnumber = PROCESS_COMMAND_CERO_MACHINE,.argument.spin.velocity = 5,	.argument.spin.acceleration = 10 , .fpcommandhandler = HandlerCeroMachine },
+		{ .commandnumber = PROCESS_COMMAND_DOWN, 		.argument.spin.velocity = -2,	.argument.spin.acceleration = 1 , .fpcommandhandler = HandlerDown },
+		{ .commandnumber = PROCESS_COMMAND_WAIT, 		.argument.spin.velocity = 0,	.argument.spin.acceleration = 1 , .fpcommandhandler = HandlerWait},
+		{ .commandnumber = PROCESS_COMMAND_DOWN, 		.argument.spin.velocity = -2,	.argument.spin.acceleration = 1 , .fpcommandhandler = HandlerDown },
+		{ .commandnumber = PROCESS_COMMAND_WAIT, 		.argument.spin.velocity = 0,	.argument.spin.acceleration = 1 , .fpcommandhandler = HandlerWait },
+		{ .commandnumber = PROCESS_COMMAND_UP, 			.argument.spin.velocity = 2,	.argument.spin.acceleration = 1 , .fpcommandhandler = HandlerUp },
+		{ .commandnumber = PROCESS_COMMAND_WAIT, 		.argument.spin.velocity = 0,	.argument.spin.acceleration = 1 , .fpcommandhandler = HandlerWait },
+		{ .commandnumber = PROCESS_COMMAND_DOWN, 		.argument.spin.velocity = -2,	.argument.spin.acceleration = 1 , .fpcommandhandler = HandlerDown },
+		{ .commandnumber = PROCESS_COMMAND_CERO_MACHINE,.argument.spin.velocity = 5,	.argument.spin.acceleration = 10 , .fpcommandhandler = HandlerCeroMachine },
+/*TODO: Agregar comando LOOP */
+
+};
+
+/*Definicion del Proceso Estático Comando Velocidad Aceleracion */
+processCommand_t cmdProcesoCustom[MAX_ESTATIC_COMMAND] = {
+		{ .commandnumber = PROCESS_COMMAND_CERO_MACHINE,.argument.spin.velocity = 5,	.argument.spin.acceleration = 10},
 		{ .commandnumber = PROCESS_COMMAND_DOWN, 		.argument.spin.velocity = -2,	.argument.spin.acceleration = 1 },
 		{ .commandnumber = PROCESS_COMMAND_WAIT, 		.argument.spin.velocity = 0,	.argument.spin.acceleration = 1 },
 		{ .commandnumber = PROCESS_COMMAND_DOWN, 		.argument.spin.velocity = -2,	.argument.spin.acceleration = 1 },
@@ -21,13 +36,6 @@ processCommand_t cmdProcesoEstandar[MAX_ESTATIC_COMMAND] = {
 		{ .commandnumber = PROCESS_COMMAND_CERO_MACHINE,.argument.spin.velocity = 5,	.argument.spin.acceleration = 10 },
 /*TODO: Agregar comando LOOP */
 };
-///*Definicion del Proceso Dinámico - recibe parametros de configuracion desde el módulo de mensajería */
-//processCommand_t cmd_dinamic[] = {
-//		{ .commandnumber = PROCESS_COMMAND_SPIN,.argument.spin.velocity = 0.1 },
-//		{ },
-//		{ },
-//		{ },
-//};
 
 
 
@@ -40,9 +48,11 @@ void handlerEmpty(void){
 //}
 void ProcessInit(process_t* process){
 
+	/*Crear un array de comandos vacios fijo*/
+
 	process->command = NULL;
 	process->commandlen=0;
-	process->state.commandIndex=0;
+	process->state.commandIndex=MAX_ESTATIC_COMMAND;
 	process->state.flags=0;
 
 //	while(1){
@@ -51,9 +61,6 @@ void ProcessInit(process_t* process){
 //	}
 }
 
-void ProcessNextCommand(process_t*	process){
-
-}
 
 void ProcessCommandAdd(process_t *process, processCommand_t *cmd) {
 }
@@ -67,96 +74,104 @@ int InitCommand(void) {
 
 
 //arrayHandlers[PROCESS_COMMAND__N];
+void  ProcessRun(process_t *process) {
+
+//	processCommand_t *cmd = process->command ;
+	uint8_t ci = process->state.commandIndex; 				// command index
+	uint8_t index=0;
 
 
-processReturn_e  ProcessRun(process_t *process) {
-//	uint8_t ci = process->state.commandIndex; 				// command index
-//	processCommand_t *cmd = &process->command[ci];
-	processCommand_t *cmd = process->command ;
+	//si  process->command = NULL ERROR
+	while (index < ci) {
+		process->command[index].fpcommandhandler(&(process->command[index].argument.spin));
+	index++;
+	}
+
+
+
+//	while (index < ci) {
+//		switch (process->command[index].commandnumber) {
+//
+//		case PROCESS_COMMAND_START:
+//			break;
+//		case PROCESS_COMMAND_CERO_MACHINE:
+//			//HandlerCeroMachine(&(process->command[index].argument.spin));
+//			process->command[0].fpcommandhandler(&(process->command[0].argument.spin));
+////		ProcessNextCommand(process);
+//			break;
+//		case PROCESS_COMMAND_SPIN:
+//			//HandlerSpin(&(process->command[index].argument.spin));
+//			process->command[1].fpcommandhandler(&(process->command[1].argument.spin));
+////		ProcessNextCommand(process);
+//			break;
+//		case PROCESS_COMMAND_UP:
+//			HandlerUp(&(process->command[index].argument.spin));
+////		ProcessNextCommand(process);
+//			break;
+//		case PROCESS_COMMAND_DOWN:
+//			HandlerDown(&(process->command[index].argument.spin));
+////		ProcessNextCommand(process);
+//			break;
+//		case PROCESS_COMMAND_WAIT:
+//			HandlerWait(&(process->command[index].argument.spin));
+////		ProcessNextCommand(process);
+//			break;
+//		case PROCESS_COMMAND_STOP:
+//			HandlerStop(&(process->command[index].argument.spin));
+//
+////		ProcessNextCommand(process);
+//			break;
+//		case PROCESS_COMMAND__N:
+//			break;
+//
+//		default:
+//			process->state.flags |= _FLAG_ERROR;
+//			break;
+//		}
+//
+//		index++;
+//	}
+//	index = 0;
+
 	if (InitCommand()) {
 	}
 
-	switch (cmd->commandnumber) {
 
-	case PROCESS_COMMAND_CERO_MACHINE:
-		HandlerCeroMachine(&(cmd->argument.spin));
-//		ProcessNextCommand(process);
-		break;
-	case PROCESS_COMMAND_SPIN:
-		HandlerSpin(&(cmd->argument.spin));
-//		ProcessNextCommand(process);
-		break;
-	case PROCESS_COMMAND_UP:
-		HandlerUp(&(cmd->argument.spin));
-//		ProcessNextCommand(process);
-		break;
-	case PROCESS_COMMAND_DOWN:
-		HandlerDown(&(cmd->argument.spin));
-//		ProcessNextCommand(process);
-		break;
-	case PROCESS_COMMAND_WAIT:
-		HandlerWait(&(cmd->argument.spin));
-//		ProcessNextCommand(process);
-		break;
-	case PROCESS_COMMAND_STOP:
-		HandlerStop(&(cmd->argument.spin));
-//		ProcessNextCommand(process);
-		break;
-	default:
-		process->state.flags |= _FLAG_ERROR;
-		break;
-	}
+
+
 //#else
 //	arrayHandlers[cmd->commandnumber]();
 //#endif
 	if (ExitCommand()) {
 	}
-	return PROCESS_RET_OK;
-}
-
-void ProcessCommandUpdate(process_t *processDipCoating){
-	uint8_t index=0;
-	int codeCommand;
-	int vel;
-	int acc;
-
-	//TODO:
-	//Cargar con los valores que vienen de la cola de mensajeria   queueconsolareception    (luego se podría reportar estado en cola queueconsolatransmit)
-	//ejecutar
-	//termiar proceso
-	//cargar de nuevo o repetir
-
-	if (processDipCoating->command != NULL) {
-		while (processDipCoating->state.commandIndex < 9) {
-			modQueue_Read(&queueconsolareception, &codeCommand);
-			processDipCoating->command->commandnumber = codeCommand;
-			/*TENER EN CUENTA QUE EL READ NO SACA DATOS DE LA COLA, TAMPOCO CAMBIA EL PUNTERO A LA POSICION*/
-			modQueue_Read(&queueconsolareception, &vel);
-			processDipCoating->command->argument.spin.velocity = vel;
-			/*TENER EN CUENTA QUE EL READ NO SACA DATOS DE LA COLA, TAMPOCO CAMBIA EL PUNTERO A LA POSICION*/
-			modQueue_Read(&queueconsolareception, &acc);
-			processDipCoating->command->argument.spin.acceleration = acc;
-
-			ProcessRun(processDipCoating);
-			processDipCoating->state.commandIndex++;
-			index++;
-		}
-		processDipCoating->state.commandIndex = 0;
-		index = 0;
-	}
-	else {   /* Avisar que no hay ningun proceso seteado!!!!*/
-		printf("No hay procedimiento cargado!\r\n");
-	}
-
 
 }
 
-/*Se carga el programa estandar*/
+void ProcessNextCommand(process_t*	process){
+	process->state.commandIndex++;
+}
 
-void ProcessLoadProgramStandar(process_t *process) {
+
+
+void ProcessLoadProgramStandard(process_t *process) {
 	process->command= cmdProcesoEstandar;
 }
 
+void ProcessLoadProgramCustom(process_t *process) {
+	process->command= cmdProcesoCustom;
+}
+
+void ProcessSetProgramCustom(){
+
+	processCommand_t readed_Command;
+	modQueue_Read(&queueconsolareception, &readed_Command);
+
+	cmdProcesoCustom[readed_Command.commandnumber].argument.spin.velocity=readed_Command.argument.spin.velocity;
+	cmdProcesoCustom[readed_Command.commandnumber].argument.spin.acceleration=readed_Command.argument.spin.acceleration;
+	cmdProcesoCustom[readed_Command.commandnumber].argument.spin.test=readed_Command.argument.spin.test;
+
+
+}
 
 /*
  * Que sea una tarea que ejecute funciones del módulo process.c    ; podría estar en el app_main_dipcoater.c
@@ -168,7 +183,11 @@ void ProcessLoadProgramStandar(process_t *process) {
  * 	case UPDATE;
  *
  * 	case RUN;
- * */
+ *
+ */
+
+
+
 
 
 

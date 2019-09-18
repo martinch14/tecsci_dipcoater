@@ -24,6 +24,7 @@ typedef struct {
 typedef struct {
 	int velocity;
 	int acceleration;
+	int test;
 
 } processCommandArgSpin_t;
 
@@ -42,13 +43,20 @@ typedef enum {
 	PROCESS_COMMAND__N,				/*7*/
 } proccesCommandNumber_t;
 
+
+typedef void (*processCommandHandler_t)(processCommandArgSpin_t* arg);
+
+
 typedef struct {
 	proccesCommandNumber_t commandnumber;
+	processCommandHandler_t fpcommandhandler;
+
 	union {
 		processCommandArgSpin_t spin;
 		processCommandArgWait_t wait;
 		processCommandArg4Float_t floats;
 	} argument;
+
 } processCommand_t;
 
 typedef struct {
@@ -72,19 +80,23 @@ typedef struct {
 } process_t;
 
 
-typedef enum {
-	PROCESS_RET_OK,
-	PROCESS_RET_ERROR,
-}processReturn_e;
+//typedef enum {
+//	PROCESS_RET_OK,
+//	PROCESS_RET_ERROR,
+//}processReturn_e;
 
 
 
 void ProcessInit(process_t *process);
 void ProcessNextCommand(process_t *process);
 void ProcessCommandAdd(process_t *process, processCommand_t *cmd);
-void ProcessCommandUpdate(process_t *process);
-void ProcessLoadProgramStandar(process_t *process);
-processReturn_e  ProcessRun(process_t *process);
+
+void ProcessRun(process_t *process);
+
+void ProcessLoadProgramStandard(process_t *process);
+void ProcessLoadProgramCustom(process_t *process);
+void ProcessSetProgramCustom();
+
 
 void handlerEmpty(void);
 

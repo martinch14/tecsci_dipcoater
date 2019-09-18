@@ -24,8 +24,9 @@
 /*Definiciones de colas y buffer  para la mensajeria, las mismas se manejan a nivel de variable Global*/
 
 mod_queue_t queueconsolareception,queueconsolatransmit;
-int bufferreception[10];
+processCommand_t bufferreception[10];
 int buffertransmit[10];
+
 
 
 int app_main_dipcoater(void);
