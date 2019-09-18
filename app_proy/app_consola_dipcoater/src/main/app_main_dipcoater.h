@@ -21,19 +21,21 @@
 #include "../components/tinysh/include/tinysh.h"
 
 
-/*Definiciones de colas y buffer  para la mensajeria*/
+/*Definiciones de colas y buffer  para la mensajeria, las mismas se manejan a nivel de variable Global*/
 
 mod_queue_t queueconsolareception,queueconsolatransmit;
-float bufferreception[10];
-float buffertransmit[10];
+int bufferreception[10];
+int buffertransmit[10];
 
 
 int app_main_dipcoater(void);
+
+void task_tinysh(char c);
+void task_process(process_t *processDipCoating);
+void task_motor(void);
+
+
+
 void HandlerConsolePutchar(unsigned char c);
-void tinysh_update(char c);
-
-
-
-
 
 #endif /* MAIN_APP_MAIN_DIPCOATER_H_ */

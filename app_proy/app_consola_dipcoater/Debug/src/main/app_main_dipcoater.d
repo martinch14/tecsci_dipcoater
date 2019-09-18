@@ -8,8 +8,7 @@ src/main/app_main_dipcoater.o: ../src/main/app_main_dipcoater.c \
  ../src/main/../components/tinysh/include/tinysh.h \
  ../src/main/../components/tinysh/include/tinysh_core.h \
  ../src/main/../components/tinysh/include/tinysh_custom.h \
- ../src/main/../components/tinysh/include/tinysh_utils.h \
- ../src/main/../components/api/include/processStandar.h
+ ../src/main/../components/tinysh/include/tinysh_utils.h
 
 ../src/main/app_main_dipcoater.h:
 
@@ -30,5 +29,3 @@ src/main/app_main_dipcoater.o: ../src/main/app_main_dipcoater.c \
 ../src/main/../components/tinysh/include/tinysh_custom.h:
 
 ../src/main/../components/tinysh/include/tinysh_utils.h:
-
-../src/main/../components/api/include/processStandar.h:

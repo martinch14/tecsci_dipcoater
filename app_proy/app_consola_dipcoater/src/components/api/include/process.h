@@ -10,7 +10,7 @@
 
 
 #include <stdint.h>
-#define _FLAG_ERROR          1<< 8;
+#define _FLAG_ERROR          	1<< 8
 
 
 typedef struct {
@@ -22,8 +22,8 @@ typedef struct {
 } processCommandArg4Int32_t;
 
 typedef struct {
-	float velocity;
-	float acceleration;
+	int velocity;
+	int acceleration;
 
 } processCommandArgSpin_t;
 
@@ -55,7 +55,6 @@ typedef struct {
 
 	/*Largo con la cantidad de comandos del cada proceso*/
 
-
 } processConfig_t;
 
 typedef struct {
@@ -79,20 +78,19 @@ typedef enum {
 }processReturn_e;
 
 
-processReturn_e  ProcessRun(process_t *process);
 
 void ProcessInit(process_t *process);
 void ProcessNextCommand(process_t *process);
 void ProcessCommandAdd(process_t *process, processCommand_t *cmd);
-void handlerEmpty(void);
-void ProcessCommandUpdate(process_t *process,processCommand_t *cmdProcesoEstandar);
+void ProcessCommandUpdate(process_t *process);
+void ProcessLoadProgramStandar(process_t *process);
+processReturn_e  ProcessRun(process_t *process);
 
+void handlerEmpty(void);
 
 /* Proceso_cargar_configuracion   */
 /* Proceso_leer_configuracion   */
 /*Estructura con la configuracion del usuario para cargar sobre el proceso*/
-
-
 
 
 

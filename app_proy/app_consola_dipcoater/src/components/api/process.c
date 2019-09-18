@@ -6,6 +6,29 @@
 
 
 
+#define MAX_ESTATIC_COMMAND 	9
+
+/*Definicion del Proceso Estático Comando Velocidad Aceleracion */
+processCommand_t cmdProcesoEstandar[MAX_ESTATIC_COMMAND] = {
+		{ .commandnumber = PROCESS_COMMAND_CERO_MACHINE,.argument.spin.velocity = 5,	.argument.spin.acceleration = 10 },
+		{ .commandnumber = PROCESS_COMMAND_DOWN, 		.argument.spin.velocity = -2,	.argument.spin.acceleration = 1 },
+		{ .commandnumber = PROCESS_COMMAND_WAIT, 		.argument.spin.velocity = 0,	.argument.spin.acceleration = 1 },
+		{ .commandnumber = PROCESS_COMMAND_DOWN, 		.argument.spin.velocity = -2,	.argument.spin.acceleration = 1 },
+		{ .commandnumber = PROCESS_COMMAND_WAIT, 		.argument.spin.velocity = 0,	.argument.spin.acceleration = 1 },
+		{ .commandnumber = PROCESS_COMMAND_UP, 			.argument.spin.velocity = 2,	.argument.spin.acceleration = 1 },
+		{ .commandnumber = PROCESS_COMMAND_WAIT, 		.argument.spin.velocity = 0,	.argument.spin.acceleration = 1 },
+		{ .commandnumber = PROCESS_COMMAND_DOWN, 		.argument.spin.velocity = -2,	.argument.spin.acceleration = 1 },
+		{ .commandnumber = PROCESS_COMMAND_CERO_MACHINE,.argument.spin.velocity = 5,	.argument.spin.acceleration = 10 },
+/*TODO: Agregar comando LOOP */
+};
+///*Definicion del Proceso Dinámico - recibe parametros de configuracion desde el módulo de mensajería */
+//processCommand_t cmd_dinamic[] = {
+//		{ .commandnumber = PROCESS_COMMAND_SPIN,.argument.spin.velocity = 0.1 },
+//		{ },
+//		{ },
+//		{ },
+//};
+
 
 
 void handlerEmpty(void){
@@ -15,11 +38,9 @@ void handlerEmpty(void){
 //inline void ProcessNextCommand(process_t process){
 //    process->state.ci;
 //}
-
 void ProcessInit(process_t* process){
-//	process->command->argument.spin.acceleration=0;
-//	process->command->argument.spin.velocity=0;
-	process->command->commandnumber=0;
+
+	process->command = NULL;
 	process->commandlen=0;
 	process->state.commandIndex=0;
 	process->state.flags=0;
@@ -31,10 +52,7 @@ void ProcessInit(process_t* process){
 }
 
 void ProcessNextCommand(process_t*	process){
-//	if(process->state.commandIndex < 8){    /*Primera prueba con el proceso estatico*/
-//	process->state.commandIndex++;
-//	}
-//	else process->state.commandIndex = 0 ;
+
 }
 
 void ProcessCommandAdd(process_t *process, processCommand_t *cmd) {
@@ -57,7 +75,7 @@ processReturn_e  ProcessRun(process_t *process) {
 	processCommand_t *cmd = process->command ;
 	if (InitCommand()) {
 	}
-//#if 0
+
 	switch (cmd->commandnumber) {
 
 	case PROCESS_COMMAND_CERO_MACHINE:
@@ -96,9 +114,11 @@ processReturn_e  ProcessRun(process_t *process) {
 	return PROCESS_RET_OK;
 }
 
-void ProcessCommandUpdate(process_t *processDipCoating,processCommand_t* cmdProcesoEstandar){
+void ProcessCommandUpdate(process_t *processDipCoating){
 	uint8_t index=0;
-	float vel;
+	int codeCommand;
+	int vel;
+	int acc;
 
 	//TODO:
 	//Cargar con los valores que vienen de la cola de mensajeria   queueconsolareception    (luego se podría reportar estado en cola queueconsolatransmit)
@@ -106,30 +126,36 @@ void ProcessCommandUpdate(process_t *processDipCoating,processCommand_t* cmdProc
 	//termiar proceso
 	//cargar de nuevo o repetir
 
+	if (processDipCoating->command != NULL) {
+		while (processDipCoating->state.commandIndex < 9) {
+			modQueue_Read(&queueconsolareception, &codeCommand);
+			processDipCoating->command->commandnumber = codeCommand;
+			/*TENER EN CUENTA QUE EL READ NO SACA DATOS DE LA COLA, TAMPOCO CAMBIA EL PUNTERO A LA POSICION*/
+			modQueue_Read(&queueconsolareception, &vel);
+			processDipCoating->command->argument.spin.velocity = vel;
+			/*TENER EN CUENTA QUE EL READ NO SACA DATOS DE LA COLA, TAMPOCO CAMBIA EL PUNTERO A LA POSICION*/
+			modQueue_Read(&queueconsolareception, &acc);
+			processDipCoating->command->argument.spin.acceleration = acc;
 
-	while (processDipCoating->state.commandIndex < 9){
-		processDipCoating->command->commandnumber = cmdProcesoEstandar[index].commandnumber;
-//		processDipCoating->command->argument.spin.velocity = cmdProcesoEstandar[index].argument.spin.velocity;
-		modQueue_Read(&queueconsolareception,&vel);
-		processDipCoating->command->argument.spin.velocity = vel;
-		processDipCoating->command->argument.spin.acceleration = cmdProcesoEstandar[index].argument.spin.acceleration;
-		ProcessRun(processDipCoating);
-		processDipCoating->state.commandIndex++;
-		index++;
+			ProcessRun(processDipCoating);
+			processDipCoating->state.commandIndex++;
+			index++;
+		}
+		processDipCoating->state.commandIndex = 0;
+		index = 0;
 	}
-	processDipCoating->state.commandIndex=0;
-	index=0;
+	else {   /* Avisar que no hay ningun proceso seteado!!!!*/
+		printf("No hay procedimiento cargado!\r\n");
+	}
+
+
 }
 
+/*Se carga el programa estandar*/
 
-/*
- *
- * Cargar  el proceso
- *
- *
- * load()*/
-
-
+void ProcessLoadProgramStandar(process_t *process) {
+	process->command= cmdProcesoEstandar;
+}
 
 
 /*
@@ -141,12 +167,7 @@ void ProcessCommandUpdate(process_t *processDipCoating,processCommand_t* cmdProc
  *
  * 	case UPDATE;
  *
- *
- *
  * 	case RUN;
-
- *
- *
  * */
 
 

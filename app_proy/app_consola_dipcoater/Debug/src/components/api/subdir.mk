@@ -10,8 +10,7 @@ C_SRCS += \
 ../src/components/api/mod_queue.c \
 ../src/components/api/mod_ringbuffer.c \
 ../src/components/api/mod_stack.c \
-../src/components/api/process.c \
-../src/components/api/processStandar.c 
+../src/components/api/process.c 
 
 OBJS += \
 ./src/components/api/handlers.o \
@@ -20,8 +19,7 @@ OBJS += \
 ./src/components/api/mod_queue.o \
 ./src/components/api/mod_ringbuffer.o \
 ./src/components/api/mod_stack.o \
-./src/components/api/process.o \
-./src/components/api/processStandar.o 
+./src/components/api/process.o 
 
 C_DEPS += \
 ./src/components/api/handlers.d \
@@ -30,8 +28,7 @@ C_DEPS += \
 ./src/components/api/mod_queue.d \
 ./src/components/api/mod_ringbuffer.d \
 ./src/components/api/mod_stack.d \
-./src/components/api/process.d \
-./src/components/api/processStandar.d 
+./src/components/api/process.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
