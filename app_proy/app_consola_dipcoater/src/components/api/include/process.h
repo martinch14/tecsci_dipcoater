@@ -44,7 +44,7 @@ typedef enum {
 } proccesCommandNumber_t;
 
 
-typedef void (*processCommandHandler_t)(processCommandArgSpin_t* arg);
+typedef int (*processCommandHandler_t)(processCommandArgSpin_t* arg);
 
 
 typedef struct {
@@ -90,19 +90,15 @@ typedef struct {
 void ProcessInit(process_t *process);
 void ProcessNextCommand(process_t *process);
 void ProcessCommandAdd(process_t *process, processCommand_t *cmd);
-
+void ProcessCommandRemove(process_t *process, processCommand_t *cmd);
 void ProcessRun(process_t *process);
-
 void ProcessLoadProgramStandard(process_t *process);
 void ProcessLoadProgramCustom(process_t *process);
 void ProcessSetProgramCustom();
 
 
-void handlerEmpty(void);
 
-/* Proceso_cargar_configuracion   */
-/* Proceso_leer_configuracion   */
-/*Estructura con la configuracion del usuario para cargar sobre el proceso*/
+
 
 
 

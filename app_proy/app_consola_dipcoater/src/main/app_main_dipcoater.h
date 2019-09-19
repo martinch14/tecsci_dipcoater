@@ -9,7 +9,6 @@
 #define MAIN_APP_MAIN_DIPCOATER_H_
 
 
-
 #include "../components/api/include/handlers.h"
 #include "../components/api/include/process.h"
 #include "../components/api/include/mod_queue.h"
@@ -28,13 +27,11 @@ processCommand_t bufferreception[10];
 int buffertransmit[10];
 
 
-
 int app_main_dipcoater(void);
 
 void task_tinysh(char c);
 void task_process(process_t *processDipCoating);
 void task_motor(void);
-
 
 
 void HandlerConsolePutchar(unsigned char c);

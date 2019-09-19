@@ -30,14 +30,11 @@ process_t processDipCoating;
 static void CommandLOADPROGRAMSTANDARDHandler(int argc, char **argv){
 
 	ProcessLoadProgramStandard(&processDipCoating);
-
 }
-
 
 static void CommandLOADPROGRAMCUSTOMHandler(int argc, char **argv){
 
 	ProcessLoadProgramCustom(&processDipCoating);
-
 }
 
 /*handler SETCUSTOMPROGRAM para el tiny*/
@@ -49,6 +46,7 @@ static void CommandSETCUSTOMPROGRAMHandler(int argc, char **argv){
 	 aux_process_comand.argument.spin.velocity=tinysh_get_arg_int(argc, argv, 2);
 	 aux_process_comand.argument.spin.acceleration=tinysh_get_arg_int(argc, argv, 3);
 	 aux_process_comand.argument.spin.test=tinysh_get_arg_int(argc, argv, 4);
+
 	 modQueue_Write(&queueconsolareception,&aux_process_comand);
 	 ProcessSetProgramCustom();
 
@@ -63,11 +61,10 @@ static void CommandRUNHandler(int argc, char **argv){
 }
 
 
-
 static tinysh_cmd_t commandLOADPROGRAMSTANDARD = 	{NULL,"LOADPROGRAMSTANDARD", NULL, NULL, CommandLOADPROGRAMSTANDARDHandler, NULL, NULL, NULL};
-static tinysh_cmd_t commandLOADPROGRAMCUSTOM = 	{NULL,"LOADPROGRAMCUSTOM", NULL, NULL, CommandLOADPROGRAMCUSTOMHandler, NULL, NULL, NULL};
-static tinysh_cmd_t commandSETCUSTOMPROGRAM = 	{NULL,"SETCUSTOMPROGRAM", NULL, NULL, CommandSETCUSTOMPROGRAMHandler, NULL, NULL, NULL};
-static tinysh_cmd_t commandRUN = 	{NULL,"RUN", NULL, NULL, CommandRUNHandler, NULL, NULL, NULL};
+static tinysh_cmd_t commandLOADPROGRAMCUSTOM = 		{NULL,"LOADPROGRAMCUSTOM", NULL, NULL, CommandLOADPROGRAMCUSTOMHandler, NULL, NULL, NULL};
+static tinysh_cmd_t commandSETCUSTOMPROGRAM = 		{NULL,"SETCUSTOMPROGRAM", NULL, NULL, CommandSETCUSTOMPROGRAMHandler, NULL, NULL, NULL};
+static tinysh_cmd_t commandRUN = 					{NULL,"RUN", NULL, NULL, CommandRUNHandler, NULL, NULL, NULL};
 
 
 void HandlerConsolePutchar(unsigned char c){
@@ -92,7 +89,7 @@ int app_main_dipcoater(void) {
 
 //  Inicializacion de la colas de mensajerias
 
-	/* Si casteo pincha todo!*/
+	/* Si casteo pincha to_do!*/
 	modQueue_Init(&queueconsolareception, bufferreception, 10, sizeof(processCommand_t));
 	modQueue_Init(&queueconsolatransmit, buffertransmit, 10, sizeof(int));
 
@@ -123,19 +120,21 @@ void task_tinysh(char c){
 
 void task_process(process_t *processDipCoating){
 
-//	switch (){
-//	case UPDATE:    //update with new process or arguments
-//			ProcessCommandUpdate();
-//			break;
-//	case RUN;
-//			ProcessRun();
-//			break;
-//	}
+
 	if (entry){
 	//ProcessCommandSet(processDipCoating);
 	ProcessRun(processDipCoating);
 	entry=0;
 	}
+
+	//	switch (){
+	//	case UPDATE:    //update with new process or arguments
+	//			ProcessCommandUpdate();
+	//			break;
+	//	case RUN;
+	//			ProcessRun();
+	//			break;
+	//	}
 
 
 }
