@@ -20,7 +20,7 @@ processCommand_t cmdProcessStandard[MAX_ESTATIC_COMMAND] = {
 		{ .commandnumber = PROCESS_COMMAND_UP, 			.argument.spin.velocity = 2,	.argument.spin.acceleration = 1 , .fpcommandhandler = HandlerUp },
 		{ .commandnumber = PROCESS_COMMAND_WAIT, 		.argument.spin.velocity = 0,	.argument.spin.acceleration = 1 , .fpcommandhandler = HandlerWait },
 		/*Test comando LOOP   */
-		{ .commandnumber =  PROCESS_COMMAND_LOOP, 		.argument.spin.velocity = 0,	.argument.spin.acceleration = 0 , .argument.value.val = 1 },
+		{ .commandnumber =  PROCESS_COMMAND_LOOP, 		.argument.value.val = 1 },
 
 
 		{ .commandnumber = PROCESS_COMMAND_CERO_MACHINE,.argument.spin.velocity = 5,	.argument.spin.acceleration = 10, .fpcommandhandler = HandlerCeroMachine},
@@ -86,6 +86,8 @@ void ProcessRun(process_t *process) {
 
 	uint8_t ci = process->state.commandIndex; 				// command index
 	uint8_t index = 0;
+	uint8_t loop = process->command[PROCESS_COMMAND_LOOP-1].argument.value.val;
+	//uint8_t loop =2;
 
 	if (process->command != NULL) {
 		while (index < ci) {
@@ -95,11 +97,16 @@ void ProcessRun(process_t *process) {
 				//printf("Comando:%d \r\n", index);
 			}
 			if (process->command[index].commandnumber == PROCESS_COMMAND_LOOP){
-				if (0  < process->command->argument.value.val ){
-					process->command->argument.value.val--;
-					printf("Loop number:%d\r\n",process->command->argument.value.val);
+//				if (process->command[index].argument.value.val > 0 ){
+//					process->command[index].argument.value.val--;
+//					printf("Loop number:%d\r\n",process->command[index].argument.value.val);
+//					index -=4;
+				if (loop > 0 ){
+					loop--;
+					printf("Loop number:%d\r\n",loop);
 					index -=4;
-				}
+
+			}
 				else index++;
 			}
 		}
