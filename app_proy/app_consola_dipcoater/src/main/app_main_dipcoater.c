@@ -25,7 +25,6 @@ process_t processDipCoating;
 
 
 
-
 /*handler LOADPROGRAM to process  desde el comando recibido en  tinysh*/
 static void CommandLOADPROGRAMSTANDARDHandler(int argc, char **argv){
 
@@ -41,7 +40,7 @@ static void CommandLOADPROGRAMCUSTOMHandler(int argc, char **argv){
 static void CommandSETCUSTOMPROGRAMHandler(int argc, char **argv){
 	 processCommand_t aux_process_comand;
 
- if(5 == argc){	/*SET XX XX XX representa 4 comandos 	argc = 4*/
+ if(5 == argc){	/*SET XX XX XX XX representa 5 comandos 	argc = 5*/
 	 aux_process_comand.commandnumber=tinysh_get_arg_int(argc, argv, 1);
 	 aux_process_comand.argument.spin.velocity=tinysh_get_arg_int(argc, argv, 2);
 	 aux_process_comand.argument.spin.acceleration=tinysh_get_arg_int(argc, argv, 3);
@@ -54,17 +53,64 @@ static void CommandSETCUSTOMPROGRAMHandler(int argc, char **argv){
 
 }
 
+static void CommandSETALLCUSTOMPROGRAMHandler(int argc, char **argv){
+	 processCommand_t aux_process_comand;
+	 uint8_t i=1;
+	 uint8_t j=0;
+	 uint8_t k=1;
+	 uint8_t l=2;
+
+	 printf("%d\n",argc);
+
+	 if(28 == argc){
+		 for(i=1;i<=9;i++){
+
+			 aux_process_comand.commandnumber=tinysh_get_arg_int(argc, argv, i-1);
+			 aux_process_comand.argument.spin.velocity=tinysh_get_arg_int(argc, argv, i+j);
+			 aux_process_comand.argument.spin.acceleration=tinysh_get_arg_int(argc, argv, i+k);
+			 aux_process_comand.argument.spin.test=tinysh_get_arg_int(argc, argv, i+l);
+			 modQueue_Write(&queueconsolareception,&aux_process_comand);
+			 ProcessSetProgramCustom();
+
+			 j+=2;
+			 k+=2;
+			 l+=2;
+		 }
+
+	 }
+}
+
 static void CommandRUNHandler(int argc, char **argv){
 
 	entry=1;
 
 }
 
+static void CommandADDCOMANDDINAMICHandler(int argc, char **argv) {
+	if (argc == 33) {
+	}
+}
 
+static void commandSAMPLEHandler(int argc, char **argv) {
+}
+
+static void commandRECIPIENTMHandler(int argc, char **argv) {
+}
+
+
+
+/*COMANDOS DE DIMENSIONES , MUESTRA Y RECIPIENTE*/
+static tinysh_cmd_t commandSAMPLE = 	{NULL,"LOADSAMPLE", NULL, NULL, commandSAMPLEHandler, NULL, NULL, NULL};
+static tinysh_cmd_t commandRECIPIENT = 		{NULL,"LOADRECIPIENT", NULL, NULL, commandRECIPIENTMHandler, NULL, NULL, NULL};
+
+/*COMANDOS DE MOVIMIENTO*/
 static tinysh_cmd_t commandLOADPROGRAMSTANDARD = 	{NULL,"LOADPROGRAMSTANDARD", NULL, NULL, CommandLOADPROGRAMSTANDARDHandler, NULL, NULL, NULL};
 static tinysh_cmd_t commandLOADPROGRAMCUSTOM = 		{NULL,"LOADPROGRAMCUSTOM", NULL, NULL, CommandLOADPROGRAMCUSTOMHandler, NULL, NULL, NULL};
 static tinysh_cmd_t commandSETCUSTOMPROGRAM = 		{NULL,"SETCUSTOMPROGRAM", NULL, NULL, CommandSETCUSTOMPROGRAMHandler, NULL, NULL, NULL};
+static tinysh_cmd_t commandSETALLCUSTOMPROGRAM = 	{NULL,"SETALLCUSTOMPROGRAM", NULL, NULL, CommandSETALLCUSTOMPROGRAMHandler, NULL, NULL, NULL};
 static tinysh_cmd_t commandRUN = 					{NULL,"RUN", NULL, NULL, CommandRUNHandler, NULL, NULL, NULL};
+static tinysh_cmd_t commandADDCOMANDDINAMIC = 		{NULL,"ADDCOMANDDINAMIC", NULL, NULL, CommandADDCOMANDDINAMICHandler, NULL, NULL, NULL};
+
 
 
 void HandlerConsolePutchar(unsigned char c){
@@ -78,9 +124,16 @@ int app_main_dipcoater(void) {
 //	Inicialicion de los comandos
 
 	tinysh_add_command(&commandLOADPROGRAMSTANDARD);
-	tinysh_add_command(&commandSETCUSTOMPROGRAM);
 	tinysh_add_command(&commandLOADPROGRAMCUSTOM);
+	tinysh_add_command(&commandSETCUSTOMPROGRAM);
+	tinysh_add_command(&commandSETALLCUSTOMPROGRAM);
+	tinysh_add_command(&commandADDCOMANDDINAMIC);
 	tinysh_add_command(&commandRUN);
+
+	tinysh_add_command(&commandSAMPLE);
+	tinysh_add_command(&commandRECIPIENT);
+
+
 
 
 	tinysh_set_putchar(HandlerConsolePutchar);
@@ -95,6 +148,7 @@ int app_main_dipcoater(void) {
 
 //	Inicializacion del modulo de procesamiento de comandos
 	ProcessInit(&processDipCoating);
+
 
 //	Inicializacion del modulo motor
 	while (1){

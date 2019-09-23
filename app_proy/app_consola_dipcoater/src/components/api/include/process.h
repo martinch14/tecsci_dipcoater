@@ -18,6 +18,10 @@ typedef struct {
 } processCommandArg4Float_t;
 
 typedef struct {
+	uint8_t val;
+} processCommandArgUint8_t;
+
+typedef struct {
 	uint32_t values[4];
 } processCommandArg4Int32_t;
 
@@ -40,7 +44,9 @@ typedef enum {
 	PROCESS_COMMAND_WAIT,			/*4*/
 	PROCESS_COMMAND_STOP,			/*5*/
 	PROCESS_COMMAND_START,			/*6*/
-	PROCESS_COMMAND__N,				/*7*/
+	PROCESS_COMMAND_FINISH,			/*7*/
+	PROCESS_COMMAND_LOOP,			/*8*/
+	PROCESS_COMMAND__N,				/*9*/
 } proccesCommandNumber_t;
 
 
@@ -55,13 +61,17 @@ typedef struct {
 		processCommandArgSpin_t spin;
 		processCommandArgWait_t wait;
 		processCommandArg4Float_t floats;
+		processCommandArgUint8_t value;
 	} argument;
 
 } processCommand_t;
 
 typedef struct {
 
-	/*Largo con la cantidad de comandos del cada proceso*/
+	/*COnfiguracion de Variables con el tamaño de la muestra y el tamaño del recipiente   en mm   y desplazamiento en eje Y segun pasos del motor   */
+	uint16_t	samplesize;
+	uint16_t 	recipientsize;
+	uint32_t 	axisYDisplacement;    /*segun parametro contructivo de la maquina */
 
 } processConfig_t;
 
@@ -85,8 +95,6 @@ typedef struct {
 //	PROCESS_RET_ERROR,
 //}processReturn_e;
 
-
-
 void ProcessInit(process_t *process);
 void ProcessNextCommand(process_t *process);
 void ProcessCommandAdd(process_t *process, processCommand_t *cmd);
@@ -95,11 +103,6 @@ void ProcessRun(process_t *process);
 void ProcessLoadProgramStandard(process_t *process);
 void ProcessLoadProgramCustom(process_t *process);
 void ProcessSetProgramCustom();
-
-
-
-
-
 
 
 #endif /* COMPONENTS_API_INCLUDE_PROCESS_H_ */

@@ -31,10 +31,12 @@
 #define HISTORY_DEPTH 16
 #endif
 #ifndef MAX_ARGS
-#define MAX_ARGS 16
+//#define MAX_ARGS 16
+#define MAX_ARGS 99
 #endif
 #ifndef PROMPT_SIZE
-#define PROMPT_SIZE 16
+//#define PROMPT_SIZE 16
+#define PROMPT_SIZE 99
 #endif
 #ifndef TOPCHAR
 #define TOPCHAR '\\'

@@ -16,6 +16,7 @@
 #include "TMCMotionController.h"
 #include "spi.h"
 #include "TMC4671.h"
+#include "SysTick.h"
 
 
 /*==================[macros and definitions]=================================*/
@@ -38,10 +39,12 @@ extern void TMC4671_init(void);
 
 void init(void)
 {
-	tickInit(1);
 	SystemCoreClockUpdate();
+
+	tickInit(1);
+
 	spi_init();
-	usb_init();
+//	usb_init();
 
 	spiConfig(SPI0);
 	tmcmotioncontroller_init();
@@ -51,6 +54,45 @@ void init(void)
 //#elif defined(TMC4671_eval)
 	TMC4671_init();
 //#endif
+
+
+	   // Inicializar GPIOs
+	   gpioConfig( 0, GPIO_ENABLE );
+
+	   // Configuracion de pines de entrada para Teclas de la EDU-CIAA-NXP
+	   gpioConfig( TEC1, GPIO_INPUT );
+	   gpioConfig( TEC2, GPIO_INPUT );
+	   gpioConfig( TEC3, GPIO_INPUT );
+	   gpioConfig( TEC4, GPIO_INPUT );
+
+	   // Configuracion de pines de salida para Leds de la EDU-CIAA-NXP
+	   gpioConfig( LEDR, GPIO_OUTPUT );
+	   gpioConfig( LEDG, GPIO_OUTPUT );
+	   gpioConfig( LEDB, GPIO_OUTPUT );
+	   gpioConfig( LED1, GPIO_OUTPUT );
+	   gpioConfig( LED2, GPIO_OUTPUT );
+	   gpioConfig( LED3, GPIO_OUTPUT );
+
+
+	   // Configuracion de pines de entrada de la CIAA-NXP
+	   gpioConfig( DI0, GPIO_INPUT );
+	   gpioConfig( DI1, GPIO_INPUT );
+	   gpioConfig( DI2, GPIO_INPUT );
+	   gpioConfig( DI3, GPIO_INPUT );
+	   gpioConfig( DI4, GPIO_INPUT );
+	   gpioConfig( DI5, GPIO_INPUT );
+	   gpioConfig( DI6, GPIO_INPUT );
+	   gpioConfig( DI7, GPIO_INPUT );
+
+	   // Configuracion de pines de salida de la CIAA-NXP
+	   gpioConfig( DO0, GPIO_OUTPUT );
+	   gpioConfig( DO1, GPIO_OUTPUT );
+	   gpioConfig( DO2, GPIO_OUTPUT );
+	   gpioConfig( DO3, GPIO_OUTPUT );
+	   gpioConfig( DO4, GPIO_OUTPUT );
+	   gpioConfig( DO5, GPIO_OUTPUT );
+	   gpioConfig( DO6, GPIO_OUTPUT );
+	   gpioConfig( DO7, GPIO_OUTPUT );
 
 
 	//Configuración:
@@ -124,9 +166,10 @@ int main(void)
 		//usb_periodicJob();
 //		tmcl_process();
 //		Evalboards.ch1.periodicJob(tickRead());
+		if (0 == gpioRead(TEC1)){
 
-
-		tmc_wait(2000);
+		gpioToggle(LED1);
+//		tmc_wait(2000);
 		// ===== Open loop test drive =====
 		// Switch to open loop velocity mode
 //		tmc4671_writeInt(0, TMC4671_MODE_RAMP_MODE_MOTION, 0x00000008);
@@ -135,22 +178,26 @@ int main(void)
 		// Rotate right
 //		tmc4671_writeInt(0, TMC4671_OPENLOOP_VELOCITY_TARGET, 0x0000003C);
 		Evalboards.ch1.writeRegister(0, TMC4671_OPENLOOP_VELOCITY_TARGET, 0x0000003C);
-		tmc_wait(2000);
+//		tmc_wait(2000);
 
 		// Rotate left
 		//tmc4671_writeInt(0, TMC4671_OPENLOOP_VELOCITY_TARGET, 0xFFFFFFC4);
-		Evalboards.ch1.writeRegister(0, TMC4671_OPENLOOP_VELOCITY_TARGET, 0xFFFFFFC4);
-		tmc_wait(4000);
+
+//		Evalboards.ch1.writeRegister(0, TMC4671_OPENLOOP_VELOCITY_TARGET, 0xFFFFFFC4);
+//		tmc_wait(4000);
 
 		// Stop
 		//tmc4671_writeInt(0, TMC4671_OPENLOOP_VELOCITY_TARGET, 0x00000000);
-		Evalboards.ch1.writeRegister(0, TMC4671_OPENLOOP_VELOCITY_TARGET, 0x00000000);
-		tmc_wait(2000);
+
+//		Evalboards.ch1.writeRegister(0, TMC4671_OPENLOOP_VELOCITY_TARGET, 0x00000000);
+//		tmc_wait(2000);
 		//tmc4671_writeInt(0, TMC4671_UQ_UD_EXT, 0x00000000);
-		Evalboards.ch1.writeRegister(0, TMC4671_UQ_UD_EXT, 0x00000000);
+
+//		Evalboards.ch1.writeRegister(0, TMC4671_UQ_UD_EXT, 0x00000000);
 
 //		old_tick = tickRead();
 //		while(old_tick == tickRead());
+	}
 	}
 
 	return 0;

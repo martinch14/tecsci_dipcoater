@@ -51,3 +51,8 @@ int HandlerStop(processCommandArgSpin_t*	arg) {
 	sleep(2);
 	return 0;
 }
+int HandlerFinish(processCommandArgSpin_t*	arg) {
+	printf("Proceso Finalizado!!\r\n");
+	return 0;
+}
+

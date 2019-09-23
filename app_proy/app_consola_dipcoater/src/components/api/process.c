@@ -6,35 +6,41 @@
 
 
 
-#define MAX_ESTATIC_COMMAND 	9
+#define MAX_ESTATIC_COMMAND 	10
 #define MAX_DINAMIC_COMMAND 	32
 
-/*Definicion del Proceso Estático Comando Velocidad Aceleracion */
-processCommand_t cmdProcesoEstandar[MAX_ESTATIC_COMMAND] = {
+/*Definicion del Proceso Estático Comando Velocidad Aceleracion---   SE DEBE BUSCAR VELOCIDAD Y ACELERACION MEDIA DEL SISTEMA , */
+processCommand_t cmdProcessStandard[MAX_ESTATIC_COMMAND] = {
 		{ .commandnumber = PROCESS_COMMAND_CERO_MACHINE,.argument.spin.velocity = 5,	.argument.spin.acceleration = 10, .fpcommandhandler = HandlerCeroMachine },
 		{ .commandnumber = PROCESS_COMMAND_DOWN, 		.argument.spin.velocity = -2,	.argument.spin.acceleration = 1 , .fpcommandhandler = HandlerDown },
 		{ .commandnumber = PROCESS_COMMAND_WAIT, 		.argument.spin.velocity = 0,	.argument.spin.acceleration = 1 , .fpcommandhandler = HandlerWait},
+		/*Baja hasta que la muestra quede sobre el recipiente*/
 		{ .commandnumber = PROCESS_COMMAND_DOWN, 		.argument.spin.velocity = -2,	.argument.spin.acceleration = 1 , .fpcommandhandler = HandlerDown },
 		{ .commandnumber = PROCESS_COMMAND_WAIT, 		.argument.spin.velocity = 0,	.argument.spin.acceleration = 1 , .fpcommandhandler = HandlerWait },
 		{ .commandnumber = PROCESS_COMMAND_UP, 			.argument.spin.velocity = 2,	.argument.spin.acceleration = 1 , .fpcommandhandler = HandlerUp },
 		{ .commandnumber = PROCESS_COMMAND_WAIT, 		.argument.spin.velocity = 0,	.argument.spin.acceleration = 1 , .fpcommandhandler = HandlerWait },
-		{ .commandnumber = PROCESS_COMMAND_DOWN, 		.argument.spin.velocity = -2,	.argument.spin.acceleration = 1 , .fpcommandhandler = HandlerDown },
+		/*Test comando LOOP   */
+		{ .commandnumber =  PROCESS_COMMAND_LOOP, 		.argument.spin.velocity = 0,	.argument.spin.acceleration = 0 , .argument.value.val = 1 },
+
+
 		{ .commandnumber = PROCESS_COMMAND_CERO_MACHINE,.argument.spin.velocity = 5,	.argument.spin.acceleration = 10, .fpcommandhandler = HandlerCeroMachine},
-/*TODO: Agregar comando LOOP */
+		{ .commandnumber = PROCESS_COMMAND_FINISH,		.argument.spin.velocity = 0,	.argument.spin.acceleration = 0, .fpcommandhandler = HandlerFinish},
 
 };
 
 /*Definicion del Proceso Estático Comando Velocidad Aceleracion */
-processCommand_t cmdProcesoCustom[MAX_ESTATIC_COMMAND] = {
+processCommand_t cmdProcessCustom[MAX_ESTATIC_COMMAND] = {
 		{ .commandnumber = PROCESS_COMMAND_CERO_MACHINE,.argument.spin.velocity = 5,	.argument.spin.acceleration = 10, .fpcommandhandler = HandlerCeroMachine },
 		{ .commandnumber = PROCESS_COMMAND_DOWN, 		.argument.spin.velocity = -2,	.argument.spin.acceleration = 1 , .fpcommandhandler = HandlerDown },
 		{ .commandnumber = PROCESS_COMMAND_WAIT, 		.argument.spin.velocity = 0,	.argument.spin.acceleration = 1 , .fpcommandhandler = HandlerWait},
+		/*Baja hasta que la muestra quede sobre el recipiente*/
 		{ .commandnumber = PROCESS_COMMAND_DOWN, 		.argument.spin.velocity = -2,	.argument.spin.acceleration = 1 , .fpcommandhandler = HandlerDown },
 		{ .commandnumber = PROCESS_COMMAND_WAIT, 		.argument.spin.velocity = 0,	.argument.spin.acceleration = 1 , .fpcommandhandler = HandlerWait },
 		{ .commandnumber = PROCESS_COMMAND_UP, 			.argument.spin.velocity = 2,	.argument.spin.acceleration = 1 , .fpcommandhandler = HandlerUp },
 		{ .commandnumber = PROCESS_COMMAND_WAIT, 		.argument.spin.velocity = 0,	.argument.spin.acceleration = 1 , .fpcommandhandler = HandlerWait },
 		{ .commandnumber = PROCESS_COMMAND_DOWN, 		.argument.spin.velocity = -2,	.argument.spin.acceleration = 1 , .fpcommandhandler = HandlerDown },
 		{ .commandnumber = PROCESS_COMMAND_CERO_MACHINE,.argument.spin.velocity = 5,	.argument.spin.acceleration = 10, .fpcommandhandler = HandlerCeroMachine},
+		{ .commandnumber = PROCESS_COMMAND_FINISH,		.argument.spin.velocity = 0,	.argument.spin.acceleration = 0, .fpcommandhandler = HandlerFinish},
 /*TODO: Agregar comando LOOP */
 };
 
@@ -44,8 +50,6 @@ processCommand_t cmdProcessDinamic[MAX_DINAMIC_COMMAND] = {
 
 			/*Carga dinamica de COMANDOS*/
 };
-
-
 
 
 void ProcessInit(process_t* process){
@@ -85,27 +89,41 @@ void ProcessRun(process_t *process) {
 
 	if (process->command != NULL) {
 		while (index < ci) {
-			process->command[index].fpcommandhandler(
-					&(process->command[index].argument.spin));
-			index++;
+			if (process->command[index].commandnumber != PROCESS_COMMAND_LOOP) {
+				process->command[index].fpcommandhandler(&(process->command[index].argument.spin));
+				index++;
+				//printf("Comando:%d \r\n", index);
+			}
+			if (process->command[index].commandnumber == PROCESS_COMMAND_LOOP){
+				if (0  < process->command->argument.value.val ){
+					process->command->argument.value.val--;
+					printf("Loop number:%d\r\n",process->command->argument.value.val);
+					index -=4;
+				}
+				else index++;
+			}
 		}
 	} else {
-		printf("Comandos no cargados!!\r\n");
+		printf("Without program to execute!!\r\n");
 	}
 }
 
 void ProcessNextCommand(process_t*	process){
-	process->state.commandIndex++;
+//	process->state.commandIndex++;
 }
 
 
 
 void ProcessLoadProgramStandard(process_t *process) {
-	process->command= cmdProcesoEstandar;
+	process->command= cmdProcessStandard;
+	process->state.commandIndex=MAX_ESTATIC_COMMAND;
+	printf("Program Standar Load!!\r\n");
 }
 
 void ProcessLoadProgramCustom(process_t *process) {
-	process->command= cmdProcesoCustom;
+	process->command= cmdProcessCustom;
+	process->state.commandIndex=10;
+	printf("Program Custom Load!!\r\n");
 }
 
 void ProcessSetProgramCustom(){
@@ -113,9 +131,9 @@ void ProcessSetProgramCustom(){
 	processCommand_t readed_Command;
 	modQueue_Read(&queueconsolareception, &readed_Command);
 
-	cmdProcesoCustom[readed_Command.commandnumber].argument.spin.velocity=readed_Command.argument.spin.velocity;
-	cmdProcesoCustom[readed_Command.commandnumber].argument.spin.acceleration=readed_Command.argument.spin.acceleration;
-	cmdProcesoCustom[readed_Command.commandnumber].argument.spin.test=readed_Command.argument.spin.test;
+	cmdProcessCustom[readed_Command.commandnumber].argument.spin.velocity=readed_Command.argument.spin.velocity;
+	cmdProcessCustom[readed_Command.commandnumber].argument.spin.acceleration=readed_Command.argument.spin.acceleration;
+	cmdProcessCustom[readed_Command.commandnumber].argument.spin.test=readed_Command.argument.spin.test;
 
 
 }
@@ -132,10 +150,3 @@ void ProcessSetProgramCustom(){
  * 	case RUN;
  *
  */
-
-
-
-
-
-
-
