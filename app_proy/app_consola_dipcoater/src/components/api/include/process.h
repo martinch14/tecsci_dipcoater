@@ -8,17 +8,19 @@
 #ifndef COMPONENTS_API_INCLUDE_PROCESS_H_
 #define COMPONENTS_API_INCLUDE_PROCESS_H_
 
-
 #include <stdint.h>
+
+/*DEFINED VALUES*/
 #define _FLAG_ERROR          	1<< 8
 
+/*DEFINED STRUCTS*/
 
 typedef struct {
 	float values[4];
 } processCommandArg4Float_t;
 
 typedef struct {
-	uint8_t val;
+	int val;
 } processCommandArgUint8_t;
 
 typedef struct {
@@ -47,6 +49,7 @@ typedef enum {
 	PROCESS_COMMAND_FINISH,			/*7*/
 	PROCESS_COMMAND_LOOP,			/*8*/
 	PROCESS_COMMAND__N,				/*9*/
+	PROCESS_COMMAND__EMPTY,			/*10*/
 } proccesCommandNumber_t;
 
 
@@ -90,19 +93,24 @@ typedef struct {
 } process_t;
 
 
-//typedef enum {
-//	PROCESS_RET_OK,
-//	PROCESS_RET_ERROR,
-//}processReturn_e;
-
+//FUNCTION DECLARATION
 void ProcessInit(process_t *process);
-void ProcessNextCommand(process_t *process);
-void ProcessCommandAdd(process_t *process, processCommand_t *cmd);
-void ProcessCommandRemove(process_t *process, processCommand_t *cmd);
 void ProcessRun(process_t *process);
 void ProcessLoadProgramStandard(process_t *process);
 void ProcessLoadProgramCustom(process_t *process);
+void ProcessLoadProgramDinamic(process_t *process);
+void ProcessCleanDinamic();
+int ProcessDinamicLen();
+void ProcessAddSetProgramDinamic();
 void ProcessSetProgramCustom();
+void ProcessSetProgramStandard();
+void ProcessUpFastCommand();
+void ProcessUpCommand();
+void ProcessUpSlowCommand();
+void ProcessDownFastCommand();
+void ProcessDownCommand();
+void ProcessDownSlowCommand();
+void ProcessStopCommand();
 
 
 #endif /* COMPONENTS_API_INCLUDE_PROCESS_H_ */

@@ -9,17 +9,32 @@
 #define MAX_ESTATIC_COMMAND 	10
 #define MAX_DINAMIC_COMMAND 	32
 
-/*Definicion del Proceso Estático Comando Velocidad Aceleracion---   SE DEBE BUSCAR VELOCIDAD Y ACELERACION MEDIA DEL SISTEMA , */
+processCommandHandler_t Handlers_vector[]={HandlerCeroMachine,HandlerSpin,HandlerUp,HandlerDown,HandlerWait,HandlerStop,HandlerFinish};
+
+//PROCESS INIT FUNCTION
+
+void ProcessInit(process_t* process){
+	/*Crear un array de comandos vacios fijo*/
+	process->command = NULL;
+	process->commandlen=0;
+	process->state.commandIndex=MAX_ESTATIC_COMMAND;
+	process->state.flags=0;
+}
+
+
+//PROCESSES AVALIABLE
+
+/*cmdProcessStandard has the predifined values and only the N of the loop can be modified*/
 processCommand_t cmdProcessStandard[MAX_ESTATIC_COMMAND] = {
 		{ .commandnumber = PROCESS_COMMAND_CERO_MACHINE,.argument.spin.velocity = 5,	.argument.spin.acceleration = 10, .fpcommandhandler = HandlerCeroMachine },
 		{ .commandnumber = PROCESS_COMMAND_DOWN, 		.argument.spin.velocity = -2,	.argument.spin.acceleration = 1 , .fpcommandhandler = HandlerDown },
 		{ .commandnumber = PROCESS_COMMAND_WAIT, 		.argument.spin.velocity = 0,	.argument.spin.acceleration = 1 , .fpcommandhandler = HandlerWait},
-		/*Baja hasta que la muestra quede sobre el recipiente*/
+		/*start of the DWUW cycle*/
 		{ .commandnumber = PROCESS_COMMAND_DOWN, 		.argument.spin.velocity = -2,	.argument.spin.acceleration = 1 , .fpcommandhandler = HandlerDown },
 		{ .commandnumber = PROCESS_COMMAND_WAIT, 		.argument.spin.velocity = 0,	.argument.spin.acceleration = 1 , .fpcommandhandler = HandlerWait },
 		{ .commandnumber = PROCESS_COMMAND_UP, 			.argument.spin.velocity = 2,	.argument.spin.acceleration = 1 , .fpcommandhandler = HandlerUp },
 		{ .commandnumber = PROCESS_COMMAND_WAIT, 		.argument.spin.velocity = 0,	.argument.spin.acceleration = 1 , .fpcommandhandler = HandlerWait },
-		/*Test comando LOOP   */
+		/*LOOP repeates N times the DWUW cycle */
 		{ .commandnumber =  PROCESS_COMMAND_LOOP, 		.argument.value.val = 1 },
 
 
@@ -28,60 +43,37 @@ processCommand_t cmdProcessStandard[MAX_ESTATIC_COMMAND] = {
 
 };
 
-/*Definicion del Proceso Estático Comando Velocidad Aceleracion */
+/*CmdProcessCustom, the arguments can be modified to make a load and run after*/
 processCommand_t cmdProcessCustom[MAX_ESTATIC_COMMAND] = {
 		{ .commandnumber = PROCESS_COMMAND_CERO_MACHINE,.argument.spin.velocity = 5,	.argument.spin.acceleration = 10, .fpcommandhandler = HandlerCeroMachine },
 		{ .commandnumber = PROCESS_COMMAND_DOWN, 		.argument.spin.velocity = -2,	.argument.spin.acceleration = 1 , .fpcommandhandler = HandlerDown },
 		{ .commandnumber = PROCESS_COMMAND_WAIT, 		.argument.spin.velocity = 0,	.argument.spin.acceleration = 1 , .fpcommandhandler = HandlerWait},
-		/*Baja hasta que la muestra quede sobre el recipiente*/
+		/*start of the DWUW cycle*/
 		{ .commandnumber = PROCESS_COMMAND_DOWN, 		.argument.spin.velocity = -2,	.argument.spin.acceleration = 1 , .fpcommandhandler = HandlerDown },
 		{ .commandnumber = PROCESS_COMMAND_WAIT, 		.argument.spin.velocity = 0,	.argument.spin.acceleration = 1 , .fpcommandhandler = HandlerWait },
 		{ .commandnumber = PROCESS_COMMAND_UP, 			.argument.spin.velocity = 2,	.argument.spin.acceleration = 1 , .fpcommandhandler = HandlerUp },
 		{ .commandnumber = PROCESS_COMMAND_WAIT, 		.argument.spin.velocity = 0,	.argument.spin.acceleration = 1 , .fpcommandhandler = HandlerWait },
-		{ .commandnumber = PROCESS_COMMAND_DOWN, 		.argument.spin.velocity = -2,	.argument.spin.acceleration = 1 , .fpcommandhandler = HandlerDown },
+		/*LOOP repeates N times the DWUW cycle */
+		{ .commandnumber =  PROCESS_COMMAND_LOOP, 		.argument.value.val = 1 },
+
+
 		{ .commandnumber = PROCESS_COMMAND_CERO_MACHINE,.argument.spin.velocity = 5,	.argument.spin.acceleration = 10, .fpcommandhandler = HandlerCeroMachine},
 		{ .commandnumber = PROCESS_COMMAND_FINISH,		.argument.spin.velocity = 0,	.argument.spin.acceleration = 0, .fpcommandhandler = HandlerFinish},
-/*TODO: Agregar comando LOOP */
+
 };
 
 
-/*Definicion del Proceso Estático Comando Velocidad Aceleracion */
-processCommand_t cmdProcessDinamic[MAX_DINAMIC_COMMAND] = {
-
+/* cmdProcessDinamic is an empty process that it can fill to get a personalized process, up to MAX_DINAMIC_COMMAND commands can be added and set up */
+processCommand_t cmdProcessDinamic[MAX_DINAMIC_COMMAND] ={
 			/*Carga dinamica de COMANDOS*/
 };
 
 
-void ProcessInit(process_t* process){
-
-	/*Crear un array de comandos vacios fijo*/
-
-	process->command = NULL;
-	process->commandlen=0;
-	process->state.commandIndex=MAX_ESTATIC_COMMAND;
-	process->state.flags=0;
-
-}
-
-
-/* HACER PRUEBAS CON ESTA FUNCION*/
-void ProcessCommandAdd(process_t *process, processCommand_t *cmd) {
-	if (process->state.commandIndex < MAX_DINAMIC_COMMAND) {
-		cmdProcessDinamic[process->state.commandIndex] = *cmd;
-		process->state.commandIndex++;
-		process->command=cmdProcessDinamic;
-	} else {
-		printf("Comandos maximos alcanzados!\r\n");
-	}
-}
-
-void ProcessCommandRemove(process_t *process, processCommand_t *cmd) {
-}
 
 
 
+//PROCESS RUN FUNCTION
 
-//arrayHandlers[PROCESS_COMMAND__N];
 void ProcessRun(process_t *process) {
 
 	uint8_t ci = process->state.commandIndex; 				// command index
@@ -105,7 +97,6 @@ void ProcessRun(process_t *process) {
 					loop--;
 					printf("Loop number:%d\r\n",loop);
 					index -=4;
-
 			}
 				else index++;
 			}
@@ -115,11 +106,10 @@ void ProcessRun(process_t *process) {
 	}
 }
 
-void ProcessNextCommand(process_t*	process){
-//	process->state.commandIndex++;
-}
 
 
+
+//PROCESS LOAD FUNCTIONS
 
 void ProcessLoadProgramStandard(process_t *process) {
 	process->command= cmdProcessStandard;
@@ -132,28 +122,148 @@ void ProcessLoadProgramCustom(process_t *process) {
 	process->state.commandIndex=10;
 	printf("Program Custom Load!!\r\n");
 }
+void ProcessLoadProgramDinamic(process_t *process) {
+	process->command= cmdProcessDinamic;
+	process->state.commandIndex=ProcessDinamicLen();
+	printf("Program Dinamic Load!!\r\n");
+}
+
+
+//PROCESS SET FUNCTIONS
+
+void ProcessSetProgramStandard(){
+		processCommand_t readed_Command;
+		modQueue_Read(&queueconsolareception, &readed_Command);
+		cmdProcessStandard[readed_Command.commandnumber].argument.value=readed_Command.argument.value;
+}
+
 
 void ProcessSetProgramCustom(){
+
 
 	processCommand_t readed_Command;
 	modQueue_Read(&queueconsolareception, &readed_Command);
 
-	cmdProcessCustom[readed_Command.commandnumber].argument.spin.velocity=readed_Command.argument.spin.velocity;
-	cmdProcessCustom[readed_Command.commandnumber].argument.spin.acceleration=readed_Command.argument.spin.acceleration;
-	cmdProcessCustom[readed_Command.commandnumber].argument.spin.test=readed_Command.argument.spin.test;
-
-
+	cmdProcessCustom[readed_Command.commandnumber].argument=readed_Command.argument;
+	//cmdProcessCustom[readed_Command.commandnumber].argument.spin.velocity=readed_Command.argument.spin.velocity;
+	//cmdProcessCustom[readed_Command.commandnumber].argument.spin.acceleration=readed_Command.argument.spin.acceleration;
+	//cmdProcessCustom[readed_Command.commandnumber].argument.spin.test=readed_Command.argument.spin.test;
 }
 
-/*
- * Que sea una tarea que ejecute funciones del módulo process.c    ; podría estar en el app_main_dipcoater.c
- * podria ser  Taskprocess
- * processProcesarr
- *
- * switch ()
- *
- * 	case UPDATE;
- *
- * 	case RUN;
- *
- */
+
+void ProcessAddSetProgramDinamic() {
+	processCommand_t readed_Command;
+	modQueue_Read(&queueconsolareception, &readed_Command);
+	printf("%d\n",ProcessDinamicLen());
+
+	if ( ProcessDinamicLen() < MAX_DINAMIC_COMMAND) {
+		printf("%d\n",ProcessDinamicLen());
+
+		cmdProcessDinamic[ProcessDinamicLen()].fpcommandhandler = Handlers_vector[readed_Command.commandnumber];
+		cmdProcessDinamic[ProcessDinamicLen()].argument = readed_Command.argument;
+		cmdProcessDinamic[ProcessDinamicLen()].commandnumber = readed_Command.commandnumber;
+
+
+	} else {
+		printf("Comandos maximos alcanzados!\r\n");
+	}
+}
+
+void ProcessCleanDinamic(){
+	int i=0;
+
+	for(i=0;i<MAX_DINAMIC_COMMAND;i++){
+		cmdProcessDinamic[i].commandnumber = PROCESS_COMMAND__EMPTY;
+	}
+}
+
+int ProcessDinamicLen(){
+	int i=0;
+
+	for(i=0;i<MAX_DINAMIC_COMMAND;i++){
+		if(cmdProcessDinamic[i].commandnumber == PROCESS_COMMAND__EMPTY){
+			return i;
+		}
+	}
+	return MAX_DINAMIC_COMMAND;
+}
+
+//SINGLE MOVEMENT COMMAND FUNCTIONS
+
+void ProcessUpFastCommand(){
+
+	processCommandArgSpin_t parameters;
+
+	parameters.velocity=3;
+	parameters.acceleration=3;
+	parameters.test=3;
+
+	HandlerUp(&parameters);
+}
+
+void ProcessUpCommand(){
+
+	processCommandArgSpin_t parameters;
+
+	parameters.velocity=2;
+	parameters.acceleration=2;
+	parameters.test=2;
+
+	HandlerUp(&parameters);
+}
+
+void ProcessUpSlowCommand(){
+
+	processCommandArgSpin_t parameters;
+
+	parameters.velocity=1;
+	parameters.acceleration=1;
+	parameters.test=1;
+
+	HandlerUp(&parameters);
+}
+
+void ProcessDownFastCommand(){
+
+	processCommandArgSpin_t parameters;
+
+	parameters.velocity=3;
+	parameters.acceleration=3;
+	parameters.test=3;
+
+	HandlerDown(&parameters);
+}
+void ProcessDownCommand(){
+
+	processCommandArgSpin_t parameters;
+
+	parameters.velocity=2;
+	parameters.acceleration=2;
+	parameters.test=2;
+
+	HandlerDown(&parameters);
+}
+void ProcessDownSlowCommand(){
+
+	processCommandArgSpin_t parameters;
+
+	parameters.velocity=1;
+	parameters.acceleration=1;
+	parameters.test=1;
+
+	HandlerDown(&parameters);
+}
+
+void ProcessStopCommand(){
+
+	processCommandArgSpin_t parameters;
+
+	parameters.velocity=1;
+	parameters.acceleration=1;
+	parameters.test=1;
+
+	HandlerStop(&parameters);
+}
+
+
+

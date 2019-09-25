@@ -12,17 +12,15 @@
 #include "../components/api/include/handlers.h"
 #include "../components/api/include/process.h"
 #include "../components/api/include/mod_queue.h"
-
-
 /*ver porque no lo puedo incluir*/
 //#include "../tinysh.h"
-
 #include "../components/tinysh/include/tinysh.h"
 
+typedef enum{RUN,STOP}flagRun_t;
 
-/*Definiciones de colas y buffer  para la mensajeria, las mismas se manejan a nivel de variable Global*/
-
-mod_queue_t queueconsolareception,queueconsolatransmit;
+/*Queue for comunication with Process */
+mod_queue_t queueconsolareception;
+mod_queue_t queueconsolatransmit;
 processCommand_t bufferreception[10];
 int buffertransmit[10];
 

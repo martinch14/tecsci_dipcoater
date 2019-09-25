@@ -4,7 +4,7 @@
 #include <unistd.h>
 
 
-
+//Handler Functions
 int HandlerCeroMachine(processCommandArgSpin_t*	arg) {
 	printf("Buscando Cero Machine!!\t");
 	printf("velocidad:%d\t",arg->velocity);

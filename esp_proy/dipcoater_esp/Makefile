@@ -3,7 +3,8 @@
 # project subdirectory.
 #
 
-PROJECT_NAME := hello-world
+#PROJECT_NAME := hello-world
 
+PROJECT_NAME := dipcoater_esp
 include $(IDF_PATH)/make/project.mk
 

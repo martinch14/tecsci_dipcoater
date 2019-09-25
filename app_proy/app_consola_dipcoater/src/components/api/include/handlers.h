@@ -20,4 +20,5 @@ int HandlerWait(processCommandArgSpin_t *arg);
 int HandlerStop(processCommandArgSpin_t *arg);
 int HandlerFinish(processCommandArgSpin_t *arg);
 
+
 #endif /* COMPONENTS_API_INCLUDE_HANDLERS_H_ */
