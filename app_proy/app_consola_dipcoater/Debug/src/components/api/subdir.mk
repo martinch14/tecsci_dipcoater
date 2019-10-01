@@ -4,6 +4,7 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
+../src/components/api/enviromental_chamber_control.c \
 ../src/components/api/handlers.c \
 ../src/components/api/mod_fms.c \
 ../src/components/api/mod_message.c \
@@ -13,6 +14,7 @@ C_SRCS += \
 ../src/components/api/process.c 
 
 OBJS += \
+./src/components/api/enviromental_chamber_control.o \
 ./src/components/api/handlers.o \
 ./src/components/api/mod_fms.o \
 ./src/components/api/mod_message.o \
@@ -22,6 +24,7 @@ OBJS += \
 ./src/components/api/process.o 
 
 C_DEPS += \
+./src/components/api/enviromental_chamber_control.d \
 ./src/components/api/handlers.d \
 ./src/components/api/mod_fms.d \
 ./src/components/api/mod_message.d \

@@ -16,10 +16,9 @@
 
 #include "app_main_dipcoater.h"
 
-//hola
-
 // Global process_t for tinysh handler use
 process_t processDipCoating;
+enviromental_chamber_t enviromentalChamberDipCoating;
 
 
 //Flag to Run the pŕogram loaded
@@ -202,10 +201,30 @@ static void commandSAMPLEHandler(int argc, char **argv) {
 static void commandRECIPIENTMHandler(int argc, char **argv) {
 }
 
+/*ENVIROMENTAL CHAMBER HANDLERS*/
+static void CommandSETRHHandler(int argc, char **argv) {
+	 if(2 == argc){
+		 EnviromentalChamberSetRH(&enviromentalChamberDipCoating,(uint8_t)tinysh_get_arg_int(argc, argv, 1));
+	 }
+}
+static void CommandSETTEMPHandler(int argc, char **argv) {
+	 if(2 == argc){
+		 EnviromentalChamberSetTemp(&enviromentalChamberDipCoating,(uint8_t)tinysh_get_arg_int(argc, argv, 1));
+	 }
+}
+static void CommandACTIVATEENVIROMENTALCHAMBERHandler(int argc, char **argv) {
+	 if(1 == argc){
+		 EnviromentalChamberActivateRH(&enviromentalChamberDipCoating);
+	 }
+}
+static void CommandDEACTIVATEENVIROMENTALCHAMBERHandler(int argc, char **argv) {
+	 if(1 == argc){
+		 EnviromentalChamberDeactivateRH(&enviromentalChamberDipCoating);
+	 }
+}
 
-/*CONFIGURATION COMMANDS*/
-static tinysh_cmd_t commandSAMPLE = 	{NULL,"LOADSAMPLE", NULL, NULL, commandSAMPLEHandler, NULL, NULL, NULL};
-static tinysh_cmd_t commandRECIPIENT = 		{NULL,"LOADRECIPIENT", NULL, NULL, commandRECIPIENTMHandler, NULL, NULL, NULL};
+
+
 
 /*MOVEMENT COMMANDS*/
 //PROCESS STANDARD:
@@ -229,8 +248,15 @@ static tinysh_cmd_t commandDOWNFAST = 					{NULL,"DOWNFAST", NULL, NULL, Command
 static tinysh_cmd_t commandDOWN = 					{NULL,"DOWN", NULL, NULL, CommandDOWNHandler, NULL, NULL, NULL};
 static tinysh_cmd_t commandDOWNSLOW = 					{NULL,"DOWNSLOW", NULL, NULL, CommandDOWNSLOWHandler, NULL, NULL, NULL};
 static tinysh_cmd_t commandSTOP = 					{NULL,"STOP", NULL, NULL, CommandSTOPHandler, NULL, NULL, NULL};
+/*CONFIGURATION COMMANDS*/
+static tinysh_cmd_t commandSAMPLE = 	{NULL,"LOADSAMPLE", NULL, NULL, commandSAMPLEHandler, NULL, NULL, NULL};
+static tinysh_cmd_t commandRECIPIENT = 		{NULL,"LOADRECIPIENT", NULL, NULL, commandRECIPIENTMHandler, NULL, NULL, NULL};
 
-
+//ENVIROMENTAL CHAMBER:
+static tinysh_cmd_t commandSETRH = 					{NULL,"SETRH", NULL, NULL, CommandSETRHHandler, NULL, NULL, NULL};
+static tinysh_cmd_t commandSETTEMP = 					{NULL,"SETTEMP", NULL, NULL, CommandSETTEMPHandler, NULL, NULL, NULL};
+static tinysh_cmd_t commandACTIVATEENVIROMENTALCHAMBER = 					{NULL,"ACTIVATEENVIROMENTALCHAMBER", NULL, NULL, CommandACTIVATEENVIROMENTALCHAMBERHandler, NULL, NULL, NULL};
+static tinysh_cmd_t commandDEACTIVATEENVIROMENTALCHAMBER = 					{NULL,"DEACTIVATEENVIROMENTALCHAMBER", NULL, NULL, CommandDEACTIVATEENVIROMENTALCHAMBERHandler, NULL, NULL, NULL};
 
 
 
@@ -261,6 +287,10 @@ int app_main_dipcoater(void) {
 	tinysh_add_command(&commandSTOP);
 	tinysh_add_command(&commandSAMPLE);
 	tinysh_add_command(&commandRECIPIENT);
+	tinysh_add_command(&commandSETRH);
+	tinysh_add_command(&commandSETTEMP);
+	tinysh_add_command(&commandACTIVATEENVIROMENTALCHAMBER);
+	tinysh_add_command(&commandDEACTIVATEENVIROMENTALCHAMBER);
 
 
 	tinysh_set_putchar(HandlerConsolePutchar);
@@ -271,8 +301,9 @@ int app_main_dipcoater(void) {
 	modQueue_Init(&queueconsolareception, bufferreception, 10, sizeof(processCommand_t));
 	modQueue_Init(&queueconsolatransmit, buffertransmit, 10, sizeof(int));
 
-	//Process initialization
+	//Process & enviromental chamber initialization
 	ProcessInit(&processDipCoating);
+	EnviromentalChamberInit(&enviromentalChamberDipCoating);
 
 	//Motor module initialization
 	//MotorInit();
@@ -289,6 +320,8 @@ int app_main_dipcoater(void) {
 
 		/*Task Motor  ->TODO según el estado en donde se encuentre ejecuta la ordenes de accionamiento del motor*/
 		task_motor();
+
+		task_enviromental_chamber();
 	}
 
 	return EXIT_SUCCESS;
@@ -317,6 +350,9 @@ void task_process(process_t *processDipCoating){
 
 void task_motor(void){
 
+}
+void task_enviromental_chamber(void){
+	EnviromentalChamberRun(&enviromentalChamberDipCoating);
 }
 
 

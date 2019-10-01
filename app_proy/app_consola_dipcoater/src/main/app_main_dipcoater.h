@@ -11,6 +11,7 @@
 
 #include "../components/api/include/handlers.h"
 #include "../components/api/include/process.h"
+#include "../components/api/include/enviromental_chamber_control.h"
 #include "../components/api/include/mod_queue.h"
 /*ver porque no lo puedo incluir*/
 //#include "../tinysh.h"
@@ -30,7 +31,7 @@ int app_main_dipcoater(void);
 void task_tinysh(char c);
 void task_process(process_t *processDipCoating);
 void task_motor(void);
-
+void task_enviromental_chamber(void);
 
 void HandlerConsolePutchar(unsigned char c);
 
