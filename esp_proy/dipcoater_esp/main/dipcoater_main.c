@@ -25,6 +25,8 @@
 #include "esp_system.h"
 #include "esp_spi_flash.h"
 
+//Cambio jueves
+
 
 
 static const char *TAG = "WEBSOCKET";
