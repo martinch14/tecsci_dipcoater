@@ -25,8 +25,6 @@ typedef enum{RUN,STOP}flagRun_t;
 process_t processDipCoating;
 
 
-// Global process_t for tinysh handler use
-//process_t processDipCoating;
 enviromental_chamber_t enviromentalChamberDipCoating;
 
 
