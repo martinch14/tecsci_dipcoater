@@ -27,7 +27,7 @@
 		<link>
 			<name>src/components/api</name>
 			<type>2</type>
-			<location>/home/martin/Escritorio/EspEmbebidos/ESP32_DipCoater/proyectos/esp_ws/dipcoater_esp2/components/api</location>
+			<location>/home/martin/Escritorio/EspEmbebidos/ESP32_DipCoater/proyectos/esp_proy/dipcoater_esp2/components/api</location>
 		</link>
 	</linkedResources>
 </projectDescription>

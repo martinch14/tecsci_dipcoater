@@ -1,11 +1,10 @@
-src/components/api/process.o: ../src/components/api/process.c \
+src/components/api/command.o: ../src/components/api/command.c \
  ../src/components/api/../../components/api/include/process.h \
- ../src/components/api/../../components/api/include/handlers.h \
- ../src/components/api/../../components/api/include/../../../components/api/include/process.h \
  ../src/components/api/../../components/api/include/mod_queue.h \
  ../src/components/api/../../components/api/include/../../../components/api/include/mod_ringbuffer.h \
  ../src/components/api/../../main/app_main_dipcoater.h \
  ../src/components/api/../../main/../components/api/include/handlers.h \
+ ../src/components/api/../../main/../components/api/include/../../../components/api/include/process.h \
  ../src/components/api/../../main/../components/api/include/process.h \
  ../src/components/api/../../main/../components/api/include/command.h \
  ../src/components/api/../../main/../components/api/include/enviromental_chamber_control.h \
@@ -17,10 +16,6 @@ src/components/api/process.o: ../src/components/api/process.c \
 
 ../src/components/api/../../components/api/include/process.h:
 
-../src/components/api/../../components/api/include/handlers.h:
-
-../src/components/api/../../components/api/include/../../../components/api/include/process.h:
-
 ../src/components/api/../../components/api/include/mod_queue.h:
 
 ../src/components/api/../../components/api/include/../../../components/api/include/mod_ringbuffer.h:
@@ -28,6 +23,8 @@ src/components/api/process.o: ../src/components/api/process.c \
 ../src/components/api/../../main/app_main_dipcoater.h:
 
 ../src/components/api/../../main/../components/api/include/handlers.h:
+
+../src/components/api/../../main/../components/api/include/../../../components/api/include/process.h:
 
 ../src/components/api/../../main/../components/api/include/process.h:
 

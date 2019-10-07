@@ -11,12 +11,23 @@
 
 #include "../components/api/include/handlers.h"
 #include "../components/api/include/process.h"
+#include "../components/api/include/command.h"
 #include "../components/api/include/enviromental_chamber_control.h"
 #include "../components/api/include/mod_queue.h"
 /*ver porque no lo puedo incluir*/
 //#include "../tinysh.h"
 
 typedef enum{RUN,STOP}flagRun_t;
+
+// Global process_t for tinysh handler use
+process_t processDipCoating;
+
+
+// Global process_t for tinysh handler use
+//process_t processDipCoating;
+enviromental_chamber_t enviromentalChamberDipCoating;
+
+
 
 /*Queue for comunication with Process */
 mod_queue_t queueconsolareception;

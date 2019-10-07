@@ -18,17 +18,10 @@
 
 
 /*TODO:
- * Al ingresar el comando setstandarprogram verificar que ingre un argumento con el loop
- *
- *
- *
- *
+ * Al ingresar el comando setstandarprogram verificar que ingrese  un argumento con el loop
  *
  *
  * */
-
-
-
 
 //Flag to Run the pŕogram loaded
 flagRun_t entry = STOP;

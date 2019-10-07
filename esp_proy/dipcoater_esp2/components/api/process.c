@@ -37,7 +37,6 @@ processCommand_t cmdProcessStandard[MAX_ESTATIC_COMMAND] = {
 		/*LOOP repeates N times the DWUW cycle */
 		{ .commandnumber =  PROCESS_COMMAND_LOOP, 		.argument.value.val = 1 },
 
-
 		{ .commandnumber = PROCESS_COMMAND_CERO_MACHINE,.argument.spin.velocity = 5,	.argument.spin.acceleration = 10, .fpcommandhandler = HandlerCeroMachine},
 		{ .commandnumber = PROCESS_COMMAND_FINISH,		.argument.spin.velocity = 0,	.argument.spin.acceleration = 0, .fpcommandhandler = HandlerFinish},
 
@@ -69,9 +68,6 @@ processCommand_t cmdProcessDinamic[MAX_DINAMIC_COMMAND] ={
 };
 
 
-
-
-
 //PROCESS RUN FUNCTION
 
 void ProcessRun(process_t *process) {
@@ -79,7 +75,6 @@ void ProcessRun(process_t *process) {
 	uint8_t ci;
 	uint8_t index = 0;
 	uint8_t loop;
-
 
 	if (process->command != NULL) {
 		ci = process->state.commandIndex; 				// command index
@@ -91,10 +86,6 @@ void ProcessRun(process_t *process) {
 				//printf("Comando:%d \r\n", index);
 			}
 			if (process->command[index].commandnumber == PROCESS_COMMAND_LOOP){
-//				if (process->command[index].argument.value.val > 0 ){
-//					process->command[index].argument.value.val--;
-//					printf("Loop number:%d\r\n",process->command[index].argument.value.val);
-//					index -=4;
 				if (loop > 0 ){
 					loop--;
 					printf("Loop number:%d\r\n",loop);
@@ -107,8 +98,6 @@ void ProcessRun(process_t *process) {
 		printf("Without program to execute!!\r\n");
 	}
 }
-
-
 
 
 //PROCESS LOAD FUNCTIONS
