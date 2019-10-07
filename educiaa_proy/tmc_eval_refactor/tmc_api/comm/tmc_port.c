@@ -56,8 +56,6 @@ void tmc_spi_readWriteArray(uint8_t channel, uint8_t *data, size_t length)
 	Chip_SSP_RWFrames_Blocking(LPC_SSP1, &config);
 
 	tmc_gpio_write(PORT_GPIO_SPI1_CSN, ON);
-//	for(size_t i = 0; i < length; i++)
-//		data[i] = spi_readWrite(channel, data[i], (i == length - 1) ? true : false);
 }
 
 void tmc_spi_init()
