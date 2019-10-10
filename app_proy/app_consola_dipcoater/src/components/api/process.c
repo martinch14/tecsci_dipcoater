@@ -64,6 +64,7 @@ processCommand_t cmdProcessCustom[MAX_ESTATIC_COMMAND] = {
 
 
 /* cmdProcessDinamic is an empty process that it can fill to get a personalized process, up to MAX_DINAMIC_COMMAND commands can be added and set up */
+/*  SE VA CUSTOMIZAR EN PROXIMA VERSION*/
 processCommand_t cmdProcessDinamic[MAX_DINAMIC_COMMAND] ={
 			/*Carga dinamica de COMANDOS*/
 };
@@ -88,13 +89,8 @@ void ProcessRun(process_t *process) {
 			if (process->command[index].commandnumber != PROCESS_COMMAND_LOOP) {
 				process->command[index].fpcommandhandler(&(process->command[index].argument.spin));
 				index++;
-				//printf("Comando:%d \r\n", index);
 			}
 			if (process->command[index].commandnumber == PROCESS_COMMAND_LOOP){
-//				if (process->command[index].argument.value.val > 0 ){
-//					process->command[index].argument.value.val--;
-//					printf("Loop number:%d\r\n",process->command[index].argument.value.val);
-//					index -=4;
 				if (loop > 0 ){
 					loop--;
 					printf("Loop number:%d\r\n",loop);
@@ -107,9 +103,6 @@ void ProcessRun(process_t *process) {
 		printf("Without program to execute!!\r\n");
 	}
 }
-
-
-
 
 //PROCESS LOAD FUNCTIONS
 
@@ -147,47 +140,7 @@ void ProcessSetProgramCustom(){
 	modQueue_Read(&queueconsolareception, &readed_Command);
 
 	cmdProcessCustom[readed_Command.commandnumber].argument=readed_Command.argument;
-	//cmdProcessCustom[readed_Command.commandnumber].argument.spin.velocity=readed_Command.argument.spin.velocity;
-	//cmdProcessCustom[readed_Command.commandnumber].argument.spin.acceleration=readed_Command.argument.spin.acceleration;
-	//cmdProcessCustom[readed_Command.commandnumber].argument.spin.test=readed_Command.argument.spin.test;
-}
 
-
-void ProcessAddSetProgramDinamic() {
-	processCommand_t readed_Command;
-	modQueue_Read(&queueconsolareception, &readed_Command);
-	printf("%d\n",ProcessDinamicLen());
-
-	if ( ProcessDinamicLen() < MAX_DINAMIC_COMMAND) {
-		printf("%d\n",ProcessDinamicLen());
-
-		cmdProcessDinamic[ProcessDinamicLen()].fpcommandhandler = Handlers_vector[readed_Command.commandnumber];
-		cmdProcessDinamic[ProcessDinamicLen()].argument = readed_Command.argument;
-		cmdProcessDinamic[ProcessDinamicLen()].commandnumber = readed_Command.commandnumber;
-
-
-	} else {
-		printf("Comandos maximos alcanzados!\r\n");
-	}
-}
-
-void ProcessCleanDinamic(){
-	int i=0;
-
-	for(i=0;i<MAX_DINAMIC_COMMAND;i++){
-		cmdProcessDinamic[i].commandnumber = PROCESS_COMMAND__EMPTY;
-	}
-}
-
-int ProcessDinamicLen(){
-	int i=0;
-
-	for(i=0;i<MAX_DINAMIC_COMMAND;i++){
-		if(cmdProcessDinamic[i].commandnumber == PROCESS_COMMAND__EMPTY){
-			return i;
-		}
-	}
-	return MAX_DINAMIC_COMMAND;
 }
 
 //SINGLE MOVEMENT COMMAND FUNCTIONS
@@ -202,6 +155,7 @@ void ProcessUpFastCommand(){
 
 	HandlerUp(&parameters);
 }
+
 
 void ProcessUpCommand(){
 
@@ -265,6 +219,46 @@ void ProcessStopCommand(){
 	parameters.test=1;
 
 	HandlerStop(&parameters);
+}
+
+
+/*PROCESO DINAMICO DE CARGA DE COMANDOS  -> REVISAR Y DEJAR A PUNTO EN PROXIMA VERSION   */
+
+void ProcessAddSetProgramDinamic() {
+	processCommand_t readed_Command;
+	modQueue_Read(&queueconsolareception, &readed_Command);
+	printf("%d\n",ProcessDinamicLen());
+
+	if ( ProcessDinamicLen() < MAX_DINAMIC_COMMAND) {
+		printf("%d\n",ProcessDinamicLen());
+
+		cmdProcessDinamic[ProcessDinamicLen()].fpcommandhandler = Handlers_vector[readed_Command.commandnumber];
+		cmdProcessDinamic[ProcessDinamicLen()].argument = readed_Command.argument;
+		cmdProcessDinamic[ProcessDinamicLen()].commandnumber = readed_Command.commandnumber;
+
+
+	} else {
+		printf("Comandos maximos alcanzados!\r\n");
+	}
+}
+
+void ProcessCleanDinamic(){
+	int i=0;
+
+	for(i=0;i<MAX_DINAMIC_COMMAND;i++){
+		cmdProcessDinamic[i].commandnumber = PROCESS_COMMAND__EMPTY;
+	}
+}
+
+int ProcessDinamicLen(){
+	int i=0;
+
+	for(i=0;i<MAX_DINAMIC_COMMAND;i++){
+		if(cmdProcessDinamic[i].commandnumber == PROCESS_COMMAND__EMPTY){
+			return i;
+		}
+	}
+	return MAX_DINAMIC_COMMAND;
 }
 
 
