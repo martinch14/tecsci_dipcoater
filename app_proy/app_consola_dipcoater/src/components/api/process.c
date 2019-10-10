@@ -214,9 +214,9 @@ void ProcessStopCommand(){
 
 	processCommandArgSpin_t parameters;
 
-	parameters.velocity=1;
-	parameters.acceleration=1;
-	parameters.test=1;
+	parameters.velocity=0;
+	parameters.acceleration=0;
+	parameters.test=0;
 
 	HandlerStop(&parameters);
 }

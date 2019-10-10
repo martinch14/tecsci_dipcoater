@@ -11,7 +11,7 @@
 #include "esp_system.h"
 #include "nvs_flash.h"
 #include "esp_event_loop.h"
-#include "../components/protocol_examples_common/include/protocol_examples_common.h"
+
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -24,9 +24,9 @@
 #include "esp_system.h"
 #include "esp_spi_flash.h"
 
-#include "../components/api/include/handlers.h"
-#include "../components/api/include/process.h"
-#include "app_main_dipcoater.h"
+
+#include "inc/app_main_dipcoater.h"
+
 
 
 flagRun_t entry = STOP;
@@ -42,11 +42,11 @@ void xtaskprocess(void *pvParameter) {
 
 	ProcessInit(&processDipCoating);
 	ProcessLoadProgramStandard(&processDipCoating);
-	entry = RUN;
+//	entry = RUN;
 
 	while (1) {
 		task_process(&processDipCoating);
-		vTaskDelay(1000 / portTICK_RATE_MS);
+		vTaskDelay(100 / portTICK_RATE_MS);
 	}
 
 }
@@ -54,31 +54,6 @@ void xtaskprocess(void *pvParameter) {
 void xtasktinysh(void *pvParameter) {
 
 	static char c = 0;
-	//command initialization
-	tinysh_add_command(&commandLOADPROGRAMSTANDARD);
-	tinysh_add_command(&commandLOADPROGRAMCUSTOM);
-	tinysh_add_command(&commandLOADPROGRAMDINAMIC);
-	tinysh_add_command(&commandSETCOMMANDCUSTOMPROGRAM);
-	tinysh_add_command(&commandSETSTANDARDPROGRAM);
-	tinysh_add_command(&commandSETALLCUSTOMPROGRAM);
-	tinysh_add_command(&commandCLEANPROGRAMDINAMIC);
-	tinysh_add_command(&commandADDSETALLCOMANDDINAMIC);
-	tinysh_add_command(&commandRUN);
-	tinysh_add_command(&commandUPFAST);
-	tinysh_add_command(&commandUP);
-	tinysh_add_command(&commandUPSLOW);
-	tinysh_add_command(&commandDOWNFAST);
-	tinysh_add_command(&commandDOWN);
-	tinysh_add_command(&commandDOWNSLOW);
-	tinysh_add_command(&commandSTOP);
-	tinysh_add_command(&commandSAMPLE);
-	tinysh_add_command(&commandRECIPIENT);
-	tinysh_add_command(&commandSETRH);
-	tinysh_add_command(&commandSETTEMP);
-	tinysh_add_command(&commandACTIVATEENVIROMENTALCHAMBER);
-	tinysh_add_command(&commandDEACTIVATEENVIROMENTALCHAMBER);
-
-	tinysh_set_putchar(HandlerConsolePutchar);
 
 	tinysh_init();
 
@@ -86,21 +61,22 @@ void xtasktinysh(void *pvParameter) {
 		c = getchar();
 		tinysh_char_in(c);
 
+		vTaskDelay(200 / portTICK_RATE_MS);
+
 	}
 
 }
 
 
+
 void app_main(void) {
 
 
-
-	xTaskCreate(&xtaskprocess,"Process Task",2048,NULL,2,NULL );
 	xTaskCreate(&xtasktinysh,"Tinysh Task",2048,NULL,2,NULL );
+	xTaskCreate(&xtaskprocess,"Process Task",2048,NULL,2,NULL );
 
 
 }
-
 
 
 

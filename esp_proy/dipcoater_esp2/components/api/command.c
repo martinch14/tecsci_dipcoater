@@ -9,10 +9,13 @@
 /*PROCESS STANDARD HANDLERS*/
 
 /*Handler to LOAD the standard process */
+#include <stdio.h>
 
 #include "../../components/api/include/process.h"
+#include "../../components/tinysh/include/tinysh.h"
 #include "../../components/api/include/mod_queue.h"
-#include "../../main/app_main_dipcoater.h"
+#include "../../main/inc/app_main_dipcoater.h"
+
 
 extern process_t processDipCoating;
 extern flagRun_t entry;
@@ -103,41 +106,41 @@ void CommandLOADPROGRAMDINAMICHandler(int argc, char **argv){
  * the arguments can be up to 129, in groups of 4:
  * 	comand number, velocity acceleration and test*/
 void CommandADDSETALLCOMANDDINAMICHandler(int argc, char **argv) {
-	processCommand_t aux_process_comand;
-	int i=1;
-	int a=1;
-	int b=2;
-	int c=3;
-	int d=4;
-
-	ProcessCleanDinamic();
-
-	if (5<argc<129) {
-		 for(i=1;i<=argc;i++){
-
-			 if(i==a){
-				 aux_process_comand.commandnumber=tinysh_get_arg_int(argc, argv, i);
-				 a+=4;
-			 }
-			 if(i==b){
-				 aux_process_comand.argument.spin.velocity=tinysh_get_arg_int(argc, argv, i);
-				 b+=4;
-			 }
-			 if(i==c){
-				 aux_process_comand.argument.spin.acceleration=tinysh_get_arg_int(argc, argv, i);
-				 c+=4;
-			 }
-
-			 if(i==d){
-			 aux_process_comand.argument.spin.test=tinysh_get_arg_int(argc, argv, i);
-
-			 modQueue_Write(&queueconsolareception,&aux_process_comand);
-			 ProcessAddSetProgramDinamic();
-			 d+=4;
-			 }
-
-		 }
-	}
+//	processCommand_t aux_process_comand;
+//	int i=1;
+//	int a=1;
+//	int b=2;
+//	int c=3;
+//	int d=4;
+//
+//	ProcessCleanDinamic();
+//
+//	if (5<argc<129) {
+//		 for(i=1;i<=argc;i++){
+//
+//			 if(i==a){
+//				 aux_process_comand.commandnumber=tinysh_get_arg_int(argc, argv, i);
+//				 a+=4;
+//			 }
+//			 if(i==b){
+//				 aux_process_comand.argument.spin.velocity=tinysh_get_arg_int(argc, argv, i);
+//				 b+=4;
+//			 }
+//			 if(i==c){
+//				 aux_process_comand.argument.spin.acceleration=tinysh_get_arg_int(argc, argv, i);
+//				 c+=4;
+//			 }
+//
+//			 if(i==d){
+//			 aux_process_comand.argument.spin.test=tinysh_get_arg_int(argc, argv, i);
+//
+//			 modQueue_Write(&queueconsolareception,&aux_process_comand);
+//			 ProcessAddSetProgramDinamic();
+//			 d+=4;
+//			 }
+//
+//		 }
+//	}
 }
 
 /*Handler to Clean all the dinamic program*/
