@@ -14,7 +14,7 @@
 #include "../../components/api/include/process.h"
 #include "../../components/tinysh/include/tinysh.h"
 #include "../../components/api/include/mod_queue.h"
-#include "../../main/inc/app_main_dipcoater.h"
+#include "../../main/include/app_main_dipcoater.h"
 
 
 extern process_t processDipCoating;

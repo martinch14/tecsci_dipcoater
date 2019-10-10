@@ -1,10 +1,5 @@
 #include <stdio.h>
-//#if _EPITKL_CFG_ARCH__x86 == _EPITKL_CFG_ARCH
-//#include <errno.h>
-//#include <termios.h>
-//#include <unistd.h>
-//#include <fcntl.h>
-//#endif
+
 #include "include/tinysh_custom.h"
 
 putchar_handler_t putcharHandler = NULL;

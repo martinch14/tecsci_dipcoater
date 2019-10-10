@@ -23,9 +23,7 @@
 #include "esp_event_loop.h"
 #include "esp_system.h"
 #include "esp_spi_flash.h"
-
-
-#include "inc/app_main_dipcoater.h"
+#include "include/app_main_dipcoater.h"
 
 
 
@@ -59,7 +57,7 @@ void xtasktinysh(void *pvParameter) {
 
 	while (1) {
 		c = getchar();
-		tinysh_char_in(c);
+//		tinysh_char_in(c);
 
 		vTaskDelay(200 / portTICK_RATE_MS);
 

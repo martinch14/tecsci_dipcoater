@@ -23,9 +23,9 @@
 #ifndef _TINYSH_H_
 #define	_TINYSH_H_
 
-#include "../include/tinysh_core.h"
-#include "../include/tinysh_custom.h"
-#include "../include/tinysh_utils.h"
+#include "tinysh_core.h"
+#include "tinysh_custom.h"
+#include "tinysh_utils.h"
 
 
 #endif /* _TINYSH_H_ */
