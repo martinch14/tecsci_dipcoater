@@ -8,13 +8,13 @@
 #ifndef MAIN_APP_MAIN_DIPCOATER_H_
 #define MAIN_APP_MAIN_DIPCOATER_H_
 
-#include "../../components/tinysh/include/tinysh.h"
-#include "../../components/api/include/handlers.h"
-#include "../../components/api/include/process.h"
-#include "../../components/api/include/command.h"
-#include "../../components/api/include/enviromental_chamber_control.h"
-#include "../../components/api/include/mod_queue.h"
-#include "../../components/protocol_examples_common/include/protocol_examples_common.h"
+#include "tinysh.h"
+#include "handlers.h"
+#include "process.h"
+#include "command.h"
+#include "enviromental_chamber_control.h"
+#include "mod_queue.h"
+#include "protocol_examples_common.h"
 
 
 typedef enum{RUN,STOP}flagRun_t;
