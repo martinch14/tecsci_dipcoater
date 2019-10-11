@@ -1,5 +1,5 @@
 
-#include "../../components/api/include/enviromental_chamber_control.h"
+#include "enviromental_chamber_control.h"
 
 //EMVIROMENTAL CHAMBER INIT FUNCTION
 

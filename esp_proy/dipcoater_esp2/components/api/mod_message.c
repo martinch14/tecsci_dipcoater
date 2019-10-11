@@ -27,11 +27,11 @@
  * expressed or implied, of Sebastián Pablo Bedín <sebabedin@gmail.com>.
  */
 
-#include "../../components/api/include/mod_message.h"
+#include "mod_message.h"
 
 #include <stdint.h>
 
-#include "../../components/api/include/mod_queue.h"
+#include "mod_queue.h"
 
 struct mod_message_service_s{
 	mod_message_channel_t *channels;

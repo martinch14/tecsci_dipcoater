@@ -1,8 +1,8 @@
 #include <stdio.h>
-#include "../../components/api/include/process.h"
-#include "../../components/api/include/handlers.h"
-#include "../../components/api/include/mod_queue.h"
-#include "../../main/include/app_main_dipcoater.h"
+#include "process.h"
+#include "handlers.h"
+#include "mod_queue.h"
+#include "app_main_dipcoater.h"
 
 
 

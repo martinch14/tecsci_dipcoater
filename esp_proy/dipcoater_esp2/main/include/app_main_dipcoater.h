@@ -8,14 +8,19 @@
 #ifndef MAIN_APP_MAIN_DIPCOATER_H_
 #define MAIN_APP_MAIN_DIPCOATER_H_
 
-#include "tinysh.h"
+
 #include "handlers.h"
 #include "process.h"
 #include "command.h"
 #include "enviromental_chamber_control.h"
 #include "mod_queue.h"
 #include "protocol_examples_common.h"
+#include "tinysh.h"
 
+//#include "tinysh_core.h"
+//#include "tinysh_custom.h"
+//#include "tinysh_utils.h"
+putchar_handler_t putcharHandler = NULL;
 
 typedef enum{RUN,STOP}flagRun_t;
 
@@ -35,17 +40,6 @@ mod_queue_t queueconsolatransmit;
 processCommand_t bufferreception[10];
 int buffertransmit[10];
 
-
-int app_main_dipcoater(void);
-
-
-void task_process(process_t *processDipCoating);
-//void task_motor(void);
-//void task_enviromental_chamber(void);
-
-
-void xtaskprocess(void *pvParameter);
-void xtasktinysh(void *pvParameter);
 
 
 

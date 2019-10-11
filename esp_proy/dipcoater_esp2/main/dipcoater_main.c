@@ -29,6 +29,7 @@
 
 
 
+
 flagRun_t entry = STOP;
 
 void task_process(process_t *processDipCoating){
@@ -59,7 +60,7 @@ void xtasktinysh(void *pvParameter) {
 
 	while (1) {
 		c = getchar();
-//		tinysh_char_in(c);
+		tinysh_char_in(c);
 
 		vTaskDelay(200 / portTICK_RATE_MS);
 

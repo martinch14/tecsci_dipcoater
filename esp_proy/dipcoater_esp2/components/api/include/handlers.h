@@ -9,7 +9,7 @@
 #define COMPONENTS_API_INCLUDE_HANDLERS_H_
 
 
-#include "../../../components/api/include/process.h"
+#include "process.h"
 
 
 int HandlerCeroMachine(processCommandArgSpin_t	*arg);

@@ -23,6 +23,7 @@
 #ifndef _TINYSH_H_
 #define	_TINYSH_H_
 
+#include <stdio.h>
 #include "tinysh_core.h"
 #include "tinysh_custom.h"
 #include "tinysh_utils.h"

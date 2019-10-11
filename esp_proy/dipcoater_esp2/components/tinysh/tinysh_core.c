@@ -20,8 +20,8 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-//#include "tinysh/inc/tinysh_core.h"
-#include "include/tinysh_core.h"
+
+#include "tinysh.h"
 
 
 #ifndef BUFFER_SIZE

@@ -11,9 +11,7 @@
 #include "freertos/event_groups.h"
 #endif
 
-#include "../../components/api/include/handlers.h"
-
-#include <stdio.h>
+#include "handlers.h"
 #include <unistd.h>
 
 #ifndef TECSCI_ARCH_X86

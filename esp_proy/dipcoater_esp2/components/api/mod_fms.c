@@ -27,7 +27,7 @@
  * expressed or implied, of Sebastián Pablo Bedín <sebabedin@gmail.com>.
  */
 
-#include "../../components/api/include/mod_fsm.h"
+#include "mod_fsm.h"
 //#include "mod/inc/mod_fsm.h"
 
 

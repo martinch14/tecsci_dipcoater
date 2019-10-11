@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "include/tinysh_utils.h"
+#include "tinysh_utils.h"
 
 
 int tinysh_get_arg_int(const int argc, const char **argv, const int index) {

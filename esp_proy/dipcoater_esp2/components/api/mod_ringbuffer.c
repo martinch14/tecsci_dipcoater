@@ -27,7 +27,7 @@
  * expressed or implied, of Sebastián Pablo Bedín <sebabedin@gmail.com>.
  */
 
-#include "../../components/api/include/mod_ringbuffer.h"
+#include "mod_ringbuffer.h"
 
 static inline void _inc(mod_rinfbuffer_t *rb, uint8_t *i){
 	if(*i < (rb->bufferLen - 1)){

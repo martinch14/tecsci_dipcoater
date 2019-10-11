@@ -11,10 +11,10 @@
 /*Handler to LOAD the standard process */
 #include <stdio.h>
 
-#include "../../components/api/include/process.h"
-#include "../../components/tinysh/include/tinysh.h"
-#include "../../components/api/include/mod_queue.h"
-#include "../../main/include/app_main_dipcoater.h"
+#include "process.h"
+#include "tinysh.h"
+#include "mod_queue.h"
+#include "app_main_dipcoater.h"
 
 
 extern process_t processDipCoating;
