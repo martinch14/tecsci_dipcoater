@@ -1,8 +1,6 @@
 #ifndef _TINYSH_CORE_
 #define _TINYSH_CORE_
 
-
-
 typedef void (*tinysh_fnt_t)(int argc, char **argv);
 
 typedef struct tinysh_cmd_t {
@@ -24,14 +22,14 @@ extern "C" {
  * function void tinysh_char_out(unsigned char) must be provided by
  * the application
  */
-void tinysh_char_out(unsigned char c);
+void tinysh_char_out( char c);
 
 /*
  * Functions below are provided by the tinysh module
  */
 
 /* new character input */
-void tinysh_char_in(unsigned char c);
+void tinysh_char_in( char c);
 
 /* add a new command */
 void tinysh_add_command(tinysh_cmd_t *cmd);

@@ -22,7 +22,8 @@ void ProcessInit(process_t* process){
 }
 
 
-//PROCESSES AVALIABLE
+
+//PROCESSES AVAILABLE
 
 /*cmdProcessStandard has the predifined values and only the N of the loop can be modified*/
 processCommand_t cmdProcessStandard[MAX_ESTATIC_COMMAND] = {
@@ -35,7 +36,7 @@ processCommand_t cmdProcessStandard[MAX_ESTATIC_COMMAND] = {
 		{ .commandnumber = PROCESS_COMMAND_UP, 			.argument.spin.velocity = 2,	.argument.spin.acceleration = 1 , .fpcommandhandler = HandlerUp },
 		{ .commandnumber = PROCESS_COMMAND_WAIT, 		.argument.spin.velocity = 0,	.argument.spin.acceleration = 1 , .fpcommandhandler = HandlerWait },
 		/*LOOP repeates N times the DWUW cycle */
-		{ .commandnumber =  PROCESS_COMMAND_LOOP, 		.argument.value.val = 1 },
+		{ .commandnumber =  PROCESS_COMMAND_LOOP, 		.argument.value.val = 3 },
 
 		{ .commandnumber = PROCESS_COMMAND_CERO_MACHINE,.argument.spin.velocity = 5,	.argument.spin.acceleration = 10, .fpcommandhandler = HandlerCeroMachine},
 		{ .commandnumber = PROCESS_COMMAND_FINISH,		.argument.spin.velocity = 0,	.argument.spin.acceleration = 0, .fpcommandhandler = HandlerFinish},
@@ -44,7 +45,7 @@ processCommand_t cmdProcessStandard[MAX_ESTATIC_COMMAND] = {
 
 /*CmdProcessCustom, the arguments can be modified to make a load and run after*/
 processCommand_t cmdProcessCustom[MAX_ESTATIC_COMMAND] = {
-		{ .commandnumber = PROCESS_COMMAND_CERO_MACHINE,.argument.spin.velocity = 5,	.argument.spin.acceleration = 10, .fpcommandhandler = HandlerCeroMachine },
+		{ .commandnumber = PROCESS_COMMAND_CERO_MACHINE,.argument.spin.velocity = 6,	.argument.spin.acceleration = 10, .fpcommandhandler = HandlerCeroMachine },
 		{ .commandnumber = PROCESS_COMMAND_DOWN, 		.argument.spin.velocity = -2,	.argument.spin.acceleration = 1 , .fpcommandhandler = HandlerDown },
 		{ .commandnumber = PROCESS_COMMAND_WAIT, 		.argument.spin.velocity = 0,	.argument.spin.acceleration = 1 , .fpcommandhandler = HandlerWait},
 		/*start of the DWUW cycle*/
@@ -83,12 +84,13 @@ void ProcessRun(process_t *process) {
 			if (process->command[index].commandnumber != PROCESS_COMMAND_LOOP) {
 				process->command[index].fpcommandhandler(&(process->command[index].argument.spin));
 				index++;
-				//printf("Comando:%d \r\n", index);
 			}
 			if (process->command[index].commandnumber == PROCESS_COMMAND_LOOP){
 				if (loop > 0 ){
 					loop--;
 					printf("Loop number:%d\r\n",loop);
+
+					//Desde comando LOOP vuelve 4 comandos hace atras para hacer secuencia DWUW
 					index -=4;
 			}
 				else index++;
@@ -105,7 +107,7 @@ void ProcessRun(process_t *process) {
 void ProcessLoadProgramStandard(process_t *process) {
 	process->command= cmdProcessStandard;
 	process->state.commandIndex=MAX_ESTATIC_COMMAND;
-	printf("Program Standar Load!!\r\n");
+	printf("Program Standard Load!!\r\n");
 }
 
 void ProcessLoadProgramCustom(process_t *process) {
@@ -249,12 +251,16 @@ void ProcessStopCommand(){
 
 	processCommandArgSpin_t parameters;
 
-	parameters.velocity=1;
-	parameters.acceleration=1;
-	parameters.test=1;
+	parameters.velocity=0;
+	parameters.acceleration=0;
+	parameters.test=0;
 
 	HandlerStop(&parameters);
 }
 
+void ProcessRunCommand(){
+
+	HandlerRun();
+}
 
 

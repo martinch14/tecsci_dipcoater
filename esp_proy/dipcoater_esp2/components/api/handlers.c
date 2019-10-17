@@ -58,8 +58,14 @@ int HandlerWait(processCommandArgSpin_t*	arg) {
 	return 0;
 }
 
+int HandlerRun() {
+	printf("\r\n");
+	return 0;
+}
+
+
 int HandlerStop(processCommandArgSpin_t*	arg) {
-	printf("Buscando Cero Machine!!\t");
+	printf("Comando Stop!!\t");
 	printf("velocidad:%d\t",arg->velocity);
 	printf("aceleracion:%d\r\n",arg->acceleration);
 	sleep(2);

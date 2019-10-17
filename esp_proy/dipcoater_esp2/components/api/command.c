@@ -37,6 +37,7 @@ void CommandSETSTANDARDPROGRAMHandler(int argc, char **argv){
 	 ProcessSetProgramStandard();
 
  }
+
 }
 
 /*PROCESS CUSTOM HANDLERS*/
@@ -155,6 +156,7 @@ void CommandCLEANPROGRAMDINAMICHandler(int argc, char **argv) {
  * turn on the RUN flag to RUN*/
 void CommandRUNHandler(int argc, char **argv){
 	entry=RUN;
+	ProcessRunCommand();
 }
 
 /*SINGLE MOVEMENT HANDLERS*/

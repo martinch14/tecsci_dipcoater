@@ -17,10 +17,6 @@
 #include "protocol_examples_common.h"
 #include "tinysh.h"
 
-//#include "tinysh_core.h"
-//#include "tinysh_custom.h"
-//#include "tinysh_utils.h"
-putchar_handler_t putcharHandler = NULL;
 
 typedef enum{RUN,STOP}flagRun_t;
 
@@ -39,9 +35,5 @@ mod_queue_t queueconsolareception;
 mod_queue_t queueconsolatransmit;
 processCommand_t bufferreception[10];
 int buffertransmit[10];
-
-
-
-
 
 #endif /* MAIN_APP_MAIN_DIPCOATER_H_ */

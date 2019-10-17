@@ -1,8 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "tinysh_utils.h"
-
+#include "tinysh.h"
 
 int tinysh_get_arg_int(const int argc, const char **argv, const int index) {
 	int retval = 0;
@@ -21,7 +20,8 @@ float tinysh_get_arg_float(const int argc, const char **argv, const int index) {
 }
 
 char* tinysh_get_arg_string(const int argc, const char **argv, const int index) {
-	const char *string = 0;
+////////////////////////// const char *string = 0;
+	char *string = 0;
 	if (argc > index) {
 		string = argv[index];
 	}

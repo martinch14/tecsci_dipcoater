@@ -20,8 +20,8 @@
  * Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
-#include "tinysh.h"
+//#include "tinysh/inc/tinysh_core.h"
+#include "tinysh_core.h"
 
 
 #ifndef BUFFER_SIZE
@@ -54,10 +54,10 @@ static void help_fnt(int argc, char **argv);
 static tinysh_cmd_t help_cmd={ 
   0,"help","display help","<cr>",help_fnt,0,0,0 };
 
-static uchar input_buffers[HISTORY_DEPTH][BUFFER_SIZE+1]={0};
-static uchar trash_buffer[BUFFER_SIZE+1]={0};
+static char input_buffers[HISTORY_DEPTH][BUFFER_SIZE+1]={0};
+static char trash_buffer[BUFFER_SIZE+1]={0};
 static int cur_buf_index=0;
-static uchar context_buffer[BUFFER_SIZE+1]={0};
+static char context_buffer[BUFFER_SIZE+1]={0};
 static int cur_context=0;
 static int cur_index=0;
 static int echo=1;
@@ -68,7 +68,7 @@ static void *tinysh_arg=0;
 
 /* few useful utilities that may be missing */
 
-static int strlen(uchar *s)
+static int strlen(char *s)
 {
   int i;
   for(i=0;*s;s++,i++);
@@ -104,7 +104,9 @@ enum { NULLMATCH,FULLMATCH,PARTMATCH,UNMATCH,MATCH,AMBIG };
  * but there are remaining chars in s1, UNMATCH if s1 does not start with
  * s2
  */
-int strstart(uchar *s1, uchar *s2)
+
+////////////////////////////////////////////////////int strstart(char *s1, char *s2)
+int strstart(char *s1, char *s2)
 {
   while(*s1 && *s1==*s2) { s1++; s2++; }
 
@@ -124,9 +126,9 @@ int strstart(uchar *s1, uchar *s2)
  * _cmd: point to first command at this level, return matched cmd
  * _str: point to current unprocessed input, return next unprocessed
  */
-static int parse_command(tinysh_cmd_t **_cmd, uchar **_str)
+static int parse_command(tinysh_cmd_t **_cmd, char **_str)
 {
-  uchar *str=*_str;
+  char *str=*_str;
   tinysh_cmd_t *cmd;
   int matched_len=0;
   tinysh_cmd_t *matched_cmd=0;
@@ -183,7 +185,7 @@ static int parse_command(tinysh_cmd_t **_cmd, uchar **_str)
 
 /* create a context from current input line
  */
-static void do_context(tinysh_cmd_t *cmd, uchar *str)
+static void do_context(tinysh_cmd_t *cmd, char *str)
 {
   while(*str) 
     context_buffer[cur_context++]=*str++;
@@ -194,7 +196,7 @@ static void do_context(tinysh_cmd_t *cmd, uchar *str)
 /* execute the given command by calling callback with appropriate 
  * arguments
  */
-static void exec_command(tinysh_cmd_t *cmd, uchar *str)
+static void exec_command(tinysh_cmd_t *cmd, char *str)
 {
   char *argv[MAX_ARGS];
   int argc=0;
@@ -227,9 +229,9 @@ static void exec_command(tinysh_cmd_t *cmd, uchar *str)
 
 /* try to execute the current command line
  */
-static int exec_command_line(tinysh_cmd_t *cmd, uchar *_str)
+static int exec_command_line(tinysh_cmd_t *cmd, char *_str)
 {
-  uchar *str=_str;
+  char *str=_str;
 
   while(1)
     {
@@ -306,9 +308,9 @@ static void display_child_help(tinysh_cmd_t *cmd)
 
 /* try to display help for current comand line
  */
-static int help_command_line(tinysh_cmd_t *cmd, uchar *_str)
+static int help_command_line(tinysh_cmd_t *cmd, char *_str)
 {
-  uchar *str=_str;
+  char *str=_str;
 
   while(1)
     {
@@ -370,9 +372,9 @@ static int help_command_line(tinysh_cmd_t *cmd, uchar *_str)
 
 /* try to complete current command line
  */
-static int complete_command_line(tinysh_cmd_t *cmd, uchar *_str)
+static int complete_command_line(tinysh_cmd_t *cmd,char *_str)
 {
-  uchar *str=_str;
+  char *str=_str;
 
   while(1)
     {
@@ -380,7 +382,7 @@ static int complete_command_line(tinysh_cmd_t *cmd, uchar *_str)
       int common_len=BUFFER_SIZE;
       int _str_len;
       int i;
-      uchar *__str=str;
+      char *__str=str;
 
       tinysh_cmd_t *_cmd=cmd;
       ret=parse_command(&cmd,&str);
@@ -489,9 +491,9 @@ static void start_of_line()
 
 /* character input 
  */
-static void _tinysh_char_in(uchar c)
+static void _tinysh_char_in(char c)
 {
-  uchar *line=input_buffers[cur_buf_index];
+  char *line=input_buffers[cur_buf_index];
 
   if(c=='\n' || c=='\r') /* validate command */
     {
@@ -597,7 +599,7 @@ static void _tinysh_char_in(uchar c)
 }
 
 /* new character input */
-void tinysh_char_in(uchar c)
+void tinysh_char_in(char c)
 {
   /*
    * filter characters here

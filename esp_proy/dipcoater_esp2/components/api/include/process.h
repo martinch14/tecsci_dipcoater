@@ -71,7 +71,7 @@ typedef struct {
 
 typedef struct {
 
-	/*COnfiguracion de Variables con el tamaño de la muestra y el tamaño del recipiente   en mm   y desplazamiento en eje Y segun pasos del motor   */
+	/*Configuracion de Variables con el tamaño de la muestra y el tamaño del recipiente   en mm   y desplazamiento en eje Y segun pasos del motor   */
 	uint16_t	samplesize;
 	uint16_t 	recipientsize;
 	uint32_t 	axisYDisplacement;    /*segun parametro contructivo de la maquina */
@@ -100,7 +100,7 @@ void ProcessLoadProgramStandard(process_t *process);
 void ProcessLoadProgramCustom(process_t *process);
 void ProcessLoadProgramDinamic(process_t *process);
 void ProcessCleanDinamic();
-int ProcessDinamicLen();
+int  ProcessDinamicLen();
 void ProcessAddSetProgramDinamic();
 void ProcessSetProgramCustom();
 void ProcessSetProgramStandard();
@@ -111,6 +111,7 @@ void ProcessDownFastCommand();
 void ProcessDownCommand();
 void ProcessDownSlowCommand();
 void ProcessStopCommand();
+void ProcessRunCommand();
 
 
 #endif /* COMPONENTS_API_INCLUDE_PROCESS_H_ */
