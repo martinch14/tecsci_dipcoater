@@ -8,4 +8,6 @@ void deinit(void);
 void reset(void);
 void app_main(void);
 
+void MotorSetup(void);
+
 #endif /* #ifndef _MAIN_H_ */

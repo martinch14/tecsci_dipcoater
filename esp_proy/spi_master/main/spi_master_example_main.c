@@ -13,121 +13,136 @@
 #include "freertos/task.h"
 #include "esp_system.h"
 #include "driver/spi_master.h"
-#include "soc/gpio_struct.h"
 #include "driver/gpio.h"
 
-/*
- This code displays some fancy graphics on the 320x240 LCD on an ESP-WROVER_KIT board.
- This example demonstrates the use of both spi_device_transmit as well as
- spi_device_queue_trans/spi_device_get_trans_result and pre-transmit callbacks.
 
- Some info about the ILI9341/ST7789V: It has an C/D line, which is connected to a GPIO here. It expects this
- line to be low for a command and high for data. We use a pre-transmit callback here to control that
- line: every transaction has as the user-definable argument the needed state of the D/C line and just
- before the transaction is sent, the callback will set this line to the correct state.
-*/
+#define PIN_NUM_MISO 27//14//25
+#define PIN_NUM_MOSI 14//23
+#define PIN_NUM_CLK  12//13//19
+#define PIN_NUM_CS   15//22
 
-#define PIN_NUM_MISO 25
-#define PIN_NUM_MOSI 23
-#define PIN_NUM_CLK  19
-#define PIN_NUM_CS   22
+#define BUFFER_SIZE  5//(0x100)//255
 
-#define BUFFER_SIZE  (0x100)
-static uint8_t spi_tx_buf[BUFFER_SIZE];
-static uint8_t spi_rx_buf[BUFFER_SIZE];
 
+//FUCIONES del SPI
+spi_device_handle_t tmc_spi_init(){
+
+	esp_err_t ret;
+	spi_device_handle_t spi_dev;
+	spi_bus_config_t buscfg={
+			.miso_io_num=PIN_NUM_MISO,
+			.mosi_io_num=PIN_NUM_MOSI,
+			.sclk_io_num=PIN_NUM_CLK,
+			.quadwp_io_num=-1,
+			.quadhd_io_num=-1,
+			//.max_transfer_sz=PARALLEL_LINES*320*2+8
+			//.max_transfer_sz= 120     //ver si es bits o bytes
+	};
+	spi_device_interface_config_t devcfg={
+			.clock_speed_hz=100000,
+			.mode=0,                                //SPI mode 0
+			.spics_io_num=PIN_NUM_CS,               //CS pin
+			.queue_size=1,                          //We want to be able to queue 7 transactions at a time
+			//.pre_cb=lcd_spi_pre_transfer_callback,  //Specify pre-transfer callback to handle D/C line
+	};
+
+
+	//Initialize the SPI bus
+	ret=spi_bus_initialize(HSPI_HOST, &buscfg, 1);
+	ESP_ERROR_CHECK(ret);
+
+	ret=spi_bus_add_device(HSPI_HOST, &devcfg, &spi_dev);
+	ESP_ERROR_CHECK(ret);
+
+	return spi_dev;
+}
+
+void tmc_spi_readWriteArray(spi_device_handle_t spi, uint8_t *tx, uint8_t *rx, size_t length){
+
+	spi_transaction_t t;
+	esp_err_t ret;
+	size_t i;
+
+	//LENGTH set
+	t.length = length;  /*transaction length is in bits.*/
+
+
+	/*This is to enable the use of the static structure inside the spi_transaction_t (up to: 32 bits == 4 bytes)*/
+	//TX set
+
+//	if(length<=32){ /*If the data to be transferred is 32 bits or less, it can be stored in the transaction struct itself.*/
+//		 							/*For transmitted data, use the tx_data member for this and set the SPI_TRANS_USE_TXDATA*/
+//		t.flags=SPI_TRANS_USE_TXDATA; //flag to enable
+//		for(i=0;i<(length/8);i++){
+//			t.tx_data[i]=tx[i];
+//		}
+//	}
+//	else if (length>32) { //void *tx_buffer
+//		t.tx_buffer = tx;
+//	}
+
+	//TX set
+	t.tx_buffer = tx;
+
+	//RX set
+	t.rx_buffer = rx;
+	//t.rxlength = length;
+
+	//ret=spi_device_polling_transmit(spi, &t);
+	ret=spi_device_transmit(spi, &t);
+
+	ESP_ERROR_CHECK(ret);
+}
+
+
+
+//FUCIONES DEL EJEMPLO
 static void bufferInit(uint8_t *tx_buf, uint8_t *rx_buf)
 {
 	uint16_t i;
-	uint8_t ch = 0;
 
 	for(i = 0; i < BUFFER_SIZE; i++)
 	{
-		tx_buf[i] = ch++;
+		tx_buf[i] = i;
 		rx_buf[i] = 0xAA;
 	}
 }
 
-static uint8_t bufferVerify(uint8_t *tx_buf, uint8_t *rx_buf)
+static void bufferVerify(uint8_t *tx_buf, uint8_t *rx_buf)
 {
 	uint16_t i;
 	for(i = 0; i < BUFFER_SIZE; i++)
 	{
-		if(tx_buf[i] != rx_buf[i])
-		{
-			return 1;
-		}
+    printf("-----------------\n");
+    printf("tx :%d -----------------------------",tx_buf[i]); // hexa:  %#08x
+    printf("rx: %d\n",rx_buf[i]);
+    printf("-----------------");
 	}
-	return 0;
+
+	return;
 }
 
-void appSPIRun(spi_device_handle_t spi)
-{
-    esp_err_t ret;
 
-    spi_transaction_t t;
 
-    t.length = BUFFER_SIZE * 2 * 8;                  //Len is in bytes, transaction length is in bits.
-    t.tx_buffer = spi_tx_buf;                    //Data
-    ret = spi_device_polling_transmit(spi, &t);  //Transmit!
+void app_main(void){
 
-    assert(ret==ESP_OK);            //Should have had no issues.
-}
+		static uint8_t spi_tx_buf[BUFFER_SIZE];
+		static uint8_t spi_rx_buf[BUFFER_SIZE];
 
-void app_main()
-{
-    esp_err_t ret;
+		spi_device_handle_t spi_dev;
 
-    spi_device_handle_t spi;
+		spi_dev= tmc_spi_init();//inicializacion del spi bus y device
+		bufferInit(spi_tx_buf, spi_rx_buf);//es propio del ejemplo --> es la carga del tx
 
-    spi_bus_config_t buscfg={
-        .miso_io_num = PIN_NUM_MISO,
-        .mosi_io_num = PIN_NUM_MOSI,
-        .sclk_io_num = PIN_NUM_CLK,
-        .quadwp_io_num = -1,
-        .quadhd_io_num = -1,
-        .max_transfer_sz = BUFFER_SIZE * 2,
-    };
 
-    printf("bus cfg\r\n");
-    //Initialize the SPI bus
-    ret=spi_bus_initialize(HSPI_HOST, &buscfg, 1);
-    ESP_ERROR_CHECK(ret);
+	while (1) {
 
-    spi_device_interface_config_t devcfg={
-        .clock_speed_hz = 10*1000*1000,           //Clock out at 10 MHz
-        .mode = 0,                                //SPI mode 0
-        .spics_io_num = PIN_NUM_CS,               //CS pin
-    };
 
-    printf("device cfg\r\n");
-    //Attach the LCD to the SPI bus
-    ret=spi_bus_add_device(HSPI_HOST, &devcfg, &spi);
-    ESP_ERROR_CHECK(ret);
+		tmc_spi_readWriteArray(spi_dev, spi_tx_buf, spi_rx_buf,BUFFER_SIZE * 8); //transmision y recepcion de datos
 
-	printf("Init\r\n");
-    bufferInit(spi_tx_buf, spi_rx_buf);
+		bufferVerify(spi_tx_buf, spi_rx_buf); //es propio del ejemplo --> es la verificacion del tx y rx
+		vTaskDelay(2000 / portTICK_PERIOD_MS);
+		printf("test---->\r\n");
 
-	printf("TXRX ... ");
-    appSPIRun(spi);
-
-	if((bufferVerify(spi_tx_buf, spi_rx_buf) == 0))
-	{
-		printf("OK");
 	}
-	else
-	{
-		printf("ERROR");
-	}
-	printf("\r\n");
-
-	printf("end\r\n");
-
-    for (int i = 10; i >= 0; i--) {
-        printf("Restarting in %d seconds...\n", i);
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
-    }
-    printf("Restarting now.\n");
-    fflush(stdout);
-    esp_restart();
 }
