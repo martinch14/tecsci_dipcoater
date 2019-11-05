@@ -56,6 +56,13 @@ typedef enum {
 typedef int (*processCommandHandler_t)(processCommandArgSpin_t* arg);
 
 
+typedef union {
+	processCommandArgSpin_t spin;
+	processCommandArgWait_t wait;
+	processCommandArg4Float_t floats;
+	processCommandArgUint8_t value;
+} processCommandArgument_t;
+
 typedef struct {
 	proccesCommandNumber_t commandnumber;
 	processCommandHandler_t fpcommandhandler;
@@ -98,10 +105,6 @@ void ProcessInit(process_t *process);
 void ProcessRun(process_t *process);
 void ProcessLoadProgramStandard(process_t *process);
 void ProcessLoadProgramCustom(process_t *process);
-//void ProcessLoadProgramDinamic(process_t *process);
-//void ProcessCleanDinamic();
-//int  ProcessDinamicLen();
-//void ProcessAddSetProgramDinamic();
 void ProcessSetProgramCustom();
 void ProcessSetProgramStandard();
 void ProcessUpFastCommand();
@@ -112,6 +115,14 @@ void ProcessDownCommand();
 void ProcessDownSlowCommand();
 void ProcessStopCommand();
 void ProcessRunCommand();
+void ProcessREADDATACommand();
+
+
+//void ProcessLoadProgramDinamic(process_t *process);
+//void ProcessCleanDinamic();
+//int  ProcessDinamicLen();
+//void ProcessAddSetProgramDinamic();
+
 
 
 #endif /* COMPONENTS_API_INCLUDE_PROCESS_H_ */

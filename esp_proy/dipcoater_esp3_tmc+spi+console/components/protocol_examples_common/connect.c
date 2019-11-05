@@ -8,7 +8,6 @@
  */
 
 #include <string.h>
-//#include "protocol_examples_common.h"
 #include "protocol_examples_common.h"
 #include "sdkconfig.h"
 #include "esp_event.h"
@@ -30,8 +29,6 @@
 #define CONFIG_EXAMPLE_CONNECT_WIFI
 #define CONFIG_EXAMPLE_WIFI_SSID "FUNINTEC-CTZ"
 #define CONFIG_EXAMPLE_WIFI_PASSWORD "UnsamFun2019"
-
-
 
 
 

@@ -5,6 +5,10 @@
 
 #PROJECT_NAME := hello-world
 
-PROJECT_NAME := dipcoater_esp2
+PROJECT_NAME := dipcoater_esp3_tmc+spi+console
+
+
+EXTRA_COMPONENT_DIRS = $(IDF_PATH)/examples/common_components/protocol_examples_common
+
 include $(IDF_PATH)/make/project.mk
 

@@ -13,7 +13,15 @@
 //TODO ver con lucas para que era esto!
 //processCommandHandler_t Handlers_vector[]={HandlerCeroMachine,HandlerSpin,HandlerUp,HandlerDown,HandlerWait,HandlerStop,HandlerFinish};
 
-//PROCESS INIT FUNCTION
+
+/**
+ * @brief Function to initialize the Process
+ * Function that receives a pointer to process, and initialize the structure
+ * of the process.
+ *
+ * @param pointer to process
+ * @return nothing
+ */
 
 void ProcessInit(process_t* process){
 	/*Crear un array de comandos vacios fijo*/
@@ -38,7 +46,7 @@ processCommand_t cmdProcessStandard[MAX_ESTATIC_COMMAND] = {
 		{ .commandnumber = PROCESS_COMMAND_WAIT, 		.argument.spin.velocity = 0,	.argument.spin.acceleration = 0 , .fpcommandhandler = HandlerWait },
 		{ .commandnumber = PROCESS_COMMAND_UP, 			.argument.spin.velocity = 2,	.argument.spin.acceleration = 1 , .fpcommandhandler = HandlerUp },
 		{ .commandnumber = PROCESS_COMMAND_WAIT, 		.argument.spin.velocity = 0,	.argument.spin.acceleration = 0 , .fpcommandhandler = HandlerWait },
-		/*LOOP repeates N times the DWUW cycle */
+		/*LOOP repeats N times the DWUW cycle */
 		{ .commandnumber =  PROCESS_COMMAND_LOOP, 		.argument.value.val = 0 },
 
 		{ .commandnumber = PROCESS_COMMAND_CERO_MACHINE,.argument.spin.velocity = 5,	.argument.spin.acceleration = 10, .fpcommandhandler = HandlerCeroMachine},
@@ -75,13 +83,13 @@ void ProcessRun(process_t *process) {
 	uint8_t loop_ori,loop;
 
 	if (process->command != NULL) {
-		ci = process->state.commandIndex; 				// command index
+		ci = process->state.commandIndex; // command index
 		loop_ori = process->command[PROCESS_COMMAND_LOOP-1].argument.value.val;
 		loop=loop_ori;
 		printf("\r\nProceso Iniciado - Motor Encendido\r\n");
 		while (index < ci) {
 			if (process->command[index].commandnumber != PROCESS_COMMAND_LOOP) {
-				//VER LO QUE ESTAMOS PONIENDO EN EL PUNTERO A FUNCION
+				//VER LO QUE ESTAMOS PONIENDO EN EL PUNTERO A FUNCION (PASAR DIRECTAMENTE EL ARGUMENTO )
 				process->command[index].fpcommandhandler(&(process->command[index].argument.spin));
 				index++;
 			}
@@ -215,6 +223,14 @@ void ProcessStopCommand(){
 
 	HandlerStop(&parameters);
 }
+
+void ProcessREADDATACommand(){
+
+
+	HandlerREADDATA();
+}
+
+
 
 void ProcessRunCommand(){
 

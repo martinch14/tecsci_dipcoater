@@ -164,6 +164,12 @@ void commandRECIPIENTMHandler(int argc, char **argv) {
 	printf("\r\n");
 }
 
+void CommandREADDATAHandler(int argc, char **argv) {
+	printf("\r\n");
+	ProcessREADDATACommand();
+}
+
+
 /*ENVIROMENTAL CHAMBER HANDLERS*/
 void CommandSETRHHandler(int argc, char **argv) {
 	printf("\r\n");

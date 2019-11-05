@@ -21,6 +21,12 @@
 #include "esp_spi_flash.h"
 
 
+#include "lwip/err.h"
+#include "lwip/sockets.h"
+#include "lwip/sys.h"
+#include <lwip/netdb.h>
+
+
 #include "driver/spi_master.h"
 #include "soc/gpio_struct.h"
 #include "driver/gpio.h"
@@ -37,22 +43,71 @@
 
 /*TODO    BUGS
  * LOADPROGRAMSTANDARD    se tiene q cargar antes de SETSTANDARDPROGRAM para que se pueda ejecutar
- * COMANDO STOP O FINISH  VER DE DARLE MAS PRIORIDAD PARA QUE SE EJECUTE SIN ESPERAR A QUE TERMINE EL CICLO DE TRABAJO
+ * COMANDO STOP O FINISH  VER DE DARLE MAS PRIORIDAD PARA QUE SE EJECUTEN SIN ESPERAR A QUE TERMINE EL CICLO DE TRABAJO
  * -->>>  EN COMANDO STOP AUMENTAR EL INDEX HASTA 10
  *
- *
+ * Al ingresar el comando setstandarprogram verificar que ingrese  un argumento con el loop
  *
  *
  * */
 
+
+//#define PORT CONFIG_EXAMPLE_PORT
+#define PORT 3333
+
+//todo: porque no lo toma del archivo sdkconfig
+#define CONFIG_EXAMPLE_IPV4
+
+
+
+
+static const char *TAG = "example";
+
 flagRun_t entry = STOP;
 
 extern void TMC5130_init(void);
+//PROCESS STANDARD:
+static tinysh_cmd_t commandSETSTANDARDPROGRAM = 		{NULL,"SETSTANDARDPROGRAM", NULL, NULL, CommandSETSTANDARDPROGRAMHandler, NULL, NULL, NULL};
+static tinysh_cmd_t commandLOADPROGRAMSTANDARD = 		{NULL,"LOADPROGRAMSTANDARD", NULL, NULL, CommandLOADPROGRAMSTANDARDHandler, NULL, NULL, NULL};
 
+//PROCESS CUSTOM:
+static tinysh_cmd_t commandSETCOMMANDCUSTOMPROGRAM = 	{NULL,"SETCUSTOMPROGRAM", NULL, NULL, CommandSETCOMMANDCUSTOMPROGRAMHandler, NULL, NULL, NULL};
+static tinysh_cmd_t commandSETALLCUSTOMPROGRAM = 		{NULL,"SETALLCUSTOMPROGRAM", NULL, NULL, CommandSETALLCUSTOMPROGRAMHandler, NULL, NULL, NULL};
+static tinysh_cmd_t commandLOADPROGRAMCUSTOM = 			{NULL,"LOADPROGRAMCUSTOM", NULL, NULL, CommandLOADPROGRAMCUSTOMHandler, NULL, NULL, NULL};
+
+//PROCESS DINAMIC:
+//	static tinysh_cmd_t commandCLEANPROGRAMDINAMIC = 		{NULL,"CLEANPROGRAMDINAMIC", NULL, NULL, CommandCLEANPROGRAMDINAMICHandler, NULL, NULL, NULL};
+//	static tinysh_cmd_t commandADDSETALLCOMANDDINAMIC = 	{NULL,"ADDSETALLCOMANDDINAMIC", NULL, NULL, CommandADDSETALLCOMANDDINAMICHandler, NULL, NULL, NULL};
+//	static tinysh_cmd_t commandLOADPROGRAMDINAMIC = 		{NULL,"LOADPROGRAMDINAMIC", NULL, NULL, CommandLOADPROGRAMDINAMICHandler, NULL, NULL, NULL};
+
+//RUN LOADED PROCESS:
+static tinysh_cmd_t commandRUN = 						{NULL,"RUN", NULL, NULL, CommandRUNHandler, NULL, NULL, NULL};
+//SINGLE MOVEMENTS:
+static tinysh_cmd_t commandUPFAST = 					{NULL,"UPFAST", NULL, NULL, CommandUPFASTHandler, NULL, NULL, NULL};
+static tinysh_cmd_t commandUP = 						{NULL,"UP", NULL, NULL, CommandUPHandler, NULL, NULL, NULL};
+static tinysh_cmd_t commandUPSLOW = 					{NULL,"UPSLOW", NULL, NULL, CommandUPSLOWHandler, NULL, NULL, NULL};
+static tinysh_cmd_t commandDOWNFAST = 					{NULL,"DOWNFAST", NULL, NULL, CommandDOWNFASTHandler, NULL, NULL, NULL};
+static tinysh_cmd_t commandDOWN = 						{NULL,"DOWN", NULL, NULL, CommandDOWNHandler, NULL, NULL, NULL};
+static tinysh_cmd_t commandDOWNSLOW = 					{NULL,"DOWNSLOW", NULL, NULL, CommandDOWNSLOWHandler, NULL, NULL, NULL};
+
+//EMRGENCY STOP
+static tinysh_cmd_t commandSTOP = 						{NULL,"STOP", NULL, NULL, CommandSTOPHandler, NULL, NULL, NULL};
+
+//EMRGENCY READDATA
+static tinysh_cmd_t commandREADDATA = 						{NULL,"READDATA", NULL, NULL, CommandREADDATAHandler, NULL, NULL, NULL};
+
+/*CONFIGURATION COMMANDS*/
+static tinysh_cmd_t commandSAMPLE = 					{NULL,"LOADSAMPLE", NULL, NULL, commandSAMPLEHandler, NULL, NULL, NULL};
+static tinysh_cmd_t commandRECIPIENT = 					{NULL,"LOADRECIPIENT", NULL, NULL, commandRECIPIENTMHandler, NULL, NULL, NULL};
+
+//ENVIROMENTAL CHAMBER:
+//	static tinysh_cmd_t commandSETRH = 						{NULL,"SETRH", NULL, NULL, CommandSETRHHandler, NULL, NULL, NULL};
+//	static tinysh_cmd_t commandSETTEMP = 					{NULL,"SETTEMP", NULL, NULL, CommandSETTEMPHandler, NULL, NULL, NULL};
+//	static tinysh_cmd_t commandACTIVATEENVIROMENTALCHAMBER ={NULL,"ACTIVATEENVIROMENTALCHAMBER", NULL, NULL, CommandACTIVATEENVIROMENTALCHAMBERHandler, NULL, NULL, NULL};
+//	static tinysh_cmd_t commandDEACTIVATEENVIROMENTALCHAMBER ={NULL,"DEACTIVATEENVIROMENTALCHAMBER", NULL, NULL, CommandDEACTIVATEENVIROMENTALCHAMBERHandler, NULL, NULL, NULL};
 
 
 spi_device_handle_t  spi_dev;
-
 
 
 void xtaskprocess(void *pvParameter) {
@@ -77,41 +132,7 @@ void xtasktinysh(void *pvParameter) {
 	modQueue_Init(&queueconsolareception, bufferreception, 10, sizeof(processCommand_t));
 	modQueue_Init(&queueconsolatransmit,  buffertransmit, 10, sizeof(int));
 	/*MOVEMENT COMMANDS*/
-	//PROCESS STANDARD:
-	static tinysh_cmd_t commandSETSTANDARDPROGRAM = 		{NULL,"SETSTANDARDPROGRAM", NULL, NULL, CommandSETSTANDARDPROGRAMHandler, NULL, NULL, NULL};
-	static tinysh_cmd_t commandLOADPROGRAMSTANDARD = 		{NULL,"LOADPROGRAMSTANDARD", NULL, NULL, CommandLOADPROGRAMSTANDARDHandler, NULL, NULL, NULL};
-	//PROCESS CUSTOM:
-	static tinysh_cmd_t commandSETCOMMANDCUSTOMPROGRAM = 	{NULL,"SETCUSTOMPROGRAM", NULL, NULL, CommandSETCOMMANDCUSTOMPROGRAMHandler, NULL, NULL, NULL};
-	static tinysh_cmd_t commandSETALLCUSTOMPROGRAM = 		{NULL,"SETALLCUSTOMPROGRAM", NULL, NULL, CommandSETALLCUSTOMPROGRAMHandler, NULL, NULL, NULL};
-	static tinysh_cmd_t commandLOADPROGRAMCUSTOM = 			{NULL,"LOADPROGRAMCUSTOM", NULL, NULL, CommandLOADPROGRAMCUSTOMHandler, NULL, NULL, NULL};
-	//PROCESS DINAMIC:
 
-//	static tinysh_cmd_t commandCLEANPROGRAMDINAMIC = 		{NULL,"CLEANPROGRAMDINAMIC", NULL, NULL, CommandCLEANPROGRAMDINAMICHandler, NULL, NULL, NULL};
-//	static tinysh_cmd_t commandADDSETALLCOMANDDINAMIC = 	{NULL,"ADDSETALLCOMANDDINAMIC", NULL, NULL, CommandADDSETALLCOMANDDINAMICHandler, NULL, NULL, NULL};
-//	static tinysh_cmd_t commandLOADPROGRAMDINAMIC = 		{NULL,"LOADPROGRAMDINAMIC", NULL, NULL, CommandLOADPROGRAMDINAMICHandler, NULL, NULL, NULL};
-
-	//RUN LOADED PROCESS:
-	static tinysh_cmd_t commandRUN = 						{NULL,"RUN", NULL, NULL, CommandRUNHandler, NULL, NULL, NULL};
-	//SINGLE MOVEMENTS:
-	static tinysh_cmd_t commandUPFAST = 					{NULL,"UPFAST", NULL, NULL, CommandUPFASTHandler, NULL, NULL, NULL};
-	static tinysh_cmd_t commandUP = 						{NULL,"UP", NULL, NULL, CommandUPHandler, NULL, NULL, NULL};
-	static tinysh_cmd_t commandUPSLOW = 					{NULL,"UPSLOW", NULL, NULL, CommandUPSLOWHandler, NULL, NULL, NULL};
-	static tinysh_cmd_t commandDOWNFAST = 					{NULL,"DOWNFAST", NULL, NULL, CommandDOWNFASTHandler, NULL, NULL, NULL};
-	static tinysh_cmd_t commandDOWN = 						{NULL,"DOWN", NULL, NULL, CommandDOWNHandler, NULL, NULL, NULL};
-	static tinysh_cmd_t commandDOWNSLOW = 					{NULL,"DOWNSLOW", NULL, NULL, CommandDOWNSLOWHandler, NULL, NULL, NULL};
-
-	//EMRGENCY STOP
-	static tinysh_cmd_t commandSTOP = 						{NULL,"STOP", NULL, NULL, CommandSTOPHandler, NULL, NULL, NULL};
-
-	/*CONFIGURATION COMMANDS*/
-	static tinysh_cmd_t commandSAMPLE = 					{NULL,"LOADSAMPLE", NULL, NULL, commandSAMPLEHandler, NULL, NULL, NULL};
-	static tinysh_cmd_t commandRECIPIENT = 					{NULL,"LOADRECIPIENT", NULL, NULL, commandRECIPIENTMHandler, NULL, NULL, NULL};
-
-	//ENVIROMENTAL CHAMBER:
-//	static tinysh_cmd_t commandSETRH = 						{NULL,"SETRH", NULL, NULL, CommandSETRHHandler, NULL, NULL, NULL};
-//	static tinysh_cmd_t commandSETTEMP = 					{NULL,"SETTEMP", NULL, NULL, CommandSETTEMPHandler, NULL, NULL, NULL};
-//	static tinysh_cmd_t commandACTIVATEENVIROMENTALCHAMBER ={NULL,"ACTIVATEENVIROMENTALCHAMBER", NULL, NULL, CommandACTIVATEENVIROMENTALCHAMBERHandler, NULL, NULL, NULL};
-//	static tinysh_cmd_t commandDEACTIVATEENVIROMENTALCHAMBER ={NULL,"DEACTIVATEENVIROMENTALCHAMBER", NULL, NULL, CommandDEACTIVATEENVIROMENTALCHAMBERHandler, NULL, NULL, NULL};
 
 	//command initialization
 	tinysh_add_command(&commandLOADPROGRAMSTANDARD);
@@ -132,6 +153,7 @@ void xtasktinysh(void *pvParameter) {
 	tinysh_add_command(&commandSTOP);
 	tinysh_add_command(&commandSAMPLE);
 	tinysh_add_command(&commandRECIPIENT);
+	tinysh_add_command(&commandREADDATA);
 //	tinysh_add_command(&commandSETRH);
 //	tinysh_add_command(&commandSETTEMP);
 //	tinysh_add_command(&commandACTIVATEENVIROMENTALCHAMBER);
@@ -205,31 +227,153 @@ void xtaskmotor(void *pvParameter) {
 	Evalboards.ch1.writeRegister(0, 0x72, 0x00000000); // writing value 0x00000000 = 0 = 0.0 to address 39 = 0x72(ENCM_CTRL)
 	vTaskDelay(250 / portTICK_RATE_MS);
 
+	//borro la tarea, solo la necesitaba para la configuracion inicial con delay entre habilitaciones y envios por spi de conf
+	vTaskDelete(NULL);
+//	while (1) {
+//			vTaskDelay(10000 / portTICK_RATE_MS);
+//	}
+}
 
-	while (1) {
+static void tcp_server_task(void *pvParameters)
+{
+    char rx_buffer[128];
+    char addr_str[128];
+    int addr_family;
+    int ip_protocol;
+    int i;
 
-//			Evalboards.ch1.enableDriver(DRIVER_ENABLE);
-//			Evalboards.ch1.left(0,0x00009C40); // writing value 0x00000000 = 0 = 0.0 to address 18 = 0x2C(TZEROWAIT)
-//			printf("IZQUIERDA!!\r\n");
-//			vTaskDelay(3000 / portTICK_RATE_MS);
-//			Evalboards.ch1.right(0,0x00009C40); // writing value 0x00000000 = 0 = 0.0 to address 18 = 0x2C(TZEROWAIT)
-//			printf("DERECHA!!\n\r");
-			vTaskDelay(10000 / portTICK_RATE_MS);
+    while (1) {
+
+#ifdef CONFIG_EXAMPLE_IPV4
+        struct sockaddr_in dest_addr;
+        dest_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+        dest_addr.sin_family = AF_INET;
+        dest_addr.sin_port = htons(PORT);
+        addr_family = AF_INET;
+        ip_protocol = IPPROTO_IP;
+        inet_ntoa_r(dest_addr.sin_addr, addr_str, sizeof(addr_str) - 1);
+#else 	//IPV6
+        struct sockaddr_in6 dest_addr;
+        bzero(&dest_addr.sin6_addr.un, sizeof(dest_addr.sin6_addr.un));
+        dest_addr.sin6_family = AF_INET6;
+        dest_addr.sin6_port = htons(PORT);
+        addr_family = AF_INET6;
+        ip_protocol = IPPROTO_IPV6;
+        inet6_ntoa_r(dest_addr.sin6_addr, addr_str, sizeof(addr_str) - 1);
+#endif
+
+        int listen_sock = socket(addr_family, SOCK_STREAM, ip_protocol);
+        if (listen_sock < 0) {
+            ESP_LOGE(TAG, "Unable to create socket: errno %d", errno);
+            break;
+        }
+        ESP_LOGI(TAG, "Socket created");
+
+        int err = bind(listen_sock, (struct sockaddr *)&dest_addr, sizeof(dest_addr));
+        if (err != 0) {
+            ESP_LOGE(TAG, "Socket unable to bind: errno %d", errno);
+            break;
+        }
+        ESP_LOGI(TAG, "Socket bound, port %d", PORT);
+
+        err = listen(listen_sock, 1);
+        if (err != 0) {
+            ESP_LOGE(TAG, "Error occurred during listen: errno %d", errno);
+            break;
+        }
+        ESP_LOGI(TAG, "Socket listening");
+
+        struct sockaddr_in6 source_addr; // Large enough for both IPv4 or IPv6
+        uint addr_len = sizeof(source_addr);
+//        int sock = accept(listen_sock, (struct sockaddr *)&source_addr, &addr_len);
+//        int sock_global = accept(listen_sock, (struct sockaddr *)&source_addr, &addr_len);
+
+        sock_global = accept(listen_sock, (struct sockaddr *)&source_addr, &addr_len);
+        if (sock_global < 0) {
+            ESP_LOGE(TAG, "Unable to accept connection: errno %d", errno);
+            break;
+        }
+        ESP_LOGI(TAG, "Socket accepted");
+
+        while (1) {
 
 
+        	//int len = recv(sock, rx_buffer, sizeof(rx_buffer) - 1, 0);
+        	int len = recv(sock_global, rx_buffer, sizeof(rx_buffer) - 1, 0);
 
-	}
+        	// Error occurred during receiving
+            if (len < 0) {
+                ESP_LOGE(TAG, "recv failed: errno %d", errno);
+                break;
+            }
+            // Connection closed
+            else if (len == 0) {
+                ESP_LOGI(TAG, "Connection closed");
+                break;
+            }
+            // Data received
+            else {
+                // Get the sender's ip address as string
+                if (source_addr.sin6_family == PF_INET) {
+                    inet_ntoa_r(((struct sockaddr_in *)&source_addr)->sin_addr.s_addr, addr_str, sizeof(addr_str) - 1);
+                } else if (source_addr.sin6_family == PF_INET6) {
+                    inet6_ntoa_r(source_addr.sin6_addr, addr_str, sizeof(addr_str) - 1);
+                }
+
+                rx_buffer[len] = 0; // Null-terminate whatever we received and treat like a string
+                ESP_LOGI(TAG, "Received %d bytes from %s:", len, addr_str);
+                ESP_LOGI(TAG, "%s", rx_buffer);
+
+                for (i=0;i<len;i++){
+                tinysh_char_in(rx_buffer[i]);
+                }
+                //Para que  valide lo recibido!
+                tinysh_char_in('\n');
+
+                //test para devolucion de datos -- devuelvo un dato de la estructura del proceso , el index
+                int err = send(sock_global, rx_buffer, len, 0);
+
+
+                if (err < 0) {
+                    ESP_LOGE(TAG, "Error occurred during sending: errno %d", errno);
+                    break;
+                }
+            }
+        }
+
+        if (sock_global != -1) {
+            ESP_LOGE(TAG, "Shutting down socket and restarting...");
+            shutdown(sock_global, 0);
+            close(sock_global);
+
+            ////FIX sacado de internet  https://www.esp32.com/viewtopic.php?t=10335
+            shutdown(listen_sock,0);
+            close(listen_sock);
+            vTaskDelay(5);
+
+        }
+    }
+    vTaskDelete(NULL);
 }
 
 
 
 void app_main(void) {
 
+	ESP_ERROR_CHECK(nvs_flash_init());
+	tcpip_adapter_init();
+	ESP_ERROR_CHECK(esp_event_loop_create_default());
 
-	xTaskCreate(&xtasktinysh,"Tinysh Task",16384,NULL,2,NULL );
-	xTaskCreate(&xtaskprocess,"Process Task",8192,NULL,2,NULL );
-	xTaskCreate(&xtaskmotor,"Process Motor",16384,NULL,3,NULL );
+	/* This helper function configures Wi-Fi or Ethernet, as selected in menuconfig.
+	 * Read "Establishing Wi-Fi or Ethernet Connection" section in
+	 * examples/protocols/README.md for more information about this function.
+	 */
+	ESP_ERROR_CHECK(example_connect());
 
+	xTaskCreate(&xtasktinysh, "Tinysh Task", 16384, NULL, 2, NULL);
+	xTaskCreate(&xtaskprocess, "Process Task", 8192, NULL, 2, NULL);
+	xTaskCreate(&xtaskmotor, "Process Motor", 16384, NULL, 2, NULL);
+	xTaskCreate(tcp_server_task, "tcp_server", 4096, NULL, 2, NULL);
 }
 
 

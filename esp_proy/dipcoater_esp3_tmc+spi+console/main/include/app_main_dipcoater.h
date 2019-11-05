@@ -37,9 +37,8 @@ mod_queue_t queueconsolatransmit;
 processCommand_t bufferreception[10];
 int buffertransmit[10];
 
-
-
-
+// Test con socket TCP-IP global para envíar desde los handlers de los comandos para informar estado a la aplicación
+int sock_global;
 
 
 
@@ -47,12 +46,6 @@ void init(void);
 void deinit(void);
 void reset(void);
 void app_main(void);
-
-
-
-
-
-
 
 
 

@@ -15,6 +15,11 @@
 #include "TMC5130.h"
 
 
+#include "lwip/err.h"
+#include "lwip/sockets.h"
+#include "lwip/sys.h"
+#include <lwip/netdb.h>
+
 
 #endif
 
@@ -24,6 +29,13 @@
 #ifndef TECSCI_ARCH_X86
 #define sleep(x) vTaskDelay((x) * 1000 / portTICK_RATE_MS)
 #endif
+
+
+//Variable Global con la direccion del socket creado, sirve para enviar mensajes al sokcet desde los handlers
+extern int sock_global;
+
+const unsigned char  datos='S';
+const unsigned char  datob[]= "BAJANDO";
 
 //Handler Functions
 int HandlerCeroMachine(processCommandArgSpin_t*	arg) {
@@ -46,6 +58,7 @@ int HandlerUp(processCommandArgSpin_t*	arg) {
 	printf("Subiendo muestra!!\t");
 	printf("velocidad:%d\t",arg->velocity);
 	printf("aceleracion:%d\r\n",arg->acceleration);
+	send(sock_global, &datos, sizeof(unsigned char), 0);
 	Evalboards.ch1.left(0,0x00009C40); // writing value 0x00000000 = 0 = 0.0 to address 18 = 0x2C(TZEROWAIT)
 	sleep(2);
 	return 0;
@@ -68,6 +81,7 @@ int HandlerDown(processCommandArgSpin_t*	arg) {
 	printf("Bajando muestra!!\t");
 	printf("velocidad:%d\t",arg->velocity);
 	printf("aceleracion:%d\r\n",arg->acceleration);
+	send(sock_global, &datob, sizeof(unsigned char)*7, 0);
 	Evalboards.ch1.right(0,0x00009C40); // writing value 0x00000000 = 0 = 0.0 to address 18 = 0x2C(TZEROWAIT)
 	sleep(2);
 	return 0;
@@ -97,11 +111,17 @@ int HandlerStop(processCommandArgSpin_t*	arg) {
 	sleep(2);
 	return 0;
 }
+
+
 int HandlerFinish(processCommandArgSpin_t*	arg) {
 
 	Evalboards.ch1.enableDriver(DRIVER_DISABLE);
 	printf("Proceso Finalizado - Motor Apagado\r\n");
+	printf("\r\n");
 
 	return 0;
 }
 
+int HandlerREADDATA() {
+	return 0;
+}

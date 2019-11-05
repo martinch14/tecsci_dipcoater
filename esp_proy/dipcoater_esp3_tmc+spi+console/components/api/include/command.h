@@ -60,4 +60,6 @@ void CommandSETTEMPHandler(int argc, char **argv);
 void CommandACTIVATEENVIROMENTALCHAMBERHandler(int argc, char **argv);
 void CommandDEACTIVATEENVIROMENTALCHAMBERHandler(int argc, char **argv);
 
+void CommandREADDATAHandler(int argc, char **argv);
+
 #endif /* COMPONENTS_API_INCLUDE_COMMAND_H_ */
