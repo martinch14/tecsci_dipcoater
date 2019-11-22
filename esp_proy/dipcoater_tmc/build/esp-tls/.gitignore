@@ -1,0 +1,4 @@
+/component_project_vars.mk
+/esp_tls.d
+/esp_tls.o
+/libesp-tls.a

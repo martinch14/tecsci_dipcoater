@@ -1,0 +1,6 @@
+/commands.d
+/commands.o
+/component_project_vars.mk
+/libconsole.a
+/split_argv.d
+/split_argv.o

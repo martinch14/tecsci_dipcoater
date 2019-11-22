@@ -1,0 +1,10 @@
+/httpd_main.d
+/httpd_main.o
+/httpd_parse.d
+/httpd_parse.o
+/httpd_sess.d
+/httpd_sess.o
+/httpd_txrx.d
+/httpd_txrx.o
+/httpd_uri.d
+/httpd_uri.o

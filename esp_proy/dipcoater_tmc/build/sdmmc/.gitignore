@@ -1,0 +1,14 @@
+/component_project_vars.mk
+/libsdmmc.a
+/sdmmc_cmd.d
+/sdmmc_cmd.o
+/sdmmc_common.d
+/sdmmc_common.o
+/sdmmc_init.d
+/sdmmc_init.o
+/sdmmc_io.d
+/sdmmc_io.o
+/sdmmc_mmc.d
+/sdmmc_mmc.o
+/sdmmc_sd.d
+/sdmmc_sd.o

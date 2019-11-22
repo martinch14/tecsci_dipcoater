@@ -1,9 +1,8 @@
-/* Hello World Example
-
- This example code is in the Public Domain (or CC0 licensed, at your option.)
- Unless required by applicable law or agreed to in writing, this
- software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
- CONDITIONS OF ANY KIND, either express or implied.
+/*
+ * dipcoater_main.c
+ *
+ *  Created on: 12 sep. 2019
+ *      Author: martin
  */
 
 #include <stdio.h>
@@ -11,12 +10,9 @@
 #include "esp_system.h"
 #include "nvs_flash.h"
 #include "esp_event_loop.h"
-
-
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/event_groups.h"
-
 #include "esp_log.h"
 #include "esp_websocket_client.h"
 #include "esp_event.h"
@@ -33,17 +29,15 @@
  *
  * */
 
-
-
 flagRun_t entry = STOP;
 
 
-void task_process(process_t *processDipCoating){
-	if (entry==RUN){
-		ProcessRun(processDipCoating);
-		entry=STOP;
-	}
-}
+//void task_process(process_t *processDipCoating){
+//	if (entry==RUN){
+//		ProcessRun(processDipCoating);
+//		entry=STOP;
+//	}
+//}
 
 void xtaskprocess(void *pvParameter) {
 
@@ -134,7 +128,6 @@ void xtasktinysh(void *pvParameter) {
 
 	}
 }
-
 
 
 void app_main(void) {

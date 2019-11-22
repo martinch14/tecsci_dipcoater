@@ -1,0 +1,12 @@
+/component_project_vars.mk
+/libtcp_transport.a
+/transport.d
+/transport.o
+/transport_ssl.d
+/transport_ssl.o
+/transport_tcp.d
+/transport_tcp.o
+/transport_utils.d
+/transport_utils.o
+/transport_ws.d
+/transport_ws.o

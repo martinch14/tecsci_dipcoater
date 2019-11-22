@@ -1,0 +1,12 @@
+/spi_flash_hal.d
+/spi_flash_hal.o
+/spi_flash_hal_iram.d
+/spi_flash_hal_iram.o
+/spi_hal.d
+/spi_hal.o
+/spi_hal_iram.d
+/spi_hal_iram.o
+/spi_slave_hal.d
+/spi_slave_hal.o
+/spi_slave_hal_iram.d
+/spi_slave_hal_iram.o

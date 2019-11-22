@@ -1,0 +1,16 @@
+/dbg_stubs.d
+/dbg_stubs.o
+/esp_err_to_name.d
+/esp_err_to_name.o
+/esp_timer.d
+/esp_timer.o
+/ets_timer_legacy.d
+/ets_timer_legacy.o
+/freertos_hooks.d
+/freertos_hooks.o
+/ipc.d
+/ipc.o
+/pm_locks.d
+/pm_locks.o
+/stack_check.d
+/stack_check.o

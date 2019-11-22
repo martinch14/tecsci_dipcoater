@@ -1,0 +1,6 @@
+/crypto_box.d
+/crypto_box.o
+/crypto_box_easy.d
+/crypto_box_easy.o
+/crypto_box_seal.d
+/crypto_box_seal.o

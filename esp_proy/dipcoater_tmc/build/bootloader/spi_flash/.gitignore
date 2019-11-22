@@ -1,0 +1,4 @@
+/component_project_vars.mk
+/libspi_flash.a
+/spi_flash_rom_patch.d
+/spi_flash_rom_patch.o

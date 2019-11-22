@@ -1,0 +1,16 @@
+/nvs_api.d
+/nvs_api.o
+/nvs_encr.d
+/nvs_encr.o
+/nvs_item_hash_list.d
+/nvs_item_hash_list.o
+/nvs_ops.d
+/nvs_ops.o
+/nvs_page.d
+/nvs_page.o
+/nvs_pagemanager.d
+/nvs_pagemanager.o
+/nvs_storage.d
+/nvs_storage.o
+/nvs_types.d
+/nvs_types.o

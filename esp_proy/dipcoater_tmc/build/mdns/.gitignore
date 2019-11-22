@@ -1,0 +1,8 @@
+/component_project_vars.mk
+/libmdns.a
+/mdns.d
+/mdns.o
+/mdns_console.d
+/mdns_console.o
+/mdns_networking.d
+/mdns_networking.o

@@ -27,7 +27,7 @@ void MotorSetup(void);
 
 spi_device_handle_t  spi_dev;
 
-uint8_t rxx[5]={0xFF,0xFF,0xFF,0xFF,0xFF};
+//uint8_t rxx[5]={0xFF,0xFF,0xFF,0xFF,0xFF};
 
 void init(void) {
 
@@ -36,7 +36,7 @@ void init(void) {
 
 void MotorSetup(void)
 {
-//
+
 //	Evalboards.ch1.writeRegister(0, 0x00, 0x00002680); // writing value 0x00002680 = 9856 = 0.0 to address 0 = 0x00(GCONF)
 //	Evalboards.ch1.writeRegister(0, 0x03, 0x00000000); // writing value 0x00000000 = 0 = 0.0 to address 1 = 0x03(SLAVECONF)
 //	Evalboards.ch1.writeRegister(0, 0x05, 0x00000000); // writing value 0x00000000 = 0 = 0.0 to address 2 = 0x05(X_COMPARE)
@@ -102,7 +102,6 @@ void app_main()
 	Evalboards.ch1.enableDriver(DRIVER_DISABLE);
 
 	Evalboards.ch1.enableDriver(DRIVER_ENABLE);
-//	MotorSetup();
 
 	int i = 0;
 	while (1) {
@@ -115,6 +114,7 @@ void app_main()
 			printf("moviendo .. %d\n", i);
 
 
+//			MotorSetup();
 
 			Evalboards.ch1.writeRegister(0, 0x00, 0x00002680); // writing value 0x00002680 = 9856 = 0.0 to address 0 = 0x00(GCONF)
 			Evalboards.ch1.writeRegister(0, 0x03, 0x00000000); // writing value 0x00000000 = 0 = 0.0 to address 1 = 0x03(SLAVECONF)

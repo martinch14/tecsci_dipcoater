@@ -76,9 +76,9 @@ void tmc5130_readWriteArray(uint8_t channel, uint8_t *data, size_t length) {
 //Chip_SSP_RWFrames_Blocking(channelToSPI(channel), );
 	//memset(data, 0, length);
 #if 0
-	tmc_spi_readWriteArray(channelToSPI(channel), data, length);
+	tmc_spi_readWriteArray(channelToSPI(channel), data,data, length);
 #endif
-	tmc_spi_readWriteArray(channel, data, length);
+	tmc_spi_readWriteArray(channel, data,data, length);
 }
 
 // => Functions forwarded to API
@@ -108,7 +108,6 @@ static uint32_t stop(uint8_t motor) {
 
 static uint32_t moveTo(uint8_t motor, int32_t position) {
 	tmc5130_moveTo(motorToIC(motor), position, vmax_position);
-
 	return 0;
 }
 

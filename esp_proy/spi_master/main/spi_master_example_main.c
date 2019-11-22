@@ -21,7 +21,7 @@
 #define PIN_NUM_CLK  12//13//19
 #define PIN_NUM_CS   15//22
 
-#define BUFFER_SIZE  5//(0x100)//255
+#define BUFFER_SIZE  5//(0x100)//255 //in bytes
 
 
 //FUCIONES del SPI
@@ -59,7 +59,7 @@ spi_device_handle_t tmc_spi_init(){
 
 void tmc_spi_readWriteArray(spi_device_handle_t spi, uint8_t *tx, uint8_t *rx, size_t length){
 
-	spi_transaction_t t;
+	spi_transaction_t t = {};
 	esp_err_t ret;
 	size_t i;
 

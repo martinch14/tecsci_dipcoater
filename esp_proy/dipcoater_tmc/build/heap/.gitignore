@@ -1,0 +1,8 @@
+/component_project_vars.mk
+/heap_caps.d
+/heap_caps.o
+/heap_caps_init.d
+/heap_caps_init.o
+/libheap.a
+/multi_heap.d
+/multi_heap.o

@@ -107,6 +107,7 @@ void ProcessLoadProgramStandard(process_t *process);
 void ProcessLoadProgramCustom(process_t *process);
 void ProcessSetProgramCustom();
 void ProcessSetProgramStandard();
+void ProcessCeroMachineCommand();
 void ProcessUpFastCommand();
 void ProcessUpCommand();
 void ProcessUpSlowCommand();
@@ -116,6 +117,10 @@ void ProcessDownSlowCommand();
 void ProcessStopCommand();
 void ProcessRunCommand();
 void ProcessREADDATACommand();
+void ProcessENA_DRIVERCommand();
+void ProcessDIS_DRIVERCommand();
+
+void ProcessPOSITIONCommand();
 
 
 //void ProcessLoadProgramDinamic(process_t *process);

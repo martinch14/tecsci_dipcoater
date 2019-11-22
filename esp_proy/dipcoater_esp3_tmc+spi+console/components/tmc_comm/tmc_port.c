@@ -109,7 +109,7 @@ uint8_t tmc_spi_readWrite(uint8_t channel, uint8_t writeData, bool lastTransfer)
 #endif
 }
 
-void tmc_spi_readWriteArray(uint8_t channel, uint8_t *tx, size_t length)
+void tmc_spi_readWriteArray(uint8_t channel, uint8_t *tx, uint8_t *rx, size_t length)
 {
 #if 0
 	tmc_gpio_write(PORT_GPIO_SPI1_CSN, OFF);
@@ -151,8 +151,10 @@ void tmc_spi_readWriteArray(uint8_t channel, uint8_t *tx, size_t length)
 
 	//RX set
 //	t.rx_buffer = rxx;
-	t.rx_buffer = NULL;
-//	ret=spi_device_polling_transmit(spi_dev, &t);
+	t.rx_buffer = rx;
+//	tx=	t.rx_buffer ;
+
+	//	ret=spi_device_polling_transmit(spi_dev, &t);
 	ret=spi_device_transmit(spi_dev, &t);
 	ESP_ERROR_CHECK(ret);
 	#endif

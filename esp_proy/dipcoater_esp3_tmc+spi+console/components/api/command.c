@@ -109,6 +109,15 @@ void CommandSETALLCUSTOMPROGRAMHandler(int argc, char **argv){
 }
 
 
+/*Handler to found Cero Machine Target */
+void CommandCEROMACHINEHandler(int argc, char **argv){
+	printf("\r\n");
+	ProcessCeroMachineCommand();
+}
+
+
+
+
 /*RUN PROCESS HANDLER*/
 
 /*Handler to RUn the LOADED process,
@@ -168,6 +177,23 @@ void CommandREADDATAHandler(int argc, char **argv) {
 	printf("\r\n");
 	ProcessREADDATACommand();
 }
+
+void CommandENA_DRIVERHandler(int argc, char **argv) {
+	printf("\r\n");
+	ProcessENA_DRIVERCommand();
+}
+
+void CommandDIS_DRIVERHandler(int argc, char **argv) {
+	printf("\r\n");
+	ProcessDIS_DRIVERCommand();
+}
+
+
+void CommandPOSITIONHandler(int argc, char **argv) {
+	printf("\r\n");
+	ProcessPOSITIONCommand();
+}
+
 
 
 /*ENVIROMENTAL CHAMBER HANDLERS*/

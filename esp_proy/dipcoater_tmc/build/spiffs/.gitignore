@@ -1,0 +1,6 @@
+/component_project_vars.mk
+/esp_spiffs.d
+/esp_spiffs.o
+/libspiffs.a
+/spiffs_api.d
+/spiffs_api.o

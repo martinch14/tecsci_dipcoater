@@ -1,0 +1,8 @@
+/core_dump_common.d
+/core_dump_common.o
+/core_dump_flash.d
+/core_dump_flash.o
+/core_dump_port.d
+/core_dump_port.o
+/core_dump_uart.d
+/core_dump_uart.o

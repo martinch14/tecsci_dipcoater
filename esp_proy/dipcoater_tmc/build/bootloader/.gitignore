@@ -1,0 +1,4 @@
+/bootloader.bin
+/bootloader.elf
+/bootloader.map
+/component_project_vars.mk

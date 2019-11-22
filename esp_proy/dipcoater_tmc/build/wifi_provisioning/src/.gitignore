@@ -1,0 +1,12 @@
+/handlers.d
+/handlers.o
+/manager.d
+/manager.o
+/scheme_console.d
+/scheme_console.o
+/scheme_softap.d
+/scheme_softap.o
+/wifi_config.d
+/wifi_config.o
+/wifi_scan.d
+/wifi_scan.o

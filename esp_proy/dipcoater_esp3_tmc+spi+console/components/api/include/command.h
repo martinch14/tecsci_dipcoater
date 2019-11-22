@@ -62,4 +62,15 @@ void CommandDEACTIVATEENVIROMENTALCHAMBERHandler(int argc, char **argv);
 
 void CommandREADDATAHandler(int argc, char **argv);
 
+
+void CommandENA_DRIVERHandler(int argc, char **argv);
+void CommandDIS_DRIVERHandler(int argc, char **argv);
+void CommandCEROMACHINEHandler(int argc, char **argv);
+
+void CommandPOSITIONHandler(int argc, char **argv);
+
+
+
+
+
 #endif /* COMPONENTS_API_INCLUDE_COMMAND_H_ */

@@ -1,0 +1,8 @@
+/component_project_vars.mk
+/libvfs.a
+/vfs.d
+/vfs.o
+/vfs_semihost.d
+/vfs_semihost.o
+/vfs_uart.d
+/vfs_uart.o

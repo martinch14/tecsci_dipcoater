@@ -1,0 +1,12 @@
+/blake2b-compress-avx2.d
+/blake2b-compress-avx2.o
+/blake2b-compress-ref.d
+/blake2b-compress-ref.o
+/blake2b-compress-sse41.d
+/blake2b-compress-sse41.o
+/blake2b-compress-ssse3.d
+/blake2b-compress-ssse3.o
+/blake2b-ref.d
+/blake2b-ref.o
+/generichash_blake2b.d
+/generichash_blake2b.o

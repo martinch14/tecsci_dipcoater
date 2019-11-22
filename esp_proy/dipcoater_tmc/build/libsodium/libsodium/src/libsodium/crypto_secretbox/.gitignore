@@ -1,0 +1,4 @@
+/crypto_secretbox.d
+/crypto_secretbox.o
+/crypto_secretbox_easy.d
+/crypto_secretbox_easy.o

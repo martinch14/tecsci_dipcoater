@@ -1,0 +1,6 @@
+/component_project_vars.mk
+/event_handlers.d
+/event_handlers.o
+/libtcpip_adapter.a
+/tcpip_adapter_lwip.d
+/tcpip_adapter_lwip.o

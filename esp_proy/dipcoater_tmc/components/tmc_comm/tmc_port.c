@@ -17,7 +17,7 @@
 
 extern spi_device_handle_t  spi_dev;
 
-extern uint8_t rxx[];
+//extern uint8_t rxx[];
 
 bool_t tmc_gpio_config(int pin, int config) {
 #if 0
@@ -127,9 +127,14 @@ void tmc_spi_readWriteArray(uint8_t channel, uint8_t *tx, size_t length)
 	tmc_gpio_write(PORT_GPIO_SPI1_CSN, ON);
 #else
 	printf("tmc_spi_readWriteArray\n");
-	spi_transaction_t t;
+	spi_transaction_t t = {};    //importante inicializar t vacio sino pincha toda la transaccion
 	esp_err_t ret;
 //	size_t i;
+
+
+//	t.addr = 0;
+//	t.cmd = 0;
+//	t.flags = 0;
 
 	//LENGTH set
 	t.length = (5*8);  /*transaction length is in bits.*/
@@ -145,14 +150,20 @@ void tmc_spi_readWriteArray(uint8_t channel, uint8_t *tx, size_t length)
 //	}
 //	else if (length>32) { //void *tx_buffer
 	t.tx_buffer = tx;
-//	}
+
+
+//}
 	//TX set
 	//t.tx_buffer = tx;
 
 	//RX set
-	t.rx_buffer = rxx;
+
+	//t.rx_buffer = rxx;
+	t.rx_buffer = NULL;
+
+
 //	ret=spi_device_polling_transmit(spi_dev, &t);
-	ret=spi_device_transmit(spi_dev, &t);
+	ret=spi_device_polling_transmit(spi_dev, &t);
 	ESP_ERROR_CHECK(ret);
 	#endif
 }
@@ -181,6 +192,7 @@ spi_device_handle_t tmc_spi_init()
 			.quadwp_io_num=-1,
 			.quadhd_io_num=-1,
 			//.max_transfer_sz=PARALLEL_LINES*320*2+8
+			//.max_transfer_sz=0,
 	};
 	spi_device_interface_config_t devcfg={
 			.clock_speed_hz=100000,
@@ -191,7 +203,7 @@ spi_device_handle_t tmc_spi_init()
 	};
 
 	//Initialize the SPI bus
-	ret=spi_bus_initialize(HSPI_HOST, &buscfg, 1);
+	ret=spi_bus_initialize(HSPI_HOST, &buscfg, 0);  //change 0 to no dma
 	ESP_ERROR_CHECK(ret);
 
 	ret=spi_bus_add_device(HSPI_HOST, &devcfg, &spi_dev_i);

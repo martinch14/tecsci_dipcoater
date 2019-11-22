@@ -1,0 +1,10 @@
+/app_trace.d
+/app_trace.o
+/app_trace_util.d
+/app_trace_util.o
+/component_project_vars.mk
+/heap_trace_tohost.d
+/heap_trace_tohost.o
+/host_file_io.d
+/host_file_io.o
+/libapp_trace.a

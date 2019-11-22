@@ -1,0 +1,8 @@
+/core.d
+/core.o
+/runtime.d
+/runtime.o
+/utils.d
+/utils.o
+/version.d
+/version.o

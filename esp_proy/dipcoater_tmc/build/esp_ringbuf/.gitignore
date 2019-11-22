@@ -1,0 +1,4 @@
+/component_project_vars.mk
+/libesp_ringbuf.a
+/ringbuf.d
+/ringbuf.o

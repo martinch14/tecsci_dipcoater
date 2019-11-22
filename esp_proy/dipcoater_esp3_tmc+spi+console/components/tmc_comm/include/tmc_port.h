@@ -69,6 +69,6 @@ bool_t 		tmc_gpio_write			(int pin, bool_t value);
 bool_t 		tmc_gpio_read			(int pin);
 spi_device_handle_t 		tmc_spi_init			(void);
 uint8_t 	tmc_spi_readWrite		(uint8_t channel, uint8_t data, bool lastTransfer);
-void 		tmc_spi_readWriteArray	(uint8_t channel, uint8_t *data, size_t length);
+void 		tmc_spi_readWriteArray	(uint8_t channel, uint8_t *tx,uint8_t *rx, size_t length);
 
 #endif /* PORT_INCLUDE_TMC_PORT_H_ */

@@ -262,7 +262,7 @@ void tmc5130_moveTo(TMC5130TypeDef *tmc5130, int32_t position, uint32_t velocity
 
 	// VMAX also holds the target velocity in velocity mode.
 	// Re-write the position mode maximum velocity here.
-	tmc5130_writeInt(tmc5130, TMC5130_VMAX, velocityMax);
+	tmc5130_writeInt(tmc5130, TMC5130_VMAX, velocityMax);   //test2
 
 	tmc5130_writeInt(tmc5130, TMC5130_XTARGET, position);
 }

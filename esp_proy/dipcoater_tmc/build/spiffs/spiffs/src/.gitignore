@@ -1,0 +1,10 @@
+/spiffs_cache.d
+/spiffs_cache.o
+/spiffs_check.d
+/spiffs_check.o
+/spiffs_gc.d
+/spiffs_gc.o
+/spiffs_hydrogen.d
+/spiffs_hydrogen.o
+/spiffs_nucleus.d
+/spiffs_nucleus.o

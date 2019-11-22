@@ -1,0 +1,8 @@
+/component_project_vars.mk
+/libpthread.a
+/pthread.d
+/pthread.o
+/pthread_cond_var.d
+/pthread_cond_var.o
+/pthread_local_storage.d
+/pthread_local_storage.o

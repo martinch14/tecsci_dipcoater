@@ -1,0 +1,4 @@
+/bootloader_start.d
+/bootloader_start.o
+/component_project_vars.mk
+/libmain.a

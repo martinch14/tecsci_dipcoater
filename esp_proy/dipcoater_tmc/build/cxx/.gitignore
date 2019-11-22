@@ -1,0 +1,6 @@
+/component_project_vars.mk
+/cxx_exception_stubs.d
+/cxx_exception_stubs.o
+/cxx_guards.d
+/cxx_guards.o
+/libcxx.a

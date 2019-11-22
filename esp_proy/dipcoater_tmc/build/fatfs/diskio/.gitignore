@@ -1,0 +1,8 @@
+/diskio.d
+/diskio.o
+/diskio_rawflash.d
+/diskio_rawflash.o
+/diskio_sdmmc.d
+/diskio_sdmmc.o
+/diskio_wl.d
+/diskio_wl.o

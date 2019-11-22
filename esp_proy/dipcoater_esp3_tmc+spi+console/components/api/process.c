@@ -6,7 +6,7 @@
 
 
 
-#define MAX_ESTATIC_COMMAND 	10
+#define MAX_ESTATIC_COMMAND 	9
 #define MAX_DINAMIC_COMMAND 	32
 
 
@@ -35,21 +35,26 @@ void ProcessInit(process_t* process){
 
 /*cmdProcessStandard has the predefined values and only the N of the loop can be modified*/
 processCommand_t cmdProcessStandard[MAX_ESTATIC_COMMAND] = {
-		{ .commandnumber = PROCESS_COMMAND_CERO_MACHINE,.argument.spin.velocity = 5,	.argument.spin.acceleration = 10, .fpcommandhandler = HandlerCeroMachine },
+		{ .commandnumber = PROCESS_COMMAND_CERO_MACHINE,.argument.spin.velocity = 100000,	.argument.spin.acceleration = 10000, .fpcommandhandler = HandlerCeroMachine },
 
+
+		//Definir Z0 como la altura entre la interseccion del fluido con la muestra
+		//Bajar hasta Z0 + 10 mm
 		//DEBE BAJAR HASTA ANTES DE INGRESAR LA MUESTRA EN EL RECIPIENTE
-		{ .commandnumber = PROCESS_COMMAND_DOWN, 		.argument.spin.velocity = -2,	.argument.spin.acceleration = 1 , .fpcommandhandler = HandlerDown },
+		{ .commandnumber = PROCESS_COMMAND_DOWN, 		.argument.spin.velocity = 100000,	.argument.spin.acceleration = 10000 , .fpcommandhandler = HandlerDown },
 		{ .commandnumber = PROCESS_COMMAND_WAIT, 		.argument.spin.velocity = 0,	.argument.spin.acceleration = 0 , .fpcommandhandler = HandlerWait},
+
 		/*start of the DWUW cycle*/
 		//DEBE BAJAR LA MUESTRA Y SUMERGIRLA EN EL  RECIPIENTE
-		{ .commandnumber = PROCESS_COMMAND_DOWN, 		.argument.spin.velocity = -2,	.argument.spin.acceleration = 1 , .fpcommandhandler = HandlerDown },
+		//Tener valor de cuanto debe ingresar la muestra en el fluido -> ir hasta posicion Z0 - profundidad de inmersion
+		{ .commandnumber = PROCESS_COMMAND_DOWN, 		.argument.spin.velocity = 100000,	.argument.spin.acceleration = 10000 , .fpcommandhandler = HandlerDownLoop },
 		{ .commandnumber = PROCESS_COMMAND_WAIT, 		.argument.spin.velocity = 0,	.argument.spin.acceleration = 0 , .fpcommandhandler = HandlerWait },
-		{ .commandnumber = PROCESS_COMMAND_UP, 			.argument.spin.velocity = 2,	.argument.spin.acceleration = 1 , .fpcommandhandler = HandlerUp },
+		{ .commandnumber = PROCESS_COMMAND_UP, 			.argument.spin.velocity = 100000,	.argument.spin.acceleration = 10000 , .fpcommandhandler = HandlerUpLoop },
 		{ .commandnumber = PROCESS_COMMAND_WAIT, 		.argument.spin.velocity = 0,	.argument.spin.acceleration = 0 , .fpcommandhandler = HandlerWait },
 		/*LOOP repeats N times the DWUW cycle */
 		{ .commandnumber =  PROCESS_COMMAND_LOOP, 		.argument.value.val = 0 },
 
-		{ .commandnumber = PROCESS_COMMAND_CERO_MACHINE,.argument.spin.velocity = 5,	.argument.spin.acceleration = 10, .fpcommandhandler = HandlerCeroMachine},
+//		{ .commandnumber = PROCESS_COMMAND_CERO_MACHINE,.argument.spin.velocity = 5,	.argument.spin.acceleration = 10, .fpcommandhandler = HandlerCeroMachine},
 		{ .commandnumber = PROCESS_COMMAND_FINISH,		.argument.spin.velocity = 0,	.argument.spin.acceleration = 0, .fpcommandhandler = HandlerFinish},
 
 };
@@ -68,7 +73,7 @@ processCommand_t cmdProcessCustom[MAX_ESTATIC_COMMAND] = {
 		{ .commandnumber =  PROCESS_COMMAND_LOOP, 		.argument.value.val = 0 },
 
 
-		{ .commandnumber = PROCESS_COMMAND_CERO_MACHINE,.argument.spin.velocity = 5,	.argument.spin.acceleration = 10, .fpcommandhandler = HandlerCeroMachine},
+//		{ .commandnumber = PROCESS_COMMAND_CERO_MACHINE,.argument.spin.velocity = 5,	.argument.spin.acceleration = 10, .fpcommandhandler = HandlerCeroMachine},
 		{ .commandnumber = PROCESS_COMMAND_FINISH,		.argument.spin.velocity = 0,	.argument.spin.acceleration = 0, .fpcommandhandler = HandlerFinish},
 
 };
@@ -90,7 +95,8 @@ void ProcessRun(process_t *process) {
 		while (index < ci) {
 			if (process->command[index].commandnumber != PROCESS_COMMAND_LOOP) {
 				//VER LO QUE ESTAMOS PONIENDO EN EL PUNTERO A FUNCION (PASAR DIRECTAMENTE EL ARGUMENTO )
-				process->command[index].fpcommandhandler(&(process->command[index].argument.spin));
+				//process->command[index].fpcommandhandler(&(process->command[index].argument.spin));
+				process->command[index].fpcommandhandler(&(process->command[index].argument));
 				index++;
 			}
 			if (process->command[index].commandnumber == PROCESS_COMMAND_LOOP){
@@ -145,73 +151,97 @@ void ProcessSetProgramCustom() {
 }
 
 
+
+//SINGLE MOVEMENT COMMAND FUNCTIONS
+
+void ProcessCeroMachineCommand(){
+
+	processCommandArgSpin_t parameters;
+
+	parameters.velocity=100000;
+	parameters.acceleration=10000;
+	parameters.test=3;
+
+	HandlerCeroMachine(&parameters);
+}
+
+
+
 //SINGLE MOVEMENT COMMAND FUNCTIONS
 
 void ProcessUpFastCommand(){
 
 	processCommandArgSpin_t parameters;
 
-	parameters.velocity=3;
-	parameters.acceleration=3;
-	parameters.test=3;
+	parameters.velocity=100000;
+	parameters.acceleration=10000;
+	parameters.test=636861;  // Desplazamiento de 50 mm
 
-	HandlerUp(&parameters);
+	HandlerUp_without_program(&parameters);
 }
 
 void ProcessUpCommand(){
 
 	processCommandArgSpin_t parameters;
 
-	parameters.velocity=2;
-	parameters.acceleration=2;
-	parameters.test=2;
+	parameters.velocity=50000;
+	parameters.acceleration=1000;
+	parameters.test= 127372;  // Desplazamiento de 10 mm
 
-	HandlerUp(&parameters);
+	HandlerUp_without_program(&parameters);
 }
 
 void ProcessUpSlowCommand(){
 
 	processCommandArgSpin_t parameters;
 
-	parameters.velocity=1;
-	parameters.acceleration=1;
-	parameters.test=1;
+	parameters.velocity=50000;
+	parameters.acceleration=1000;
+	parameters.test=12737;    //Desplazamiento de 1 mm
 
-//	HandlerUp(&parameters);
 	HandlerUp_without_program(&parameters);
+//	HandlerUp_without_program(&parameters);
 
+}
+
+
+//Test para controlar el movimiento a traves de pasos
+
+
+void ProcessDownSlowCommand(){
+
+	processCommandArgSpin_t parameters;
+
+	parameters.velocity=50000;
+	parameters.acceleration=1000;
+	parameters.test=12737;    //Desplazamiento de 1 mm
+
+	HandlerDown_without_program(&parameters);
 }
 
 void ProcessDownFastCommand(){
 
 	processCommandArgSpin_t parameters;
 
-	parameters.velocity=3;
-	parameters.acceleration=3;
-	parameters.test=3;
+	parameters.velocity=100000;
+	parameters.acceleration=10000;
+	parameters.test=636861;  // Desplazamiento de 50 mm
 
-	HandlerDown(&parameters);
+	HandlerDown_without_program(&parameters);
+
+
 }
 void ProcessDownCommand(){
 
 	processCommandArgSpin_t parameters;
 
-	parameters.velocity=2;
-	parameters.acceleration=2;
-	parameters.test=2;
+	parameters.velocity=50000;
+	parameters.acceleration=1000;
+	parameters.test= 127372;  // Desplazamiento de 10 mm
 
-	HandlerDown(&parameters);
+	HandlerDown_without_program(&parameters);
 }
-void ProcessDownSlowCommand(){
 
-	processCommandArgSpin_t parameters;
-
-	parameters.velocity=1;
-	parameters.acceleration=1;
-	parameters.test=1;
-
-	HandlerDown(&parameters);
-}
 
 void ProcessStopCommand(){
 
@@ -230,6 +260,29 @@ void ProcessREADDATACommand(){
 	HandlerREADDATA();
 }
 
+
+
+void ProcessENA_DRIVERCommand(){
+
+	HandlerENA_DRIVER();
+
+}
+
+void ProcessDIS_DRIVERCommand(){
+
+	HandlerDIS_DRIVER();
+
+}
+
+
+void ProcessPOSITIONCommand(){
+
+	int posicion ;
+	posicion = HandlerPOSITION();
+
+	cmdProcessStandard[1].argument.spin.test=posicion;
+
+}
 
 
 void ProcessRunCommand(){

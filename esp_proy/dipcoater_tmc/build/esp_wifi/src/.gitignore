@@ -1,0 +1,14 @@
+/coexist.d
+/coexist.o
+/lib_printf.d
+/lib_printf.o
+/mesh_event.d
+/mesh_event.o
+/phy_init.d
+/phy_init.o
+/restore.d
+/restore.o
+/smartconfig.d
+/smartconfig.o
+/wifi_init.d
+/wifi_init.o

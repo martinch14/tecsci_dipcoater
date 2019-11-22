@@ -1,0 +1,4 @@
+/component_project_vars.mk
+/esp_adc_cal.d
+/esp_adc_cal.o
+/libesp_adc_cal.a

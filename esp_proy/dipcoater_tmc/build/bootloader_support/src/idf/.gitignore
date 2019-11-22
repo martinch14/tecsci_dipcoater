@@ -1,0 +1,4 @@
+/bootloader_sha.d
+/bootloader_sha.o
+/secure_boot_signatures.d
+/secure_boot_signatures.o

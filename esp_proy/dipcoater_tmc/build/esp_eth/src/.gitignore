@@ -1,0 +1,16 @@
+/esp_eth.d
+/esp_eth.o
+/esp_eth_mac_dm9051.d
+/esp_eth_mac_dm9051.o
+/esp_eth_mac_esp32.d
+/esp_eth_mac_esp32.o
+/esp_eth_phy_dm9051.d
+/esp_eth_phy_dm9051.o
+/esp_eth_phy_dp83848.d
+/esp_eth_phy_dp83848.o
+/esp_eth_phy_ip101.d
+/esp_eth_phy_ip101.o
+/esp_eth_phy_lan8720.d
+/esp_eth_phy_lan8720.o
+/esp_eth_phy_rtl8201.d
+/esp_eth_phy_rtl8201.o

@@ -1,0 +1,7 @@
+/component_project_vars.mk
+/esp_app_desc.d
+/esp_app_desc.o
+/esp_ota_ops.d
+/esp_ota_ops.o
+/libapp_update.a
+/tmp_cppflags.txt

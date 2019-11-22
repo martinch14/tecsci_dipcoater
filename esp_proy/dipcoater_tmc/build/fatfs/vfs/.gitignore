@@ -1,0 +1,6 @@
+/vfs_fat.d
+/vfs_fat.o
+/vfs_fat_sdmmc.d
+/vfs_fat_sdmmc.o
+/vfs_fat_spiflash.d
+/vfs_fat_spiflash.o

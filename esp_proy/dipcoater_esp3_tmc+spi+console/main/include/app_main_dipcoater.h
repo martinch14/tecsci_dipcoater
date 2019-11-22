@@ -18,7 +18,7 @@
 #include "tinysh.h"
 #include "TMCL.h"
 
-
+spi_device_handle_t  spi_dev;
 
 typedef enum{RUN,STOP}flagRun_t;
 

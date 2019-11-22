@@ -1,0 +1,4 @@
+/component_project_vars.mk
+/esp_rom.d
+/esp_rom.o
+/libesp_rom.a

@@ -1,0 +1,8 @@
+/crypto_scrypt-common.d
+/crypto_scrypt-common.o
+/pbkdf2-sha256.d
+/pbkdf2-sha256.o
+/pwhash_scryptsalsa208sha256.d
+/pwhash_scryptsalsa208sha256.o
+/scrypt_platform.d
+/scrypt_platform.o

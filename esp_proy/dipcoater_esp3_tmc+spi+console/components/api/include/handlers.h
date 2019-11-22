@@ -15,12 +15,26 @@
 int HandlerCeroMachine(processCommandArgSpin_t	*arg);
 int HandlerSpin(processCommandArgSpin_t		*arg);
 int HandlerUp(processCommandArgSpin_t 	*arg);
+int HandlerUpLoop(processCommandArgSpin_t 	*arg);
+
 int HandlerUp_without_program(processCommandArgSpin_t*	arg);
+int HandlerDown_without_program(processCommandArgSpin_t*	arg);
+
 int HandlerDown(processCommandArgSpin_t *arg);
+int HandlerDownLoop(processCommandArgSpin_t *arg);
+
+
 int HandlerWait(processCommandArgSpin_t *arg);
 int HandlerStop(processCommandArgSpin_t *arg);
 int HandlerFinish(processCommandArgSpin_t *arg);
 int HandlerRun();
+
+int HandlerENA_DRIVER();
+int HandlerDIS_DRIVER();
+int HandlerPOSITION();
+
+
+
 int HandlerREADDATA();
 
 

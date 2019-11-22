@@ -1,0 +1,12 @@
+/component_project_vars.mk
+/default_event_loop.d
+/default_event_loop.o
+/esp_event.d
+/esp_event.o
+/esp_event_private.d
+/esp_event_private.o
+/event_loop_legacy.d
+/event_loop_legacy.o
+/event_send.d
+/event_send.o
+/libesp_event.a

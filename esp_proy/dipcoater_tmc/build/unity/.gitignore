@@ -1,0 +1,6 @@
+/component_project_vars.mk
+/libunity.a
+/unity_port_esp32.d
+/unity_port_esp32.o
+/unity_runner.d
+/unity_runner.o

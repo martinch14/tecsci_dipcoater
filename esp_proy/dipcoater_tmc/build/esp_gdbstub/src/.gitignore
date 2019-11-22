@@ -1,0 +1,4 @@
+/gdbstub.d
+/gdbstub.o
+/packet.d
+/packet.o

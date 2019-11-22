@@ -1,0 +1,12 @@
+/loadlibrary.d
+/loadlibrary.o
+/xmlparse.d
+/xmlparse.o
+/xmlrole.d
+/xmlrole.o
+/xmltok.d
+/xmltok.o
+/xmltok_impl.d
+/xmltok_impl.o
+/xmltok_ns.d
+/xmltok_ns.o

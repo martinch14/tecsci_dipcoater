@@ -1,0 +1,14 @@
+/argon2-core.d
+/argon2-core.o
+/argon2-encoding.d
+/argon2-encoding.o
+/argon2-fill-block-ref.d
+/argon2-fill-block-ref.o
+/argon2-fill-block-ssse3.d
+/argon2-fill-block-ssse3.o
+/argon2.d
+/argon2.o
+/blake2b-long.d
+/blake2b-long.o
+/pwhash_argon2i.d
+/pwhash_argon2i.o

@@ -1,0 +1,4 @@
+/component_project_vars.mk
+/esp_websocket_client.d
+/esp_websocket_client.o
+/libesp_websocket_client.a

@@ -1,0 +1,10 @@
+/component_project_vars.mk
+/debug_helpers.d
+/debug_helpers.o
+/debug_helpers_asm.d
+/debug_helpers_asm.o
+/eri.d
+/eri.o
+/libxtensa.a
+/trax.d
+/trax.o

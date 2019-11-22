@@ -36,6 +36,7 @@
 #include "TMC5130.h"
 #include "SysTick.h"
 
+#include <esp_http_server.h>
 
 
 #include "include/app_main_dipcoater.h"
@@ -54,16 +55,15 @@
 
 //#define PORT CONFIG_EXAMPLE_PORT
 #define PORT 3333
-
 //todo: porque no lo toma del archivo sdkconfig
 #define CONFIG_EXAMPLE_IPV4
 
-
-
-
 static const char *TAG = "example";
-
 flagRun_t entry = STOP;
+
+
+
+
 
 extern void TMC5130_init(void);
 //PROCESS STANDARD:
@@ -82,6 +82,7 @@ static tinysh_cmd_t commandLOADPROGRAMCUSTOM = 			{NULL,"LOADPROGRAMCUSTOM", NUL
 
 //RUN LOADED PROCESS:
 static tinysh_cmd_t commandRUN = 						{NULL,"RUN", NULL, NULL, CommandRUNHandler, NULL, NULL, NULL};
+static tinysh_cmd_t commandCERO_MACHINE = 						{NULL,"CERO_MACHINE", NULL, NULL, CommandCEROMACHINEHandler, NULL, NULL, NULL};
 //SINGLE MOVEMENTS:
 static tinysh_cmd_t commandUPFAST = 					{NULL,"UPFAST", NULL, NULL, CommandUPFASTHandler, NULL, NULL, NULL};
 static tinysh_cmd_t commandUP = 						{NULL,"UP", NULL, NULL, CommandUPHandler, NULL, NULL, NULL};
@@ -100,6 +101,16 @@ static tinysh_cmd_t commandREADDATA = 						{NULL,"READDATA", NULL, NULL, Comman
 static tinysh_cmd_t commandSAMPLE = 					{NULL,"LOADSAMPLE", NULL, NULL, commandSAMPLEHandler, NULL, NULL, NULL};
 static tinysh_cmd_t commandRECIPIENT = 					{NULL,"LOADRECIPIENT", NULL, NULL, commandRECIPIENTMHandler, NULL, NULL, NULL};
 
+
+/* HABILITACION Y DESHABILITCAION GENERAL DEL DRIVER DEL MOTOR*/
+static tinysh_cmd_t commandENA_DRIVER = 					{NULL,"ENA_DRIVER", NULL, NULL, CommandENA_DRIVERHandler, NULL, NULL, NULL};
+static tinysh_cmd_t commandDIS_DRIVER = 					{NULL,"DIS_DRIVER", NULL, NULL, CommandDIS_DRIVERHandler, NULL, NULL, NULL};
+
+
+static tinysh_cmd_t commandPOSITION = 					{NULL,"POSITION", NULL, NULL, CommandPOSITIONHandler, NULL, NULL, NULL};
+
+
+
 //ENVIROMENTAL CHAMBER:
 //	static tinysh_cmd_t commandSETRH = 						{NULL,"SETRH", NULL, NULL, CommandSETRHHandler, NULL, NULL, NULL};
 //	static tinysh_cmd_t commandSETTEMP = 					{NULL,"SETTEMP", NULL, NULL, CommandSETTEMPHandler, NULL, NULL, NULL};
@@ -107,7 +118,7 @@ static tinysh_cmd_t commandRECIPIENT = 					{NULL,"LOADRECIPIENT", NULL, NULL, c
 //	static tinysh_cmd_t commandDEACTIVATEENVIROMENTALCHAMBER ={NULL,"DEACTIVATEENVIROMENTALCHAMBER", NULL, NULL, CommandDEACTIVATEENVIROMENTALCHAMBERHandler, NULL, NULL, NULL};
 
 
-spi_device_handle_t  spi_dev;
+
 
 
 void xtaskprocess(void *pvParameter) {
@@ -144,6 +155,7 @@ void xtasktinysh(void *pvParameter) {
 //	tinysh_add_command(&commandCLEANPROGRAMDINAMIC);
 //	tinysh_add_command(&commandADDSETALLCOMANDDINAMIC);
 	tinysh_add_command(&commandRUN);
+	tinysh_add_command(&commandCERO_MACHINE);
 	tinysh_add_command(&commandUPFAST);
 	tinysh_add_command(&commandUP);
 	tinysh_add_command(&commandUPSLOW);
@@ -154,6 +166,13 @@ void xtasktinysh(void *pvParameter) {
 	tinysh_add_command(&commandSAMPLE);
 	tinysh_add_command(&commandRECIPIENT);
 	tinysh_add_command(&commandREADDATA);
+
+
+	tinysh_add_command(&commandENA_DRIVER);
+	tinysh_add_command(&commandDIS_DRIVER);
+
+	tinysh_add_command(&commandPOSITION);
+
 //	tinysh_add_command(&commandSETRH);
 //	tinysh_add_command(&commandSETTEMP);
 //	tinysh_add_command(&commandACTIVATEENVIROMENTALCHAMBER);
@@ -185,48 +204,146 @@ void xtaskmotor(void *pvParameter) {
 	Evalboards.ch1.enableDriver(DRIVER_ENABLE);
 	vTaskDelay(250 / portTICK_RATE_MS);
 
-	Evalboards.ch1.writeRegister(0, 0x00, 0x00002680); // writing value 0x00002680 = 9856 = 0.0 to address 0 = 0x00(GCONF)
-	Evalboards.ch1.writeRegister(0, 0x03, 0x00000000); // writing value 0x00000000 = 0 = 0.0 to address 1 = 0x03(SLAVECONF)
-	Evalboards.ch1.writeRegister(0, 0x05, 0x00000000); // writing value 0x00000000 = 0 = 0.0 to address 2 = 0x05(X_COMPARE)
-	Evalboards.ch1.writeRegister(0, 0x10, 0x00070A03); // writing value 0x00070A03 = 461315 = 0.0 to address 3 = 0x10(IHOLD_IRUN)
-	Evalboards.ch1.writeRegister(0, 0x11, 0x00000000); // writing value 0x00000000 = 0 = 0.0 to address 4 = 0x11(TPOWERDOWN)
-	Evalboards.ch1.writeRegister(0, 0x13, 0x00000000); // writing value 0x00000000 = 0 = 0.0 to address 5 = 0x13(TPWMTHRS)
-	Evalboards.ch1.writeRegister(0, 0x14, 0x00000000); // writing value 0x00000000 = 0 = 0.0 to address 6 = 0x14(TCOOLTHRS)
-	Evalboards.ch1.writeRegister(0, 0x15, 0x00000000); // writing value 0x00000000 = 0 = 0.0 to address 7 = 0x15(THIGH)
-	Evalboards.ch1.writeRegister(0, 0x20, 0x00000001); // writing value 0x00000001 = 1 = 0.0 to address 8 = 0x20(RAMPMODE)
-	Evalboards.ch1.writeRegister(0, 0x21, 0xFFED8910); // writing value 0xFFED8910 = 0 = 0.0 to address 9 = 0x21(XACTUAL)
-	Evalboards.ch1.writeRegister(0, 0x23, 0x00000000); // writing value 0x00000000 = 0 = 0.0 to address 10 = 0x23(VSTART)
-	Evalboards.ch1.writeRegister(0, 0x24, 0x00000000); // writing value 0x00000000 = 0 = 0.0 to address 11 = 0x24(A1)
-	Evalboards.ch1.writeRegister(0, 0x25, 0x00000000); // writing value 0x00000000 = 0 = 0.0 to address 12 = 0x25(V1)
-	Evalboards.ch1.writeRegister(0, 0x26, 0x00002710); // writing value 0x00001388 = 5000 = 0.0 to address 13 = 0x26(AMAX)	   //10000  2710
-	Evalboards.ch1.writeRegister(0, 0x27, 0x00000000); // writing value 0x00002710 = 10000 = 0.0 to address 14 = 0x27(VMAX)    //SETEO DE VELOCIDAD 0
-	Evalboards.ch1.writeRegister(0, 0x28, 0x00000000); // writing value 0x00000000 = 0 = 0.0 to address 15 = 0x28(DMAX)
-	Evalboards.ch1.writeRegister(0, 0x2A, 0x00000000); // writing value 0x00000000 = 0 = 0.0 to address 16 = 0x2A(D1)
-	Evalboards.ch1.writeRegister(0, 0x2B, 0x00000000); // writing value 0x00000000 = 0 = 0.0 to address 17 = 0x2B(VSTOP)
-	Evalboards.ch1.writeRegister(0, 0x2C, 0x00000000); // writing value 0x00000000 = 0 = 0.0 to address 18 = 0x2C(TZEROWAIT)
-	Evalboards.ch1.writeRegister(0, 0x2D, 0x00000000); // writing value 0x00000000 = 0 = 0.0 to address 19 = 0x2D(XTARGET)
-	Evalboards.ch1.writeRegister(0, 0x33, 0x00000000); // writing value 0x00000000 = 0 = 0.0 to address 20 = 0x33(VDCMIN)
-	Evalboards.ch1.writeRegister(0, 0x34, 0x00000000); // writing value 0x00000000 = 0 = 0.0 to address 21 = 0x34(SW_MODE)
-	Evalboards.ch1.writeRegister(0, 0x38, 0x00000000); // writing value 0x00000000 = 0 = 0.0 to address 22 = 0x38(ENCMODE)
-	Evalboards.ch1.writeRegister(0, 0x39, 0x00000000); // writing value 0x00000000 = 0 = 0.0 to address 23 = 0x39(X_ENC)
-	Evalboards.ch1.writeRegister(0, 0x3A, 0x00010000); // writing value 0x00010000 = 65536 = 0.0 to address 24 = 0x3A(ENC_CONST)
-	Evalboards.ch1.writeRegister(0, 0x60, 0xAAAAB554); // writing value 0xAAAAB554 = 0 = 0.0 to address 25 = 0x60(MSLUT[0])
-	Evalboards.ch1.writeRegister(0, 0x61, 0x4A9554AA); // writing value 0x4A9554AA = 1251300522 = 0.0 to address 26 = 0x61(MSLUT[1])
-	Evalboards.ch1.writeRegister(0, 0x62, 0x24492929); // writing value 0x24492929 = 608774441 = 0.0 to address 27 = 0x62(MSLUT[2])
-	Evalboards.ch1.writeRegister(0, 0x63, 0x10104222); // writing value 0x10104222 = 269500962 = 0.0 to address 28 = 0x63(MSLUT[3])
-	Evalboards.ch1.writeRegister(0, 0x64, 0xFBFFFFFF); // writing value 0xFBFFFFFF = 0 = 0.0 to address 29 = 0x64(MSLUT[4])
-	Evalboards.ch1.writeRegister(0, 0x65, 0xB5BB777D); // writing value 0xB5BB777D = 0 = 0.0 to address 30 = 0x65(MSLUT[5])
-	Evalboards.ch1.writeRegister(0, 0x66, 0x49295556); // writing value 0x49295556 = 1227445590 = 0.0 to address 31 = 0x66(MSLUT[6])
-	Evalboards.ch1.writeRegister(0, 0x67, 0x00404222); // writing value 0x00404222 = 4211234 = 0.0 to address 32 = 0x67(MSLUT[7])
-	Evalboards.ch1.writeRegister(0, 0x68, 0xFFFF8056); // writing value 0xFFFF8056 = 0 = 0.0 to address 33 = 0x68(MSLUTSEL)
-	Evalboards.ch1.writeRegister(0, 0x69, 0x00F70000); // writing value 0x00F70000 = 16187392 = 0.0 to address 34 = 0x69(MSLUTSTART)
-	Evalboards.ch1.writeRegister(0, 0x6C, 0x000101D5); // writing value 0x000101D5 = 66005 = 0.0 to address 35 = 0x6C(CHOPCONF)
-	Evalboards.ch1.writeRegister(0, 0x6D, 0x00000000); // writing value 0x00000000 = 0 = 0.0 to address 36 = 0x6D(COOLCONF)
-	Evalboards.ch1.writeRegister(0, 0x6E, 0x00000000); // writing value 0x00000000 = 0 = 0.0 to address 37 = 0x6E(DCCTRL)
-	Evalboards.ch1.writeRegister(0, 0x70, 0x000504C8); // writing value 0x000504C8 = 328904 = 0.0 to address 38 = 0x70(PWMCONF)
-	Evalboards.ch1.writeRegister(0, 0x72, 0x00000000); // writing value 0x00000000 = 0 = 0.0 to address 39 = 0x72(ENCM_CTRL)
-	vTaskDelay(250 / portTICK_RATE_MS);
 
+//	Evalboards.ch1.writeRegister(0,0x00, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 0 = 0x00(GCONF)
+//	Evalboards.ch1.writeRegister(0,0x03, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 1 = 0x03(SLAVECONF)
+//	Evalboards.ch1.writeRegister(0,0x05, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 2 = 0x05(X_COMPARE)
+//	Evalboards.ch1.writeRegister(0,0x10, 	0x00070500); 		// writing value 0x00070500 = 460032 = 0.0 to address 3 = 0x10(IHOLD_IRUN)
+//	Evalboards.ch1.writeRegister(0,0x11, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 4 = 0x11(TPOWERDOWN)
+//	Evalboards.ch1.writeRegister(0,0x13, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 5 = 0x13(TPWMTHRS)
+//	Evalboards.ch1.writeRegister(0,0x14, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 6 = 0x14(TCOOLTHRS)
+//	Evalboards.ch1.writeRegister(0,0x15, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 7 = 0x15(THIGH)
+//	Evalboards.ch1.writeRegister(0,0x20, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 8 = 0x20(RAMPMODE)
+//	Evalboards.ch1.writeRegister(0,0x21, 	0x0007D000); 		// writing value 0x0007D000 = 512000 = 0.0 to address 9 = 0x21(XACTUAL)
+//	Evalboards.ch1.writeRegister(0,0x23, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 10 = 0x23(VSTART)
+//	Evalboards.ch1.writeRegister(0,0x24, 	0x000003E8); 		// writing value 0x000003E8 = 1000 = 0.0 to address 11 = 0x24(A1)
+//	Evalboards.ch1.writeRegister(0,0x25, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 12 = 0x25(V1)
+//	Evalboards.ch1.writeRegister(0,0x26, 	0x000003E8); 		// writing value 0x000001F4 = 500 = 0.0 to address 13 = 0x26(AMAX)
+//	Evalboards.ch1.writeRegister(0,0x27, 	0x0000C350); 		// writing value 0x00030D40 = 200000 = 0.0 to address 14 = 0x27(VMAX)
+//	Evalboards.ch1.writeRegister(0,0x28, 	0x000003E8); 		// writing value 0x000002BC = 700 = 0.0 to address 15 = 0x28(DMAX)
+//	Evalboards.ch1.writeRegister(0,0x2A, 	0x00000578); 		// writing value 0x00000578 = 1400 = 0.0 to address 16 = 0x2A(D1)
+//	Evalboards.ch1.writeRegister(0,0x2B, 	0x0000000A); 		// writing value 0x0000000A = 10 = 0.0 to address 17 = 0x2B(VSTOP)
+//	Evalboards.ch1.writeRegister(0,0x2C, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 18 = 0x2C(TZEROWAIT)
+//	Evalboards.ch1.writeRegister(0,0x2D, 	0x0007D000); 		// writing value 0x0007D000 = 512000 = 0.0 to address 19 = 0x2D(XTARGET)
+//	Evalboards.ch1.writeRegister(0,0x33, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 20 = 0x33(VDCMIN)
+//	Evalboards.ch1.writeRegister(0,0x34, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 21 = 0x34(SW_MODE)
+//	Evalboards.ch1.writeRegister(0,0x38, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 22 = 0x38(ENCMODE)
+//	Evalboards.ch1.writeRegister(0,0x39, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 23 = 0x39(X_ENC)
+//	Evalboards.ch1.writeRegister(0,0x3A, 	0x00010000); 		// writing value 0x00010000 = 65536 = 0.0 to address 24 = 0x3A(ENC_CONST)
+//	Evalboards.ch1.writeRegister(0,0x60, 	0xAAAAB554); 		// writing value 0xAAAAB554 = 0 = 0.0 to address 25 = 0x60(MSLUT[0])
+//	Evalboards.ch1.writeRegister(0,0x61, 	0x4A9554AA); 		// writing value 0x4A9554AA = 1251300522 = 0.0 to address 26 = 0x61(MSLUT[1])
+//	Evalboards.ch1.writeRegister(0,0x62, 	0x24492929); 		// writing value 0x24492929 = 608774441 = 0.0 to address 27 = 0x62(MSLUT[2])
+//	Evalboards.ch1.writeRegister(0,0x63, 	0x10104222); 		// writing value 0x10104222 = 269500962 = 0.0 to address 28 = 0x63(MSLUT[3])
+//	Evalboards.ch1.writeRegister(0,0x64, 	0xFBFFFFFF); 		// writing value 0xFBFFFFFF = 0 = 0.0 to address 29 = 0x64(MSLUT[4])
+//	Evalboards.ch1.writeRegister(0,0x65, 	0xB5BB777D); 		// writing value 0xB5BB777D = 0 = 0.0 to address 30 = 0x65(MSLUT[5])
+//	Evalboards.ch1.writeRegister(0,0x66, 	0x49295556); 		// writing value 0x49295556 = 1227445590 = 0.0 to address 31 = 0x66(MSLUT[6])
+//	Evalboards.ch1.writeRegister(0,0x67, 	0x00404222); 		// writing value 0x00404222 = 4211234 = 0.0 to address 32 = 0x67(MSLUT[7])
+//	Evalboards.ch1.writeRegister(0,0x68, 	0xFFFF8056); 		// writing value 0xFFFF8056 = 0 = 0.0 to address 33 = 0x68(MSLUTSEL)
+//	Evalboards.ch1.writeRegister(0,0x69, 	0x00F70000); 		// writing value 0x00F70000 = 16187392 = 0.0 to address 34 = 0x69(MSLUTSTART)
+//	Evalboards.ch1.writeRegister(0,0x6C, 	0x000101D5); 		// writing value 0x000101D5 = 66005 = 0.0 to address 35 = 0x6C(CHOPCONF)
+//	Evalboards.ch1.writeRegister(0,0x6D, 	0x01020000); 		// writing value 0x00000000 = 0 = 0.0 to address 36 = 0x6D(COOLCONF)
+//	Evalboards.ch1.writeRegister(0,0x6E, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 37 = 0x6E(DCCTRL)
+//	Evalboards.ch1.writeRegister(0,0x70, 	0x000504C8); 		// writing value 0x000504C8 = 328904 = 0.0 to address 38 = 0x70(PWMCONF)
+//	Evalboards.ch1.writeRegister(0,0x72, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 39 = 0x72(ENCM_CTRL)
+
+
+
+//	Evalboards.ch1.writeRegister(0,0x00, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 0 = 0x00(GCONF)
+//	Evalboards.ch1.writeRegister(0,0x03, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 1 = 0x03(SLAVECONF)
+//	Evalboards.ch1.writeRegister(0,0x05, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 2 = 0x05(X_COMPARE)
+//	Evalboards.ch1.writeRegister(0,0x10, 	0x00070500); 		// writing value 0x00070500 = 460032 = 0.0 to address 3 = 0x10(IHOLD_IRUN)
+//	Evalboards.ch1.writeRegister(0,0x11, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 4 = 0x11(TPOWERDOWN)
+//	Evalboards.ch1.writeRegister(0,0x13, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 5 = 0x13(TPWMTHRS)
+//	Evalboards.ch1.writeRegister(0,0x14, 	0x0000068D); 		// writing value 0x0000068D = 1677 = 0.0 to address 6 = 0x14(TCOOLTHRS)
+//	Evalboards.ch1.writeRegister(0,0x15, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 7 = 0x15(THIGH)
+//	Evalboards.ch1.writeRegister(0,0x20, 	0x00000000); 		// writing value 0x00000001 = 1 = 0.0 to address 8 = 0x20(RAMPMODE)
+//	Evalboards.ch1.writeRegister(0,0x21, 	0x000000FF); 		// writing value 0x00000000 = 0 = 0.0 to address 9 = 0x21(XACTUAL)
+//	Evalboards.ch1.writeRegister(0,0x23, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 10 = 0x23(VSTART)
+//	Evalboards.ch1.writeRegister(0,0x24, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 11 = 0x24(A1)
+//	Evalboards.ch1.writeRegister(0,0x25, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 12 = 0x25(V1)
+//	Evalboards.ch1.writeRegister(0,0x26, 	0x000003E8); 		// writing value 0x000003E8 = 1000 = 0.0 to address 13 = 0x26(AMAX)
+//	Evalboards.ch1.writeRegister(0,0x27, 	0x0000C350); 		// writing value 0x00000000 = 0 = 0.0 to address 14 = 0x27(VMAX)
+//	Evalboards.ch1.writeRegister(0,0x28, 	0x000003E8); 		// writing value 0x00000000 = 0 = 0.0 to address 15 = 0x28(DMAX)
+//	Evalboards.ch1.writeRegister(0,0x2A, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 16 = 0x2A(D1)
+//	Evalboards.ch1.writeRegister(0,0x2B, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 17 = 0x2B(VSTOP)
+//	Evalboards.ch1.writeRegister(0,0x2C, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 18 = 0x2C(TZEROWAIT)
+//	Evalboards.ch1.writeRegister(0,0x2D, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 19 = 0x2D(XTARGET)
+//	Evalboards.ch1.writeRegister(0,0x33, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 20 = 0x33(VDCMIN)
+//	//Evalboards.ch1.writeRegister(0,0x34, 	0x00000400); 		// writing value 0x00000400 = 1024 = 0.0 to address 21 = 0x34(SW_MODE)  ->> stallguard activado
+//	Evalboards.ch1.writeRegister(0,0x34, 	0x00000000); 		// writing value 0x00000400 = 1024 = 0.0 to address 21 = 0x34(SW_MODE)
+//	Evalboards.ch1.writeRegister(0,0x38, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 22 = 0x38(ENCMODE)
+//	Evalboards.ch1.writeRegister(0,0x39, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 23 = 0x39(X_ENC)
+//	Evalboards.ch1.writeRegister(0,0x3A, 	0x00010000); 		// writing value 0x00010000 = 65536 = 0.0 to address 24 = 0x3A(ENC_CONST)
+//	Evalboards.ch1.writeRegister(0,0x60, 	0xAAAAB554); 		// writing value 0xAAAAB554 = 0 = 0.0 to address 25 = 0x60(MSLUT[0])
+//	Evalboards.ch1.writeRegister(0,0x61, 	0x4A9554AA); 		// writing value 0x4A9554AA = 1251300522 = 0.0 to address 26 = 0x61(MSLUT[1])
+//	Evalboards.ch1.writeRegister(0,0x62, 	0x24492929); 		// writing value 0x24492929 = 608774441 = 0.0 to address 27 = 0x62(MSLUT[2])
+//	Evalboards.ch1.writeRegister(0,0x63, 	0x10104222); 		// writing value 0x10104222 = 269500962 = 0.0 to address 28 = 0x63(MSLUT[3])
+//	Evalboards.ch1.writeRegister(0,0x64, 	0xFBFFFFFF); 		// writing value 0xFBFFFFFF = 0 = 0.0 to address 29 = 0x64(MSLUT[4])
+//	Evalboards.ch1.writeRegister(0,0x65, 	0xB5BB777D); 		// writing value 0xB5BB777D = 0 = 0.0 to address 30 = 0x65(MSLUT[5])
+//	Evalboards.ch1.writeRegister(0,0x66, 	0x49295556); 		// writing value 0x49295556 = 1227445590 = 0.0 to address 31 = 0x66(MSLUT[6])
+//	Evalboards.ch1.writeRegister(0,0x67, 	0x00404222); 		// writing value 0x00404222 = 4211234 = 0.0 to address 32 = 0x67(MSLUT[7])
+//	Evalboards.ch1.writeRegister(0,0x68, 	0xFFFF8056); 		// writing value 0xFFFF8056 = 0 = 0.0 to address 33 = 0x68(MSLUTSEL)
+//	Evalboards.ch1.writeRegister(0,0x69, 	0x00F70000); 		// writing value 0x00F70000 = 16187392 = 0.0 to address 34 = 0x69(MSLUTSTART)
+//	Evalboards.ch1.writeRegister(0,0x6C, 	0x000101D5); 		// writing value 0x000101D5 = 66005 = 0.0 to address 35 = 0x6C(CHOPCONF)
+//	Evalboards.ch1.writeRegister(0,0x6D, 	0x01020000); 		// writing value 0x01020000 = 16908288 = 0.0 to address 36 = 0x6D(COOLCONF)
+//	Evalboards.ch1.writeRegister(0,0x6E, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 37 = 0x6E(DCCTRL)
+//	Evalboards.ch1.writeRegister(0,0x70, 	0x000504C8); 		// writing value 0x000504C8 = 328904 = 0.0 to address 38 = 0x70(PWMCONF)
+//	Evalboards.ch1.writeRegister(0,0x72, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 39 = 0x72(ENCM_CTRL)
+
+
+
+
+
+	Evalboards.ch1.writeRegister(0,0x00, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 0 = 0x00(GCONF)
+	Evalboards.ch1.writeRegister(0,0x03, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 1 = 0x03(SLAVECONF)
+	Evalboards.ch1.writeRegister(0,0x05, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 2 = 0x05(X_COMPARE)
+	Evalboards.ch1.writeRegister(0,0x10, 	0x00070A00); 		// writing value 0x00070A00 = 461312 = 0.0 to address 3 = 0x10(IHOLD_IRUN)
+	Evalboards.ch1.writeRegister(0,0x11, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 4 = 0x11(TPOWERDOWN)
+	Evalboards.ch1.writeRegister(0,0x13, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 5 = 0x13(TPWMTHRS)
+	Evalboards.ch1.writeRegister(0,0x14, 	0x00000D1B); 		// writing value 0x00000D1B = 3355 = 0.0 to address 6 = 0x14(TCOOLTHRS)
+	Evalboards.ch1.writeRegister(0,0x15, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 7 = 0x15(THIGH)
+	Evalboards.ch1.writeRegister(0,0x20, 	0x00000000); 		// writing value 0x00000001 = 1 = 0.0 to address 8 = 0x20(RAMPMODE)
+	Evalboards.ch1.writeRegister(0,0x21, 	0x00000000); 		// writing value 0xFFFA6B8C = 0 = 0.0 to address 9 = 0x21(XACTUAL)
+	Evalboards.ch1.writeRegister(0,0x23, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 10 = 0x23(VSTART)
+	Evalboards.ch1.writeRegister(0,0x24, 	0x000003E8); 		// writing value 0x000003E8 = 1000 = 0.0 to address 11 = 0x24(A1)
+	Evalboards.ch1.writeRegister(0,0x25, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 12 = 0x25(V1)
+	Evalboards.ch1.writeRegister(0,0x26, 	0x000003E8); 		// writing value 0x000003E8 = 1000 = 0.0 to address 13 = 0x26(AMAX)
+	Evalboards.ch1.writeRegister(0,0x27, 	0x0000C350); 		// writing value 0x00000000 = 0 = 0.0 to address 14 = 0x27(VMAX)
+	Evalboards.ch1.writeRegister(0,0x28, 	0x000002BC); 		// writing value 0x000002BC = 700 = 0.0 to address 15 = 0x28(DMAX)
+	Evalboards.ch1.writeRegister(0,0x2A, 	0x00000578); 		// writing value 0x00000578 = 1400 = 0.0 to address 16 = 0x2A(D1)
+	Evalboards.ch1.writeRegister(0,0x2B, 	0x0000000A); 		// writing value 0x0000000A = 10 = 0.0 to address 17 = 0x2B(VSTOP)
+	Evalboards.ch1.writeRegister(0,0x2C, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 18 = 0x2C(TZEROWAIT)
+	Evalboards.ch1.writeRegister(0,0x2D, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 19 = 0x2D(XTARGET)
+	Evalboards.ch1.writeRegister(0,0x33, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 20 = 0x33(VDCMIN)
+	Evalboards.ch1.writeRegister(0,0x34, 	0x00000400); 		// writing value 0x00000400 = 1024 = 0.0 to address 21 = 0x34(SW_MODE)
+	Evalboards.ch1.writeRegister(0,0x38, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 22 = 0x38(ENCMODE)
+	Evalboards.ch1.writeRegister(0,0x39, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 23 = 0x39(X_ENC)
+	Evalboards.ch1.writeRegister(0,0x3A, 	0x00010000); 		// writing value 0x00010000 = 65536 = 0.0 to address 24 = 0x3A(ENC_CONST)
+	Evalboards.ch1.writeRegister(0,0x60, 	0xAAAAB554); 		// writing value 0xAAAAB554 = 0 = 0.0 to address 25 = 0x60(MSLUT[0])
+	Evalboards.ch1.writeRegister(0,0x61, 	0x4A9554AA); 		// writing value 0x4A9554AA = 1251300522 = 0.0 to address 26 = 0x61(MSLUT[1])
+	Evalboards.ch1.writeRegister(0,0x62, 	0x24492929); 		// writing value 0x24492929 = 608774441 = 0.0 to address 27 = 0x62(MSLUT[2])
+	Evalboards.ch1.writeRegister(0,0x63, 	0x10104222); 		// writing value 0x10104222 = 269500962 = 0.0 to address 28 = 0x63(MSLUT[3])
+	Evalboards.ch1.writeRegister(0,0x64, 	0xFBFFFFFF); 		// writing value 0xFBFFFFFF = 0 = 0.0 to address 29 = 0x64(MSLUT[4])
+	Evalboards.ch1.writeRegister(0,0x65, 	0xB5BB777D); 		// writing value 0xB5BB777D = 0 = 0.0 to address 30 = 0x65(MSLUT[5])
+	Evalboards.ch1.writeRegister(0,0x66, 	0x49295556); 		// writing value 0x49295556 = 1227445590 = 0.0 to address 31 = 0x66(MSLUT[6])
+	Evalboards.ch1.writeRegister(0,0x67, 	0x00404222); 		// writing value 0x00404222 = 4211234 = 0.0 to address 32 = 0x67(MSLUT[7])
+	Evalboards.ch1.writeRegister(0,0x68, 	0xFFFF8056); 		// writing value 0xFFFF8056 = 0 = 0.0 to address 33 = 0x68(MSLUTSEL)
+	Evalboards.ch1.writeRegister(0,0x69, 	0x00F70000); 		// writing value 0x00F70000 = 16187392 = 0.0 to address 34 = 0x69(MSLUTSTART)
+	Evalboards.ch1.writeRegister(0,0x6C, 	0x000101D5); 		// writing value 0x000101D5 = 66005 = 0.0 to address 35 = 0x6C(CHOPCONF)
+	Evalboards.ch1.writeRegister(0,0x6D, 	0x01030000); 		// writing value 0x01030000 = 16973824 = 0.0 to address 36 = 0x6D(COOLCONF)
+	Evalboards.ch1.writeRegister(0,0x6E, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 37 = 0x6E(DCCTRL)
+	Evalboards.ch1.writeRegister(0,0x70, 	0x000504C8); 		// writing value 0x000504C8 = 328904 = 0.0 to address 38 = 0x70(PWMCONF)
+	Evalboards.ch1.writeRegister(0,0x72, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 39 = 0x72(ENCM_CTRL)
+
+
+
+
+
+
+
+
+	vTaskDelay(250 / portTICK_RATE_MS);
+	Evalboards.ch1.enableDriver(DRIVER_DISABLE);
 	//borro la tarea, solo la necesitaba para la configuracion inicial con delay entre habilitaciones y envios por spi de conf
 	vTaskDelete(NULL);
 //	while (1) {
@@ -244,7 +361,7 @@ static void tcp_server_task(void *pvParameters)
 
     while (1) {
 
-#ifdef CONFIG_EXAMPLE_IPV4
+//#ifdef CONFIG_EXAMPLE_IPV4
         struct sockaddr_in dest_addr;
         dest_addr.sin_addr.s_addr = htonl(INADDR_ANY);
         dest_addr.sin_family = AF_INET;
@@ -252,15 +369,20 @@ static void tcp_server_task(void *pvParameters)
         addr_family = AF_INET;
         ip_protocol = IPPROTO_IP;
         inet_ntoa_r(dest_addr.sin_addr, addr_str, sizeof(addr_str) - 1);
-#else 	//IPV6
-        struct sockaddr_in6 dest_addr;
-        bzero(&dest_addr.sin6_addr.un, sizeof(dest_addr.sin6_addr.un));
-        dest_addr.sin6_family = AF_INET6;
-        dest_addr.sin6_port = htons(PORT);
-        addr_family = AF_INET6;
-        ip_protocol = IPPROTO_IPV6;
-        inet6_ntoa_r(dest_addr.sin6_addr, addr_str, sizeof(addr_str) - 1);
-#endif
+//#else 	//IPV6
+//        struct sockaddr_in6 dest_addr;
+//        bzero(&dest_addr.sin6_addr.un, sizeof(dest_addr.sin6_addr.un));
+//        dest_addr.sin6_family = AF_INET6;
+//        dest_addr.sin6_port = htons(PORT);
+//        addr_family = AF_INET6;
+//        ip_protocol = IPPROTO_IPV6;
+//        inet6_ntoa_r(dest_addr.sin6_addr, addr_str, sizeof(addr_str) - 1);
+//#endif
+
+
+
+        printf("Numero de Socket: %d\r\n", sock_global);
+
 
         int listen_sock = socket(addr_family, SOCK_STREAM, ip_protocol);
         if (listen_sock < 0) {
@@ -285,10 +407,12 @@ static void tcp_server_task(void *pvParameters)
 
         struct sockaddr_in6 source_addr; // Large enough for both IPv4 or IPv6
         uint addr_len = sizeof(source_addr);
-//        int sock = accept(listen_sock, (struct sockaddr *)&source_addr, &addr_len);
-//        int sock_global = accept(listen_sock, (struct sockaddr *)&source_addr, &addr_len);
-
+//      int sock = accept(listen_sock, (struct sockaddr *)&source_addr, &addr_len);
+//      int sock_global = accept(listen_sock, (struct sockaddr *)&source_addr, &addr_len);
         sock_global = accept(listen_sock, (struct sockaddr *)&source_addr, &addr_len);
+
+        printf("Numero de Socket: %d\r\n", sock_global);
+
         if (sock_global < 0) {
             ESP_LOGE(TAG, "Unable to accept connection: errno %d", errno);
             break;
@@ -349,13 +473,24 @@ static void tcp_server_task(void *pvParameters)
             ////FIX sacado de internet  https://www.esp32.com/viewtopic.php?t=10335
             shutdown(listen_sock,0);
             close(listen_sock);
-            vTaskDelay(5);
+            vTaskDelay(10);
 
         }
     }
     vTaskDelete(NULL);
 }
 
+
+void xtaskmonitorstatus(void *pvParameter) {
+	const unsigned char  datos[]="ON=1,VEL_ACTUAL=4343,POS_ACTUAL\r\n";
+
+	while (1) {
+		vTaskDelay(2000 / portTICK_RATE_MS);
+		if (sock_global > 0){
+		send(sock_global, &datos, sizeof(datos) , 0);
+		}
+	}
+}
 
 
 void app_main(void) {
@@ -370,10 +505,12 @@ void app_main(void) {
 	 */
 	ESP_ERROR_CHECK(example_connect());
 
+
 	xTaskCreate(&xtasktinysh, "Tinysh Task", 16384, NULL, 2, NULL);
 	xTaskCreate(&xtaskprocess, "Process Task", 8192, NULL, 2, NULL);
-	xTaskCreate(&xtaskmotor, "Process Motor", 16384, NULL, 2, NULL);
-	xTaskCreate(tcp_server_task, "tcp_server", 4096, NULL, 2, NULL);
+	xTaskCreate(&xtaskmotor, "Process Motor Task", 16384, NULL, 2, NULL);
+	xTaskCreate(&tcp_server_task, "tcp_server Task", 4096, NULL, 2, NULL);
+	xTaskCreate(&xtaskmonitorstatus, "Monitor Status Task", 1024, NULL, 2, NULL);
 }
 
 

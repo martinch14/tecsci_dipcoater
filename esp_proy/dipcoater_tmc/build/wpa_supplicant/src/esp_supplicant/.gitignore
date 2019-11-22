@@ -1,0 +1,10 @@
+/esp_hostap.d
+/esp_hostap.o
+/esp_wpa2.d
+/esp_wpa2.o
+/esp_wpa_main.d
+/esp_wpa_main.o
+/esp_wpas_glue.d
+/esp_wpas_glue.o
+/esp_wps.d
+/esp_wps.o

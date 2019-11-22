@@ -1,0 +1,6 @@
+/mqtt_msg.d
+/mqtt_msg.o
+/mqtt_outbox.d
+/mqtt_outbox.o
+/platform_esp32_idf.d
+/platform_esp32_idf.o

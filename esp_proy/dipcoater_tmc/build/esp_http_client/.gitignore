@@ -1,0 +1,4 @@
+/component_project_vars.mk
+/esp_http_client.d
+/esp_http_client.o
+/libesp_http_client.a

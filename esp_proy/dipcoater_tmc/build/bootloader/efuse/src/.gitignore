@@ -1,0 +1,6 @@
+/esp_efuse_api.d
+/esp_efuse_api.o
+/esp_efuse_fields.d
+/esp_efuse_fields.o
+/esp_efuse_utility.d
+/esp_efuse_utility.o

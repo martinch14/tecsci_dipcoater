@@ -1,0 +1,16 @@
+/Partition.d
+/Partition.o
+/SPI_Flash.d
+/SPI_Flash.o
+/WL_Ext_Perf.d
+/WL_Ext_Perf.o
+/WL_Ext_Safe.d
+/WL_Ext_Safe.o
+/WL_Flash.d
+/WL_Flash.o
+/component_project_vars.mk
+/crc32.d
+/crc32.o
+/libwear_levelling.a
+/wear_levelling.d
+/wear_levelling.o
