@@ -30,7 +30,7 @@ typedef struct {
 typedef struct {
 	int velocity;
 	int acceleration;
-	int test;
+	int displacement_z;
 
 } processCommandArgSpin_t;
 
@@ -78,10 +78,20 @@ typedef struct {
 
 typedef struct {
 
-	/*Configuracion de Variables con el tamaño de la muestra y el tamaño del recipiente   en mm   y desplazamiento en eje Y segun pasos del motor   */
-	uint16_t	samplesize;
-	uint16_t 	recipientsize;
-	uint32_t 	axisYDisplacement;    /*segun parametro constructivo de la maquina */
+	/*Configuracion ->  status  -> 1  cuando se esta ejecutando un programa    -> 0 cunado no se esta ejecutando ningun programa        desplazamiento en eje Y segun pasos del motor   */
+	uint8_t	status;
+
+
+	/*Todos estas variables deben esta en 1 antes de que se ejecute cada programa*/
+	uint8_t cero_machine_ok;
+	uint8_t cero_sample_ok;
+	uint8_t delta_dip_ok;
+
+
+	uint32_t displacement_delta_sample;    	/*Depende del tamaño de la muestra*/
+	uint32_t displacement_to_sample;    	/*Depende del tamaño del recipiente*/
+
+
 
 } processConfig_t;
 
@@ -120,8 +130,8 @@ void ProcessREADDATACommand();
 void ProcessENA_DRIVERCommand();
 void ProcessDIS_DRIVERCommand();
 
-void ProcessPOSITIONCommand();
-
+void ProcessCERO_SAMPLECommand();
+void ProcessDELTADIPCommand();
 
 //void ProcessLoadProgramDinamic(process_t *process);
 //void ProcessCleanDinamic();

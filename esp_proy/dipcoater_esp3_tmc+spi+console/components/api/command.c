@@ -21,6 +21,9 @@ extern process_t processDipCoating;
 extern flagRun_t entry;
 
 
+#define MAX_ESTATIC_COMMAND 	8
+
+
 /*PROCESS STANDARD HANDLERS*/
 
 void CommandLOADPROGRAMSTANDARDHandler(int argc, char **argv){
@@ -34,7 +37,7 @@ void CommandSETSTANDARDPROGRAMHandler(int argc, char **argv) {
 	processCommand_t aux_process_comand;
 	printf("\r\n");
 	if (2 == argc) {
-		aux_process_comand.commandnumber = PROCESS_COMMAND_LOOP - 1;
+		aux_process_comand.commandnumber = PROCESS_COMMAND_LOOP - 2;
 		aux_process_comand.argument.value.val = tinysh_get_arg_int(argc, argv,
 				1);
 		modQueue_Write(&queueconsolareception, &aux_process_comand);
@@ -61,14 +64,18 @@ void CommandLOADPROGRAMCUSTOMHandler(int argc, char **argv){
 void CommandSETCOMMANDCUSTOMPROGRAMHandler(int argc, char **argv) {
 	processCommand_t aux_process_comand;
 	printf("\r\n");
-	if (5 == argc) { /*SET XX XX XX XX representa 5 comandos 	argc = 5*/
+	if (5 == argc) { /*SETCUSTOMPROGRAM  XX XX XX XX representa 5 comandos 	argc = 5*/
 		aux_process_comand.commandnumber = tinysh_get_arg_int(argc, argv, 1);
-		aux_process_comand.argument.spin.velocity = tinysh_get_arg_int(argc,
-				argv, 2);
-		aux_process_comand.argument.spin.acceleration = tinysh_get_arg_int(argc,
-				argv, 3);
-		aux_process_comand.argument.spin.test = tinysh_get_arg_int(argc, argv,
-				4);
+
+		if (aux_process_comand.commandnumber == 6) {
+			aux_process_comand.argument.value.val = tinysh_get_arg_int(argc,argv, 2);
+		}
+
+		else {
+			aux_process_comand.argument.spin.velocity = tinysh_get_arg_int(argc,argv, 2);
+			aux_process_comand.argument.spin.acceleration = tinysh_get_arg_int(argc,argv, 3);
+			aux_process_comand.argument.spin.displacement_z = tinysh_get_arg_int(argc, argv,4);
+		}
 
 		modQueue_Write(&queueconsolareception, &aux_process_comand);
 		ProcessSetProgramCustom();
@@ -92,12 +99,12 @@ void CommandSETALLCUSTOMPROGRAMHandler(int argc, char **argv){
 
 	 if(31 == argc){
 
-		 for(i=1;i<=9;i++){
+		 for(i=1;i<=MAX_ESTATIC_COMMAND;i++){
 
 			 aux_process_comand.commandnumber=tinysh_get_arg_int(argc, argv, i-1);
 			 aux_process_comand.argument.spin.velocity=tinysh_get_arg_int(argc, argv, i+j);
 			 aux_process_comand.argument.spin.acceleration=tinysh_get_arg_int(argc, argv, i+k);
-			 aux_process_comand.argument.spin.test=tinysh_get_arg_int(argc, argv, i+l);
+			 aux_process_comand.argument.spin.displacement_z=tinysh_get_arg_int(argc, argv, i+l);
 			 modQueue_Write(&queueconsolareception,&aux_process_comand);
 			 ProcessSetProgramCustom();
 
@@ -189,40 +196,60 @@ void CommandDIS_DRIVERHandler(int argc, char **argv) {
 }
 
 
-void CommandPOSITIONHandler(int argc, char **argv) {
+void CommandCERO_SAMPLEHandler(int argc, char **argv) {
 	printf("\r\n");
-	ProcessPOSITIONCommand();
+	ProcessCERO_SAMPLECommand();
 }
+
+void CommandDELTADIPHandler(int argc, char **argv) {
+
+	processConfig_t aux_process_config;
+
+	printf("\r\n");
+	if (2 == argc) {
+
+		aux_process_config.displacement_delta_sample = tinysh_get_arg_int(argc, argv,1);
+		modQueue_Write(&queueconsolareception, &aux_process_config);
+		ProcessDELTADIPCommand();
+
+	} else {
+		printf(
+				"Ingrese 2 argumentos -> DELTADIP X( Profundidad de Inmersion de la muenstra en mm)\r\n");
+	}
+
+
+}
+
 
 
 
 /*ENVIROMENTAL CHAMBER HANDLERS*/
-void CommandSETRHHandler(int argc, char **argv) {
-	printf("\r\n");
-	if (2 == argc) {
-		EnviromentalChamberSetRH(&enviromentalChamberDipCoating,
-				(uint8_t) tinysh_get_arg_int(argc, argv, 1));
-	}
-}
-void CommandSETTEMPHandler(int argc, char **argv) {
-	printf("\r\n");
-	if (2 == argc) {
-		EnviromentalChamberSetTemp(&enviromentalChamberDipCoating,
-				(uint8_t) tinysh_get_arg_int(argc, argv, 1));
-	}
-}
-void CommandACTIVATEENVIROMENTALCHAMBERHandler(int argc, char **argv) {
-	printf("\r\n");
-	if (1 == argc) {
-		EnviromentalChamberActivateRH(&enviromentalChamberDipCoating);
-	}
-}
-void CommandDEACTIVATEENVIROMENTALCHAMBERHandler(int argc, char **argv) {
-	printf("\r\n");
-	if (1 == argc) {
-		EnviromentalChamberDeactivateRH(&enviromentalChamberDipCoating);
-	}
-}
+//void CommandSETRHHandler(int argc, char **argv) {
+//	printf("\r\n");
+//	if (2 == argc) {
+//		EnviromentalChamberSetRH(&enviromentalChamberDipCoating,
+//				(uint8_t) tinysh_get_arg_int(argc, argv, 1));
+//	}
+//}
+//void CommandSETTEMPHandler(int argc, char **argv) {
+//	printf("\r\n");
+//	if (2 == argc) {
+//		EnviromentalChamberSetTemp(&enviromentalChamberDipCoating,
+//				(uint8_t) tinysh_get_arg_int(argc, argv, 1));
+//	}
+//}
+//void CommandACTIVATEENVIROMENTALCHAMBERHandler(int argc, char **argv) {
+//	printf("\r\n");
+//	if (1 == argc) {
+//		EnviromentalChamberActivateRH(&enviromentalChamberDipCoating);
+//	}
+//}
+//void CommandDEACTIVATEENVIROMENTALCHAMBERHandler(int argc, char **argv) {
+//	printf("\r\n");
+//	if (1 == argc) {
+//		EnviromentalChamberDeactivateRH(&enviromentalChamberDipCoating);
+//	}
+//}
 
 
 /*PROCESS DINAMIC HANDLERS*/

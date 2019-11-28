@@ -20,6 +20,8 @@
 #include "lwip/sys.h"
 #include <lwip/netdb.h>
 
+#include "app_main_dipcoater.h"
+
 
 #endif
 
@@ -31,21 +33,13 @@
 #endif
 
 
-
-
 /*TODO
  *
  *
  * ver fix cuando ejecuto 2 veces seguidas la busqueda de cero machine, la segunda baja en vez de subir nuevamente
  *
  *
- *
- *
- *
  * */
-
-
-
 
 //Variable Global con la direccion del socket creado, sirve para enviar mensajes al sokcet desde los handlers
 extern int sock_global;
@@ -55,12 +49,15 @@ extern int sock_global;
 // Constante de dezplazamiento lineal   , expresadda en mm/micropasos         ->   una vuelta   1 paso  ==   0.00007851  mm     -->    (una vuelta) 51200   ==   4.02 mm
 #define  K_DEZPLAZAMIENTO_LINEAL   0.00007851   //  78.51E-6
 
+// Constante de diferencia de velocidad debido a que no esta el clk de 16MHZ externo en nuestro diseño
+
+#define K_VELOCIDAD  1.34
+
+
 
 // Constante de convesion de velocidad y desplazamineto   de mm/s a o mm/min    -> pasos
 
 
-const unsigned char  datos='S';
-const unsigned char  datob[]= "BAJANDO";
 
 //Handler Functions
 int HandlerCeroMachine(processCommandArgSpin_t *arg) {
@@ -70,6 +67,8 @@ int HandlerCeroMachine(processCommandArgSpin_t *arg) {
 	printf("Buscando Cero Machine!!\t");
 	printf("velocidad:%d\t", arg->velocity);
 	printf("aceleracion:%d\r\n", arg->acceleration);
+
+	Evalboards.ch1.enableDriver(DRIVER_ENABLE);
 
 	//TEST DEZPLAZAMINETO LINEAL CONFIGURADO DESDE MODO POSICION
 //	Evalboards.ch1.writeRegister(0, 0x21, 0x00000000);
@@ -157,7 +156,9 @@ int HandlerCeroMachine(processCommandArgSpin_t *arg) {
 
 	}
 
-	printf("FUNCIONO!!!!!\r\n");
+	Evalboards.ch1.enableDriver(DRIVER_DISABLE);
+
+	printf("Cero Machine Detectado!!!!!\r\n");
 	Evalboards.ch1.readRegister(0, 0x2D, &lectura);
 	printf("Posicion XTARGET :%d\r\n", lectura);
 
@@ -181,9 +182,12 @@ int HandlerUp(processCommandArgSpin_t*	arg) {
 
 	int32_t lectura;
 
+	printf("\r\n");
 	printf("Subiendo muestra!!\t");
 	printf("velocidad:%d\t",arg->velocity);
 	printf("aceleracion:%d\t",arg->acceleration);
+
+
 //	send(sock_global, &datos, sizeof(unsigned char), 0);
 //	Evalboards.ch1.left(0,0x00009C40); // writing value 0x00000000 = 0 = 0.0 to address 18 = 0x2C(TZEROWAIT)
 
@@ -198,7 +202,7 @@ int HandlerUp(processCommandArgSpin_t*	arg) {
 
 
 	// Seteo de registro XTARGET
-	Evalboards.ch1.writeRegister(0, 0x2D, lectura - arg->test );
+	Evalboards.ch1.writeRegister(0, 0x2D, lectura - arg->displacement_z );
 
 	// Seteo aceleracion y velocidad
 	Evalboards.ch1.writeRegister(0, 0x26,  arg->acceleration);
@@ -222,7 +226,6 @@ int HandlerUp(processCommandArgSpin_t*	arg) {
 }
 
 
-//Prueba
 int HandlerUp_without_program(processCommandArgSpin_t*	arg) {
 
 	int32_t lectura;
@@ -230,6 +233,9 @@ int HandlerUp_without_program(processCommandArgSpin_t*	arg) {
 	printf("Subiendo muestra!!\t");
 	printf("velocidad:%d\t",arg->velocity);
 	printf("aceleracion:%d\r\n",arg->acceleration);
+
+
+	Evalboards.ch1.enableDriver(DRIVER_ENABLE);
 
 	//Leo Actual
 
@@ -241,7 +247,18 @@ int HandlerUp_without_program(processCommandArgSpin_t*	arg) {
 
 
 	// Seteo de registro XTARGET
-	Evalboards.ch1.writeRegister(0, 0x2D, lectura - arg->test );
+	Evalboards.ch1.writeRegister(0, 0x2D, lectura - arg->displacement_z );
+
+	// Detecto el flag que detecta XACTUAL=XTARGET y apago driver
+	while (1) {
+		Evalboards.ch1.readRegister(0, TMC5130_RAMPSTAT, &lectura);
+		if (lectura & 0x00000200){
+			Evalboards.ch1.enableDriver(DRIVER_DISABLE);
+			break;
+		}
+		else
+			sleep(0.1);
+	}
 
 	return 0;
 }
@@ -255,6 +272,8 @@ int HandlerDown_without_program(processCommandArgSpin_t*	arg) {
 	printf("velocidad:%d\t",arg->velocity);
 	printf("aceleracion:%d\r\n",arg->acceleration);
 
+	Evalboards.ch1.enableDriver(DRIVER_ENABLE);
+
 	//Leo Actual
 
 	Evalboards.ch1.readRegister(0, 0x21, &lectura);
@@ -264,7 +283,21 @@ int HandlerDown_without_program(processCommandArgSpin_t*	arg) {
 	Evalboards.ch1.writeRegister(0, 0x27, arg->velocity);
 
 	// Seteo de registro XTARGET
-	Evalboards.ch1.writeRegister(0, 0x2D, lectura + arg->test );
+	Evalboards.ch1.writeRegister(0, 0x2D, lectura + arg->displacement_z );
+
+	// Detecto el flag que detecta XACTUAL=XTARGET y apago driver
+		while (1) {
+
+			Evalboards.ch1.readRegister(0, TMC5130_RAMPSTAT, &lectura);
+			if (lectura & 0x00000200){
+				Evalboards.ch1.enableDriver(DRIVER_DISABLE);
+				break;
+			}
+			else
+				sleep(0.1);
+
+		}
+
 
 	return 0;
 }
@@ -275,11 +308,15 @@ int HandlerDown_without_program(processCommandArgSpin_t*	arg) {
 int HandlerDown(processCommandArgSpin_t*	arg) {
 	int32_t lectura;
 
-
+	printf("\r\n");
 	printf("Bajando muestra!!\t");
 	printf("velocidad:%d\t",arg->velocity);
 	printf("aceleracion:%d\t",arg->acceleration);
-	printf("desplazamieto pasos:%d\r\n",arg->test);
+
+	// Seteo de registro XTARGET
+	arg->displacement_z = processDipCoating.config.displacement_to_sample;
+
+	printf("desplazamiento hasta fluido en pasos:%d\r\n",arg->displacement_z);
 //	send(sock_global, &datob, sizeof(unsigned char)*7, 0);
 //	Evalboards.ch1.right(0,0x00009C40); // writing value 0x00000000 = 0 = 0.0 to address 18 = 0x2C(TZEROWAIT)
 //
@@ -291,8 +328,8 @@ int HandlerDown(processCommandArgSpin_t*	arg) {
 	Evalboards.ch1.readRegister(0, 0x21, &lectura);
 	printf("Posicion ACTUAL TARGET :%d\r\n", lectura);
 
-	// Seteo de registro XTARGET
-	Evalboards.ch1.writeRegister(0, 0x2D, arg->test );
+
+	Evalboards.ch1.writeRegister(0, 0x2D, arg->displacement_z );
 
 	// Seteo aceleracion y velocidad
 	Evalboards.ch1.writeRegister(0, 0x26,  arg->acceleration);
@@ -333,7 +370,7 @@ int HandlerDownLoop(processCommandArgSpin_t*	arg) {
 	Evalboards.ch1.writeRegister(0, 0x27, arg->velocity);
 
 	// Seteo de registro XTARGET
-	Evalboards.ch1.writeRegister(0, 0x2D, lectura + 636861 );
+	Evalboards.ch1.writeRegister(0, 0x2D, lectura + processDipCoating.config.displacement_delta_sample  );
 
 	//Una vez detectado el cero realizo un movimiento fijo con 512000 pasos hacia abajo, detecto el flag que detecta XACTUAL=XTARGET
 	while (1) {
@@ -369,7 +406,7 @@ int HandlerUpLoop(processCommandArgSpin_t*	arg) {
 	Evalboards.ch1.writeRegister(0, 0x27, arg->velocity);
 
 	// Seteo de registro XTARGET
-	Evalboards.ch1.writeRegister(0, 0x2D, lectura - 636861 );
+	Evalboards.ch1.writeRegister(0, 0x2D, lectura - processDipCoating.config.displacement_delta_sample  );
 
 
 	//Una vez detectado el cero realizo un movimiento fijo con 512000 pasos hacia abajo, detecto el flag que detecta XACTUAL=XTARGET
@@ -383,18 +420,14 @@ int HandlerUpLoop(processCommandArgSpin_t*	arg) {
 
 	}
 
+
 	return 0;
 
 
 }
 
-
-
-
-
 int HandlerWait(processCommandArgSpin_t*	arg) {
 	printf("Muestra en espera!!\r\n");
-
 //	Evalboards.ch1.rotate(0,0x00000000); // writing value 0x00000000 = 0 = 0.0 to address 18 = 0x2C(TZEROWAIT)
 	sleep(2);
 	return 0;
@@ -431,6 +464,25 @@ int HandlerFinish(processCommandArgSpin_t*	arg) {
 }
 
 int HandlerREADDATA() {
+
+	int32_t lectura1,lectura2;
+	float cuenta=0;
+
+	Evalboards.ch1.readRegister(0,0x21,&lectura1);
+	printf("VALOR XACTUAL (t1) :%d\r\n",lectura1);
+	Evalboards.ch1.writeRegister(0, 0x26,  60000);
+	Evalboards.ch1.writeRegister(0, 0x27, 10000);
+	Evalboards.ch1.rotate(0,10000);
+	sleep(0.5);
+	Evalboards.ch1.readRegister(0,0x21,&lectura2);
+	Evalboards.ch1.writeRegister(0, 0x27, 0);
+	Evalboards.ch1.rotate(0,0);
+
+	printf("VALOR XACTUAL (t2) :%d\r\n",lectura2);
+
+	cuenta=(10000*0.5)/(lectura2-lectura1);
+	printf("El factor de escala es -> %f\r\n",cuenta);
+
 	return 0;
 }
 
@@ -449,7 +501,7 @@ int HandlerDIS_DRIVER() {
 
 
 
-int HandlerPOSITION() {
+int HandlerCERO_SAMPLE() {
 
 	int32_t lectura;
 	Evalboards.ch1.readRegister(0, 0x21, &lectura);     //
@@ -458,43 +510,11 @@ int HandlerPOSITION() {
 }
 
 
+int HandlerDELTADIP() {
 
-
-//FUNCIONA BUSQUEDA DE CERO
-//Evalboards.ch1.writeRegister(0, 0x34, 0x00000400);
-//Evalboards.ch1.left(0,0x00009C40);
-//
-////Detecto flag de stallguard
-//while (1){
-//
-//		Evalboards.ch1.readRegister(0,TMC5130_RAMPSTAT,&lectura);
-//		if ( lectura & 0x0000040 ){
-//
-//			Evalboards.ch1.writeRegister(0, 0x21, 0x00000000);
-//			//Evalboards.ch1.writeRegister(0, 0x2D, 0x0007D000);  //51200
-//			Evalboards.ch1.right(0,0x00009C40);
-//			Evalboards.ch1.readRegister(0,TMC5130_RAMPSTAT,&lectura);
-//			Evalboards.ch1.writeRegister(0, 0x34, 0x00000000);
-//
-//			break;
-//		}
-//		else sleep(0.2);
-//
-//	}
-//
-//
-//printf("FUNCIONO!!!!!\r\n");
-//sleep(3);
-//
-//
-//return 0;
-//
-
-
-
-
-
-
+	printf("Profundidad de dip cargada!\r\n");
+	return 0;
+}
 
 
 
