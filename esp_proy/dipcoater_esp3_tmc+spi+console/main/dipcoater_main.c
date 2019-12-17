@@ -58,6 +58,9 @@
  * carga de comando wait
  * hacer una maquina de estado para customprogram y customprogramall
  *
+ *VER /home/martin/Programas/esp/esp-idf/examples/provisioning/softap_prov
+ *
+ *
  *
  * */
 
@@ -81,8 +84,11 @@ static tinysh_cmd_t commandLOADPROGRAMSTANDARD = 		{NULL,"LOADPROGRAMSTANDARD", 
 
 //PROCESS CUSTOM:
 static tinysh_cmd_t commandSETCOMMANDCUSTOMPROGRAM = 	{NULL,"SETCUSTOMPROGRAM", NULL, NULL, CommandSETCOMMANDCUSTOMPROGRAMHandler, NULL, NULL, NULL};
+static tinysh_cmd_t commandSETCOMMANDCUSTOMPROGRAMAPP = {NULL,"SETCUSTOMPROGRAMAPP", NULL, NULL, CommandSETCOMMANDCUSTOMPROGRAMAPPHandler, NULL, NULL, NULL};
 static tinysh_cmd_t commandSETALLCUSTOMPROGRAM = 		{NULL,"SETALLCUSTOMPROGRAM", NULL, NULL, CommandSETALLCUSTOMPROGRAMHandler, NULL, NULL, NULL};
+
 static tinysh_cmd_t commandLOADPROGRAMCUSTOM = 			{NULL,"LOADPROGRAMCUSTOM", NULL, NULL, CommandLOADPROGRAMCUSTOMHandler, NULL, NULL, NULL};
+
 
 //PROCESS DINAMIC:
 //	static tinysh_cmd_t commandCLEANPROGRAMDINAMIC = 		{NULL,"CLEANPROGRAMDINAMIC", NULL, NULL, CommandCLEANPROGRAMDINAMICHandler, NULL, NULL, NULL};
@@ -136,13 +142,24 @@ void xtaskprocess(void *pvParameter) {
 	ProcessInit(&processDipCoating);
 
 	while (1) {
+
+		/* leo la cola de comandos
+		 * comand = read(cola)
+		 * numero_comando = comand.head.number
+		 * hanlder = arrayJanlder[numero_comando];
+		 * hanlder(&comand)
+		 *
+		 * */
+
+
+
 		if (entry == RUN) {
 			processDipCoating.config.status=1;
 			ProcessRun(&processDipCoating);
 			entry = STOP;
 			processDipCoating.config.status=0;
 		}
-		vTaskDelay(20 / portTICK_RATE_MS);
+		vTaskDelay(500 / portTICK_RATE_MS);
 	}
 }
 
@@ -160,8 +177,12 @@ void xtasktinysh(void *pvParameter) {
 	//command initialization
 	tinysh_add_command(&commandLOADPROGRAMSTANDARD);
 	tinysh_add_command(&commandLOADPROGRAMCUSTOM);
+
 //	tinysh_add_command(&commandLOADPROGRAMDINAMIC);
 	tinysh_add_command(&commandSETCOMMANDCUSTOMPROGRAM);
+	tinysh_add_command(&commandSETCOMMANDCUSTOMPROGRAMAPP);
+
+
 	tinysh_add_command(&commandSETSTANDARDPROGRAM);
 	tinysh_add_command(&commandSETALLCUSTOMPROGRAM);
 //	tinysh_add_command(&commandCLEANPROGRAMDINAMIC);
@@ -198,7 +219,7 @@ void xtasktinysh(void *pvParameter) {
 		if (c != 0xFF){
 		tinysh_char_in(c);
 		}
-		vTaskDelay(20 / portTICK_RATE_MS);
+		vTaskDelay(100 / portTICK_RATE_MS);
 
 	}
 }
@@ -216,49 +237,6 @@ void xtaskmotor(void *pvParameter) {
 	vTaskDelay(250 / portTICK_RATE_MS);
 	Evalboards.ch1.enableDriver(DRIVER_ENABLE);
 	vTaskDelay(250 / portTICK_RATE_MS);
-
-
-//	Evalboards.ch1.writeRegister(0,0x00, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 0 = 0x00(GCONF)
-//	Evalboards.ch1.writeRegister(0,0x03, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 1 = 0x03(SLAVECONF)
-//	Evalboards.ch1.writeRegister(0,0x05, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 2 = 0x05(X_COMPARE)
-//	Evalboards.ch1.writeRegister(0,0x10, 	0x00070500); 		// writing value 0x00070500 = 460032 = 0.0 to address 3 = 0x10(IHOLD_IRUN)
-//	Evalboards.ch1.writeRegister(0,0x11, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 4 = 0x11(TPOWERDOWN)
-//	Evalboards.ch1.writeRegister(0,0x13, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 5 = 0x13(TPWMTHRS)
-//	Evalboards.ch1.writeRegister(0,0x14, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 6 = 0x14(TCOOLTHRS)
-//	Evalboards.ch1.writeRegister(0,0x15, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 7 = 0x15(THIGH)
-//	Evalboards.ch1.writeRegister(0,0x20, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 8 = 0x20(RAMPMODE)
-//	Evalboards.ch1.writeRegister(0,0x21, 	0x0007D000); 		// writing value 0x0007D000 = 512000 = 0.0 to address 9 = 0x21(XACTUAL)
-//	Evalboards.ch1.writeRegister(0,0x23, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 10 = 0x23(VSTART)
-//	Evalboards.ch1.writeRegister(0,0x24, 	0x000003E8); 		// writing value 0x000003E8 = 1000 = 0.0 to address 11 = 0x24(A1)
-//	Evalboards.ch1.writeRegister(0,0x25, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 12 = 0x25(V1)
-//	Evalboards.ch1.writeRegister(0,0x26, 	0x000003E8); 		// writing value 0x000001F4 = 500 = 0.0 to address 13 = 0x26(AMAX)
-//	Evalboards.ch1.writeRegister(0,0x27, 	0x0000C350); 		// writing value 0x00030D40 = 200000 = 0.0 to address 14 = 0x27(VMAX)
-//	Evalboards.ch1.writeRegister(0,0x28, 	0x000003E8); 		// writing value 0x000002BC = 700 = 0.0 to address 15 = 0x28(DMAX)
-//	Evalboards.ch1.writeRegister(0,0x2A, 	0x00000578); 		// writing value 0x00000578 = 1400 = 0.0 to address 16 = 0x2A(D1)
-//	Evalboards.ch1.writeRegister(0,0x2B, 	0x0000000A); 		// writing value 0x0000000A = 10 = 0.0 to address 17 = 0x2B(VSTOP)
-//	Evalboards.ch1.writeRegister(0,0x2C, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 18 = 0x2C(TZEROWAIT)
-//	Evalboards.ch1.writeRegister(0,0x2D, 	0x0007D000); 		// writing value 0x0007D000 = 512000 = 0.0 to address 19 = 0x2D(XTARGET)
-//	Evalboards.ch1.writeRegister(0,0x33, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 20 = 0x33(VDCMIN)
-//	Evalboards.ch1.writeRegister(0,0x34, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 21 = 0x34(SW_MODE)
-//	Evalboards.ch1.writeRegister(0,0x38, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 22 = 0x38(ENCMODE)
-//	Evalboards.ch1.writeRegister(0,0x39, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 23 = 0x39(X_ENC)
-//	Evalboards.ch1.writeRegister(0,0x3A, 	0x00010000); 		// writing value 0x00010000 = 65536 = 0.0 to address 24 = 0x3A(ENC_CONST)
-//	Evalboards.ch1.writeRegister(0,0x60, 	0xAAAAB554); 		// writing value 0xAAAAB554 = 0 = 0.0 to address 25 = 0x60(MSLUT[0])
-//	Evalboards.ch1.writeRegister(0,0x61, 	0x4A9554AA); 		// writing value 0x4A9554AA = 1251300522 = 0.0 to address 26 = 0x61(MSLUT[1])
-//	Evalboards.ch1.writeRegister(0,0x62, 	0x24492929); 		// writing value 0x24492929 = 608774441 = 0.0 to address 27 = 0x62(MSLUT[2])
-//	Evalboards.ch1.writeRegister(0,0x63, 	0x10104222); 		// writing value 0x10104222 = 269500962 = 0.0 to address 28 = 0x63(MSLUT[3])
-//	Evalboards.ch1.writeRegister(0,0x64, 	0xFBFFFFFF); 		// writing value 0xFBFFFFFF = 0 = 0.0 to address 29 = 0x64(MSLUT[4])
-//	Evalboards.ch1.writeRegister(0,0x65, 	0xB5BB777D); 		// writing value 0xB5BB777D = 0 = 0.0 to address 30 = 0x65(MSLUT[5])
-//	Evalboards.ch1.writeRegister(0,0x66, 	0x49295556); 		// writing value 0x49295556 = 1227445590 = 0.0 to address 31 = 0x66(MSLUT[6])
-//	Evalboards.ch1.writeRegister(0,0x67, 	0x00404222); 		// writing value 0x00404222 = 4211234 = 0.0 to address 32 = 0x67(MSLUT[7])
-//	Evalboards.ch1.writeRegister(0,0x68, 	0xFFFF8056); 		// writing value 0xFFFF8056 = 0 = 0.0 to address 33 = 0x68(MSLUTSEL)
-//	Evalboards.ch1.writeRegister(0,0x69, 	0x00F70000); 		// writing value 0x00F70000 = 16187392 = 0.0 to address 34 = 0x69(MSLUTSTART)
-//	Evalboards.ch1.writeRegister(0,0x6C, 	0x000101D5); 		// writing value 0x000101D5 = 66005 = 0.0 to address 35 = 0x6C(CHOPCONF)
-//	Evalboards.ch1.writeRegister(0,0x6D, 	0x01020000); 		// writing value 0x00000000 = 0 = 0.0 to address 36 = 0x6D(COOLCONF)
-//	Evalboards.ch1.writeRegister(0,0x6E, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 37 = 0x6E(DCCTRL)
-//	Evalboards.ch1.writeRegister(0,0x70, 	0x000504C8); 		// writing value 0x000504C8 = 328904 = 0.0 to address 38 = 0x70(PWMCONF)
-//	Evalboards.ch1.writeRegister(0,0x72, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 39 = 0x72(ENCM_CTRL)
-
 
 
 //	Evalboards.ch1.writeRegister(0,0x00, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 0 = 0x00(GCONF)
@@ -427,6 +405,7 @@ static void tcp_server_task(void *pvParameters)
         addr_family = AF_INET;
         ip_protocol = IPPROTO_IP;
         inet_ntoa_r(dest_addr.sin_addr, addr_str, sizeof(addr_str) - 1);
+
 //#else 	//IPV6
 //        struct sockaddr_in6 dest_addr;
 //        bzero(&dest_addr.sin6_addr.un, sizeof(dest_addr.sin6_addr.un));
@@ -480,7 +459,7 @@ static void tcp_server_task(void *pvParameters)
         while (1) {
 
 
-        	//int len = recv(sock, rx_buffer, sizeof(rx_buffer) - 1, 0);
+
         	int len = recv(sock_global, rx_buffer, sizeof(rx_buffer) - 1, 0);
 
         	// Error occurred during receiving
@@ -513,7 +492,7 @@ static void tcp_server_task(void *pvParameters)
                 tinysh_char_in('\n');
 
                 //test para devolucion de datos -- devuelvo un dato de la estructura del proceso , el index
-                int err = send(sock_global, rx_buffer, len, 0);
+               // int err = send(sock_global, rx_buffer, len, 0);
 
 
                 if (err < 0) {
@@ -525,17 +504,20 @@ static void tcp_server_task(void *pvParameters)
 
         if (sock_global != -1) {
             ESP_LOGE(TAG, "Shutting down socket and restarting...");
-            shutdown(sock_global, 0);
-            close(sock_global);
+            //shutdown(sock_global, 0);   /*TEST MARTES SOCKET*/
+            close(sock_global);         /*TEST MARTES SOCKET*/
 
             ////FIX sacado de internet  https://www.esp32.com/viewtopic.php?t=10335
-            shutdown(listen_sock,0);
+            //shutdown(listen_sock,0);  /*TEST MARTES SOCKET*/
             close(listen_sock);
             vTaskDelay(10);
 
         }
     }
-    vTaskDelete(NULL);
+
+
+    //vTaskDelete(NULL); /*TEST MARTES SOCKET*/
+
 }
 
 
@@ -545,7 +527,7 @@ void xtaskemergencystop(void *pvParameter) {
 		vTaskDelay(1000 / portTICK_RATE_MS);
 		ProcessCeroMachineCommand();
 		//Testear el estado de algun pin, deshabilitar driver ,reiniciar dispositivo
-		vTaskDelete(NULL);
+		//vTaskDelete(NULL);
 
 
 }
@@ -557,12 +539,12 @@ void xtaskmonitorstatus(void *pvParameter) {
 	char datos[16];
 
 	while (1) {
-		vTaskDelay(2000 / portTICK_RATE_MS);
+		vTaskDelay(1000 / portTICK_RATE_MS);
 		if (sock_global > 0){
 //		itoa(processDipCoating.config.status,datos,10);
 
 
-		sprintf(datos,"STATUS: %d\r\n",processDipCoating.config.status);
+		sprintf(datos,"STATUS %d\r\n",processDipCoating.config.status);
 
 		send(sock_global, &datos, sizeof(datos) , 0);
 		//send(sock_global, &processDipCoating.config.status, sizeof(processDipCoating.config.status) , 0);

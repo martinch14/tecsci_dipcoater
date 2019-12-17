@@ -71,7 +71,7 @@ void CommandCERO_SAMPLEHandler(int argc, char **argv);
 void CommandDELTADIPHandler(int argc, char **argv);
 
 
-
+void CommandSETCOMMANDCUSTOMPROGRAMAPPHandler(int argc, char **argv);
 
 
 #endif /* COMPONENTS_API_INCLUDE_COMMAND_H_ */

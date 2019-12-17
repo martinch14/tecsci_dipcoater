@@ -234,6 +234,7 @@ int HandlerUp_without_program(processCommandArgSpin_t*	arg) {
 	printf("velocidad:%d\t",arg->velocity);
 	printf("aceleracion:%d\r\n",arg->acceleration);
 
+	processDipCoating.config.status=1;
 
 	Evalboards.ch1.enableDriver(DRIVER_ENABLE);
 
@@ -260,6 +261,8 @@ int HandlerUp_without_program(processCommandArgSpin_t*	arg) {
 			sleep(0.1);
 	}
 
+	processDipCoating.config.status=0;
+
 	return 0;
 }
 
@@ -271,6 +274,9 @@ int HandlerDown_without_program(processCommandArgSpin_t*	arg) {
 	printf("Bajando muestra!!\t");
 	printf("velocidad:%d\t",arg->velocity);
 	printf("aceleracion:%d\r\n",arg->acceleration);
+
+
+	processDipCoating.config.status=1;
 
 	Evalboards.ch1.enableDriver(DRIVER_ENABLE);
 
@@ -298,6 +304,7 @@ int HandlerDown_without_program(processCommandArgSpin_t*	arg) {
 
 		}
 
+	processDipCoating.config.status=0;
 
 	return 0;
 }
@@ -465,23 +472,28 @@ int HandlerFinish(processCommandArgSpin_t*	arg) {
 
 int HandlerREADDATA() {
 
-	int32_t lectura1,lectura2;
-	float cuenta=0;
+	int32_t lectura1,lectura2, i;
+//	float cuenta=0;
+//
+//	Evalboards.ch1.readRegister(0,0x21,&lectura1);
+//	printf("VALOR XACTUAL (t1) :%d\r\n",lectura1);
+//	Evalboards.ch1.writeRegister(0, 0x26,  60000);
+//	Evalboards.ch1.writeRegister(0, 0x27, 10000);
+//	Evalboards.ch1.rotate(0,10000);
+//	sleep(0.5);
+//	Evalboards.ch1.readRegister(0,0x21,&lectura2);
+//	Evalboards.ch1.writeRegister(0, 0x27, 0);
+//	Evalboards.ch1.rotate(0,0);
+//
+//	printf("VALOR XACTUAL (t2) :%d\r\n",lectura2);
+//
+//	cuenta=(10000*0.5)/(lectura2-lectura1);
+//	printf("El factor de escala es -> %f\r\n",cuenta);
 
-	Evalboards.ch1.readRegister(0,0x21,&lectura1);
-	printf("VALOR XACTUAL (t1) :%d\r\n",lectura1);
-	Evalboards.ch1.writeRegister(0, 0x26,  60000);
-	Evalboards.ch1.writeRegister(0, 0x27, 10000);
-	Evalboards.ch1.rotate(0,10000);
-	sleep(0.5);
-	Evalboards.ch1.readRegister(0,0x21,&lectura2);
-	Evalboards.ch1.writeRegister(0, 0x27, 0);
-	Evalboards.ch1.rotate(0,0);
+	for (i=0; i<8 ;i++){
+		printf( "%d %d %d %d \r\n" ,processDipCoating.command[i].commandnumber,processDipCoating.command[i].argument.spin.velocity ,processDipCoating.command[i].argument.spin.acceleration,processDipCoating.command[i].argument.spin.displacement_z  );
+	}
 
-	printf("VALOR XACTUAL (t2) :%d\r\n",lectura2);
-
-	cuenta=(10000*0.5)/(lectura2-lectura1);
-	printf("El factor de escala es -> %f\r\n",cuenta);
 
 	return 0;
 }
@@ -504,8 +516,18 @@ int HandlerDIS_DRIVER() {
 int HandlerCERO_SAMPLE() {
 
 	int32_t lectura;
+	static char datos[32];
+
+	printf("\r\n");
 	Evalboards.ch1.readRegister(0, 0x21, &lectura);     //
-	printf("Se cargo posicion %d de muestra \r\n", lectura);
+	printf("CERO_SAMPLE %d\r\n", lectura);
+
+	if (sock_global > 0){
+		sprintf(datos,"CERO_SAMPLE %d\r\n", lectura);
+		send(sock_global, &datos, sizeof(datos) , 0);
+	}
+
+
 	return lectura;
 }
 

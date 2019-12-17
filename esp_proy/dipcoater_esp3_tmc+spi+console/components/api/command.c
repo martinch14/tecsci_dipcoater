@@ -16,6 +16,8 @@
 #include "mod_queue.h"
 #include "app_main_dipcoater.h"
 
+#include "command.h"
+
 
 extern process_t processDipCoating;
 extern flagRun_t entry;
@@ -59,6 +61,7 @@ void CommandLOADPROGRAMCUSTOMHandler(int argc, char **argv){
 	ProcessLoadProgramCustom(&processDipCoating);
 }
 
+
 /*Handler to set up a single command of the custom Process
  4 arguments must be passed: command number (see manual), velocity, acceleration and the test parameter */
 void CommandSETCOMMANDCUSTOMPROGRAMHandler(int argc, char **argv) {
@@ -82,10 +85,45 @@ void CommandSETCOMMANDCUSTOMPROGRAMHandler(int argc, char **argv) {
 	}
 }
 
+
+
+/*Handler to set up APP command of the custom Process
+ 4 arguments must be passed: command number (see manual), velocity, acceleration and the test parameter */
+void CommandSETCOMMANDCUSTOMPROGRAMAPPHandler(int argc, char **argv) {
+	processCommand_t aux_process_comand;
+	printf("\r\n");
+	if (15 == argc) { /*SETCUSTOMPROGRAMAPP 2 XX XX 3 XX 4 XX XX 5 XX 6 X X X  	*/
+
+		processDipCoating.command[2].argument.spin.velocity = tinysh_get_arg_int(argc, argv,2);
+		processDipCoating.command[2].argument.spin.acceleration = tinysh_get_arg_int(argc, argv,3);
+
+		processDipCoating.command[3].argument.spin.velocity = tinysh_get_arg_int(argc, argv,5);
+
+		processDipCoating.command[4].argument.spin.velocity = tinysh_get_arg_int(argc, argv,7);
+		processDipCoating.command[4].argument.spin.acceleration = tinysh_get_arg_int(argc, argv,8);
+
+		processDipCoating.command[5].argument.spin.velocity = tinysh_get_arg_int(argc, argv,10);
+
+		processDipCoating.command[6].argument.spin.velocity = tinysh_get_arg_int(argc, argv,12);
+
+
+		processDipCoating.config.displacement_to_sample =    tinysh_get_arg_int(argc, argv,13);
+		processDipCoating.config.displacement_delta_sample = ( tinysh_get_arg_int(argc, argv,14) / 0.00007851 );
+
+		printf("Datos Cargados!!!\r\n");
+
+	}
+}
+
+
 /*Handler to set up a all commands of the custom Process
- 30 arguments must be passed: the 3 parameters for each command in increasing order
+ 25 arguments must be passed: the 3 parameters for each command in increasing order
  obs: for the LOOP comand it must be passed 3 parameters,
  but only the first one will be used the other two will be discarded
+  Example
+  SETALLCUSTOMPROGRAM   x x x  y y y c c c d d d s s s m m m w w w q q q
+  	  	  command ->  	  0		1		2	3		4	5		6	 7
+
   */
 void CommandSETALLCUSTOMPROGRAMHandler(int argc, char **argv){
 	 processCommand_t aux_process_comand;
@@ -97,14 +135,21 @@ void CommandSETALLCUSTOMPROGRAMHandler(int argc, char **argv){
 	 printf("\r\n");
 	 printf("%d\n",argc);
 
-	 if(31 == argc){
+	 if(  25 == argc){
+
+		 printf("setall ok/r/n");
 
 		 for(i=1;i<=MAX_ESTATIC_COMMAND;i++){
 
+
 			 aux_process_comand.commandnumber=tinysh_get_arg_int(argc, argv, i-1);
+			 printf("%d \t %d\r\n",i-1,aux_process_comand.commandnumber);
 			 aux_process_comand.argument.spin.velocity=tinysh_get_arg_int(argc, argv, i+j);
+			 printf("%d \t %d\r\n",i+j, aux_process_comand.argument.spin.velocity);
 			 aux_process_comand.argument.spin.acceleration=tinysh_get_arg_int(argc, argv, i+k);
+			 printf("%d \t %d\r\n",i+k,aux_process_comand.argument.spin.acceleration);
 			 aux_process_comand.argument.spin.displacement_z=tinysh_get_arg_int(argc, argv, i+l);
+			 printf("%d \t %d\r\n",i+l,aux_process_comand.argument.spin.displacement_z);
 			 modQueue_Write(&queueconsolareception,&aux_process_comand);
 			 ProcessSetProgramCustom();
 
@@ -154,6 +199,14 @@ void CommandUPSLOWHandler(int argc, char **argv) {
 
 void CommandDOWNFASTHandler(int argc, char **argv) {
 	printf("\r\n");
+	/*
+	 * comando nuevo
+	 * comando.head.number =  numero de este comando
+	 * comadno.contenido = le cargo los argumentos
+	 */
+	/*validar comando , limites de arg*/
+	/* escribir en cola  */
+
 	ProcessDownFastCommand();
 }
 
@@ -197,8 +250,17 @@ void CommandDIS_DRIVERHandler(int argc, char **argv) {
 
 
 void CommandCERO_SAMPLEHandler(int argc, char **argv) {
+
+	processConfig_t aux_process_config;
+
 	printf("\r\n");
+	if (2 == argc) {
+		processDipCoating.config.displacement_to_sample = tinysh_get_arg_int(argc, argv,1);
+
+	}
+	else{
 	ProcessCERO_SAMPLECommand();
+	}
 }
 
 void CommandDELTADIPHandler(int argc, char **argv) {

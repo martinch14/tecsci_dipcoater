@@ -82,7 +82,7 @@ typedef struct {
 	uint8_t	status;
 
 
-	/*Todos estas variables deben esta en 1 antes de que se ejecute cada programa*/
+	/*Todos estas variables deben estar en 1 antes de que se ejecute cada programa*/
 	uint8_t cero_machine_ok;
 	uint8_t cero_sample_ok;
 	uint8_t delta_dip_ok;

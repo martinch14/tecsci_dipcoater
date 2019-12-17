@@ -38,6 +38,11 @@ processCommand_t cmdProcessStandard[MAX_ESTATIC_COMMAND] = {
 		//Definir Z0 como la altura entre la interseccion del fluido con la muestra
 		//Bajar hasta Z0 + 10 mm
 		//DEBE BAJAR HASTA ANTES DE INGRESAR LA MUESTRA EN EL RECIPIENTE
+		/*{ .commandnumber = PROCESS_COMMAND_DOWN, 		.argument.spin.velocity = 222000,	.argument.spin.acceleration = 1000, .fpcommandhandler = array[PROCESS_COMMAND_DOWN] },*/
+
+
+		/*Al setear el custom program arrancamos desde el comando numero 0*/
+
 		{ .commandnumber = PROCESS_COMMAND_DOWN, 		.argument.spin.velocity = 222000,	.argument.spin.acceleration = 1000, .fpcommandhandler = HandlerDown },
 		{ .commandnumber = PROCESS_COMMAND_WAIT, 		.argument.spin.velocity = 0,	.argument.spin.acceleration = 0 , .fpcommandhandler = HandlerWait},
 
@@ -131,13 +136,14 @@ void ProcessLoadProgramCustom(process_t *process) {
 }
 
 
+
+
 //PROCESS SET FUNCTIONS
 
 void ProcessSetProgramStandard() {
 	processCommand_t readed_Command;
 	modQueue_Read(&queueconsolareception, &readed_Command);
-	cmdProcessStandard[readed_Command.commandnumber].argument.value.val =
-			readed_Command.argument.value.val;
+	cmdProcessStandard[readed_Command.commandnumber].argument.value.val = readed_Command.argument.value.val;
 
 }
 
@@ -181,7 +187,8 @@ void ProcessUpFastCommand(){
 
 	parameters.velocity=450000;
 	parameters.acceleration=32000;
-	parameters.displacement_z=1273722;  // Desplazamiento de 100 mm
+//	parameters.displacement_z=1273722;  // Desplazamiento de 100 mm
+	parameters.displacement_z=636861;  // Desplazamiento de 50 mm
 
 
 	HandlerUp_without_program(&parameters);
@@ -223,7 +230,8 @@ void ProcessDownFastCommand(){
 
 	parameters.velocity=450000;
 	parameters.acceleration=32000;
-	parameters.displacement_z=1273722;  // Desplazamiento de 100 mm
+//	parameters.displacement_z=1273722;  // Desplazamiento de 100 mm
+	parameters.displacement_z=636861;  // Desplazamiento de 50 mm
 
 
 	HandlerDown_without_program(&parameters);
@@ -323,6 +331,8 @@ void ProcessRunCommand(){
 
 	HandlerRun();
 }
+
+
 
 
 //Process DINAMICO
