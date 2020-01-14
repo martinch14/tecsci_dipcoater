@@ -220,6 +220,7 @@ typedef enum connection_request_made_by_code_t{
 /**
  * The actual WiFi settings in use
  */
+
 struct wifi_settings_t{
 	uint8_t ap_ssid[MAX_SSID_SIZE];
 	uint8_t ap_pwd[MAX_PASSWORD_SIZE];
@@ -230,8 +231,12 @@ struct wifi_settings_t{
 	wifi_ps_type_t sta_power_save;
 	bool sta_static_ip;
 	tcpip_adapter_ip_info_t sta_static_ip_config;
+
 };
+
+
 extern struct wifi_settings_t wifi_settings;
+
 
 
 /**

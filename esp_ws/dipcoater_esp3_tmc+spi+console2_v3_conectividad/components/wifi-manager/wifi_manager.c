@@ -58,6 +58,11 @@ Contains the freeRTOS task and all necessary support
 
 
 
+#define DEVICE_IP "192.168.100.110"
+#define DEVICE_GW "192.168.100.1"
+#define DEVICE_NETMASK "255.255.255.0"
+
+
 
 /* objects used to manipulate the main queue of events */
 QueueHandle_t wifi_manager_queue;
@@ -75,7 +80,7 @@ wifi_config_t* wifi_manager_config_sta = NULL;
 void (**cb_ptr_arr)(void*) = NULL;
 
 /* @brief tag used for ESP serial console messages */
-static const char TAG[] = "wifi_manager";
+static const char TAG[] = "task_wifi_manager";
 
 /* @brief task handle for the main wifi_manager task */
 static TaskHandle_t task_wifi_manager = NULL;
@@ -91,8 +96,13 @@ struct wifi_settings_t wifi_settings = {
 	.ap_bandwidth = DEFAULT_AP_BANDWIDTH,
 	.sta_only = DEFAULT_STA_ONLY,
 	.sta_power_save = DEFAULT_STA_POWER_SAVE,
-	.sta_static_ip = 0,
+	//.sta_static_ip = 0,
+	// CAMBIAT A 0 si la ip no es estatica y borrar lineas de la funcion   wifi_manager();
+	.sta_static_ip = 1,
+
 };
+
+
 
 const char wifi_manager_nvs_namespace[] = "espwifimgr";
 
@@ -658,6 +668,11 @@ void wifi_manager( void * pvParameters ){
 
 
 
+
+
+
+
+
 	/* initialize the tcp stack */
 	tcpip_adapter_init();
 
@@ -711,7 +726,20 @@ void wifi_manager( void * pvParameters ){
 
 	/* STA - Wifi Station configuration setup */
 	tcpip_adapter_dhcp_status_t status;
+
+
+
+	//AGREGADO  STATIC IP
+	tcpip_adapter_ip_info_t ipInfo;
+	inet_pton(AF_INET, DEVICE_IP, &ipInfo.ip);
+	inet_pton(AF_INET, DEVICE_GW, &ipInfo.gw);
+	inet_pton(AF_INET, DEVICE_NETMASK, &ipInfo.netmask);
+
+	wifi_settings.sta_static_ip_config = ipInfo;
+	/////////////////////////////////////////////
+
 	if(wifi_settings.sta_static_ip) {
+
 		ESP_LOGI(TAG, "Assigning static ip to STA interface. IP: %s , GW: %s , Mask: %s", ip4addr_ntoa(&wifi_settings.sta_static_ip_config.ip), ip4addr_ntoa(&wifi_settings.sta_static_ip_config.gw), ip4addr_ntoa(&wifi_settings.sta_static_ip_config.netmask));
 
 		/* stop DHCP client*/

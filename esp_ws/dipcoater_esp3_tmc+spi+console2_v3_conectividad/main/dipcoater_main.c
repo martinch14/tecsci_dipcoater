@@ -74,9 +74,12 @@
 
 //#define PORT CONFIG_EXAMPLE_PORT
 #define PORT 3333
-#define CONFIG_EXAMPLE_IPV4
+//#define CONFIG_EXAMPLE_IPV4
+//#define CONFIG_EXAMPLE_IPV4 192.168.100.110
 
-static const char *TAG = "example";
+
+static const char *TAG_TASK_SOCKET = "task_socket";
+static const char *TAG_TASK_WIFI_MANAGER = "task_wifi_manager_main";
 flagRun_t entry = STOP;
 
 
@@ -394,24 +397,23 @@ void xtaskmotor(void *pvParameter) {
 //	}
 }
 
-static void tcp_server_task(void *pvParameters)
-{
-    char rx_buffer[128];
-    char addr_str[128];
-    int addr_family;
-    int ip_protocol;
-    int i;
+static void tcp_server_task(void *pvParameters) {
+	char rx_buffer[128];
+	char addr_str[128];
+	int addr_family;
+	int ip_protocol;
+	int i;
 
-    while (1) {
+	while (1) {
 
 //#ifdef CONFIG_EXAMPLE_IPV4
-        struct sockaddr_in dest_addr;
-        dest_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-        dest_addr.sin_family = AF_INET;
-        dest_addr.sin_port = htons(PORT);
-        addr_family = AF_INET;
-        ip_protocol = IPPROTO_IP;
-        inet_ntoa_r(dest_addr.sin_addr, addr_str, sizeof(addr_str) - 1);
+		struct sockaddr_in dest_addr;
+		dest_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+		dest_addr.sin_family = AF_INET;
+		dest_addr.sin_port = htons(PORT);
+		addr_family = AF_INET;
+		ip_protocol = IPPROTO_IP;
+		inet_ntoa_r(dest_addr.sin_addr, addr_str, sizeof(addr_str) - 1);
 
 //#else 	//IPV6
 //        struct sockaddr_in6 dest_addr;
@@ -423,107 +425,123 @@ static void tcp_server_task(void *pvParameters)
 //        inet6_ntoa_r(dest_addr.sin6_addr, addr_str, sizeof(addr_str) - 1);
 //#endif
 
+		int listen_sock = socket(addr_family, SOCK_STREAM, ip_protocol);
+		if (listen_sock < 0) {
+			ESP_LOGE(TAG_TASK_SOCKET, "Unable to create socket: errno %d", errno);
+			break;
+		}
+		ESP_LOGI(TAG_TASK_SOCKET, "Socket created");
 
+		int err = bind(listen_sock, (struct sockaddr*) &dest_addr,
+				sizeof(dest_addr));
+		if (err != 0) {
+			ESP_LOGE(TAG_TASK_SOCKET, "Socket unable to bind: errno %d", errno);
+			break;
+		}
+		ESP_LOGI(TAG_TASK_SOCKET, "Socket bound, port %d", PORT);
 
-        printf("Numero de Socket: %d\r\n", sock_global);
+		err = listen(listen_sock, 1);
+		if (err != 0) {
+			ESP_LOGE(TAG_TASK_SOCKET, "Error occurred during listen: errno %d", errno);
+			break;
+		}
+		ESP_LOGI(TAG_TASK_SOCKET, "Socket listening");
 
-
-        int listen_sock = socket(addr_family, SOCK_STREAM, ip_protocol);
-        if (listen_sock < 0) {
-            ESP_LOGE(TAG, "Unable to create socket: errno %d", errno);
-            break;
-        }
-        ESP_LOGI(TAG, "Socket created");
-
-        int err = bind(listen_sock, (struct sockaddr *)&dest_addr, sizeof(dest_addr));
-        if (err != 0) {
-            ESP_LOGE(TAG, "Socket unable to bind: errno %d", errno);
-            break;
-        }
-        ESP_LOGI(TAG, "Socket bound, port %d", PORT);
-
-        err = listen(listen_sock, 1);
-        if (err != 0) {
-            ESP_LOGE(TAG, "Error occurred during listen: errno %d", errno);
-            break;
-        }
-        ESP_LOGI(TAG, "Socket listening");
-
-        struct sockaddr_in6 source_addr; // Large enough for both IPv4 or IPv6
-        uint addr_len = sizeof(source_addr);
+		struct sockaddr_in6 source_addr; // Large enough for both IPv4 or IPv6
+		uint addr_len = sizeof(source_addr);
 //      int sock = accept(listen_sock, (struct sockaddr *)&source_addr, &addr_len);
 //      int sock_global = accept(listen_sock, (struct sockaddr *)&source_addr, &addr_len);
-        sock_global = accept(listen_sock, (struct sockaddr *)&source_addr, &addr_len);
+		sock_global = accept(listen_sock, (struct sockaddr*) &source_addr,
+				&addr_len);
 
-        printf("Numero de Socket: %d\r\n", sock_global);
+		printf("Numero de Socket: %d\r\n", sock_global);
 
-        if (sock_global < 0) {
-            ESP_LOGE(TAG, "Unable to accept connection: errno %d", errno);
-            break;
-        }
-        ESP_LOGI(TAG, "Socket accepted");
+		if (sock_global < 0) {
+			ESP_LOGE(TAG_TASK_SOCKET, "Unable to accept connection: errno %d", errno);
+			break;
+		}
+		ESP_LOGI(TAG_TASK_SOCKET, "Socket accepted");
 
-        while (1) {
+		while (1) {
 
+			int len = recv(sock_global, rx_buffer, sizeof(rx_buffer) - 1, 0);
 
+			// Error occurred during receiving
+			if (len < 0) {
+				ESP_LOGE(TAG_TASK_SOCKET, "recv failed: errno %d", errno);
+				break;
+			}
+			// Connection closed
+			else if (len == 0) {
+				ESP_LOGI(TAG_TASK_SOCKET, "Connection closed");
+				break;
+			}
+			// Data received
+			else {
+				// Get the sender's ip address as string
+				if (source_addr.sin6_family == PF_INET) {
+					inet_ntoa_r(
+							((struct sockaddr_in*) &source_addr)->sin_addr.s_addr,
+							addr_str, sizeof(addr_str) - 1);
+				} else if (source_addr.sin6_family == PF_INET6) {
+					inet6_ntoa_r(source_addr.sin6_addr, addr_str,
+							sizeof(addr_str) - 1);
+				}
 
-        	int len = recv(sock_global, rx_buffer, sizeof(rx_buffer) - 1, 0);
+				rx_buffer[len] = 0; // Null-terminate whatever we received and treat like a string
+				ESP_LOGI(TAG_TASK_SOCKET, "Received %d bytes from %s:", len, addr_str);
+				ESP_LOGI(TAG_TASK_SOCKET, "%s", rx_buffer);
 
-        	// Error occurred during receiving
-            if (len < 0) {
-                ESP_LOGE(TAG, "recv failed: errno %d", errno);
-                break;
-            }
-            // Connection closed
-            else if (len == 0) {
-                ESP_LOGI(TAG, "Connection closed");
-                break;
-            }
-            // Data received
-            else {
-                // Get the sender's ip address as string
-                if (source_addr.sin6_family == PF_INET) {
-                    inet_ntoa_r(((struct sockaddr_in *)&source_addr)->sin_addr.s_addr, addr_str, sizeof(addr_str) - 1);
-                } else if (source_addr.sin6_family == PF_INET6) {
-                    inet6_ntoa_r(source_addr.sin6_addr, addr_str, sizeof(addr_str) - 1);
-                }
+//				if (processDipCoating.config.status == 0){
+//						c = getchar();
+//
+//						//Para que no devuelva basura por la consola
+//						if (c != 0xFF){
+//
+//							tinysh_char_in(c);
+//								}
+//
+//				}
+//				else {
+//					// si llega algun comando mientras el config.status == 1 lo descarto porque la maquina ya esta realizando alguna accion
+//					c = getchar();
+//
+//				}
 
-                rx_buffer[len] = 0; // Null-terminate whatever we received and treat like a string
-                ESP_LOGI(TAG, "Received %d bytes from %s:", len, addr_str);
-                ESP_LOGI(TAG, "%s", rx_buffer);
+				if (processDipCoating.config.status == 0){
 
-                for (i=0;i<len;i++){
-                tinysh_char_in(rx_buffer[i]);
-                }
-                //Para que  valide lo recibido!
-                tinysh_char_in('\n');
+				for (i = 0; i < len; i++) {
+					tinysh_char_in(rx_buffer[i]);
+				}
+				//Para que  valide lo recibido!
+				tinysh_char_in('\n');
 
-                //test para devolucion de datos -- devuelvo un dato de la estructura del proceso , el index
-               // int err = send(sock_global, rx_buffer, len, 0);
+				//test para devolucion de datos -- devuelvo un dato de la estructura del proceso , el index
+				// int err = send(sock_global, rx_buffer, len, 0);
+				}
+				else tinysh_char_in('\n');
 
+				if (err < 0) {
+				ESP_LOGE(TAG_TASK_SOCKET, "Error occurred during sending: errno %d",errno);
+				break;
+				}
+			}
+		}
 
-                if (err < 0) {
-                    ESP_LOGE(TAG, "Error occurred during sending: errno %d", errno);
-                    break;
-                }
-            }
-        }
+		if (sock_global != -1) {
+			ESP_LOGE(TAG_TASK_SOCKET, "Shutting down socket and restarting...");
+			//shutdown(sock_global, 0);   /*TEST MARTES SOCKET*/
+			close(sock_global); /*TEST MARTES SOCKET*/
 
-        if (sock_global != -1) {
-            ESP_LOGE(TAG, "Shutting down socket and restarting...");
-            //shutdown(sock_global, 0);   /*TEST MARTES SOCKET*/
-            close(sock_global);         /*TEST MARTES SOCKET*/
+			////FIX sacado de internet  https://www.esp32.com/viewtopic.php?t=10335
+			//shutdown(listen_sock,0);  /*TEST MARTES SOCKET*/
+			close(listen_sock);
+			vTaskDelay(10);
 
-            ////FIX sacado de internet  https://www.esp32.com/viewtopic.php?t=10335
-            //shutdown(listen_sock,0);  /*TEST MARTES SOCKET*/
-            close(listen_sock);
-            vTaskDelay(10);
+		}
+	}
 
-        }
-    }
-
-
-    //vTaskDelete(NULL); /*TEST MARTES SOCKET*/
+	//vTaskDelete(NULL); /*TEST MARTES SOCKET*/
 
 }
 
@@ -571,20 +589,20 @@ void xtaskcommand(void *pvParameter) {
 
 
 
-
-
-void monitoring_task(void *pvParameter)
-{
-	for(;;){
-		ESP_LOGI(TAG, "free heap: %d",esp_get_free_heap_size());
-		vTaskDelay( pdMS_TO_TICKS(10000) );
-	}
-}
-
-
 /* brief this is an exemple of a callback that you can setup in your own app to get notified of wifi manager event */
 void cb_connection_ok(void *pvParameter){
-	ESP_LOGI(TAG, "I have a connection!");
+	ESP_LOGI(TAG_TASK_WIFI_MANAGER, "I have a connection!");
+
+
+
+	xTaskCreate(&xtasktinysh, "Tinysh Task", 8192, NULL, 2, NULL);
+	xTaskCreate(&xtaskprocess, "Process Task", 8192, NULL, 2, NULL);
+	xTaskCreate(&xtaskcommand, "Command Task", 8192, NULL, 2, NULL);
+	xTaskCreate(&xtaskmotor, "Process Motor Task", 8192, NULL, 2, NULL);
+	xTaskCreate(&tcp_server_task, "tcp_server Task", 8192, NULL, 2, NULL);
+	xTaskCreate(&xtaskmonitorstatus, "Monitor Status Task", 8192, NULL, 2, NULL);
+	xTaskCreate(&xtaskemergencystop, "Emergency STOP  Task", 8192, NULL, 2, NULL);
+
 }
 
 
@@ -625,13 +643,6 @@ void app_main(void) {
 //	xTaskCreate(&xtaskemergencystop, "Emergency STOP  Task", 1024, NULL, 2, NULL);
 
 
-	xTaskCreate(&xtasktinysh, "Tinysh Task", 8192, NULL, 2, NULL);
-	xTaskCreate(&xtaskprocess, "Process Task", 8192, NULL, 2, NULL);
-	xTaskCreate(&xtaskcommand, "Command Task", 8192, NULL, 2, NULL);
-	xTaskCreate(&xtaskmotor, "Process Motor Task", 8192, NULL, 2, NULL);
-	xTaskCreate(&tcp_server_task, "tcp_server Task", 8192, NULL, 2, NULL);
-	xTaskCreate(&xtaskmonitorstatus, "Monitor Status Task", 8192, NULL, 2, NULL);
-	xTaskCreate(&xtaskemergencystop, "Emergency STOP  Task", 8192, NULL, 2, NULL);
 
 
 }

@@ -305,7 +305,7 @@ int HandlerDown_without_program(processCommandArgSpin_t*	arg) {
 				printf ("STATUS:%d\r\n",processDipCoating.config.status);
 				//sleep(0.1);
 				//sleep(0.5);
-				vTaskDelay(500 / portTICK_RATE_MS);
+				vTaskDelay(0.2 / portTICK_RATE_MS);
 
 			}
 		}
