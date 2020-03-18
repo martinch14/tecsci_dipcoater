@@ -527,7 +527,7 @@ void xtaskemergencystop(void *pvParameter) {
 		vTaskDelay(1000 / portTICK_RATE_MS);
 		ProcessCeroMachineCommand();
 		//Testear el estado de algun pin, deshabilitar driver ,reiniciar dispositivo
-		//vTaskDelete(NULL);
+		vTaskDelete(NULL);
 
 
 }

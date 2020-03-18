@@ -6,9 +6,11 @@
    software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
    CONDITIONS OF ANY KIND, either express or implied.
 */
-#include <string.h>
+
 #include <sys/param.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp_system.h"
@@ -24,17 +26,190 @@
 #include "lwip/sys.h"
 #include <lwip/netdb.h>
 
+#include "cJSON.h"
+#include "cJSON_Utils.h"
+
 
 #define PORT CONFIG_EXAMPLE_PORT
 
+
+
+/* Used by some code below as an example datatype. */
+//struct dipcommand
+//{
+//    const char *comando;
+//    float aceleracion;
+//    float velocidad;
+//    float desplazamiento;
+//    const char *address;
+//    const char *city;
+//    const char *state;
+//    const char *zip;
+//    const char *country;
+//};
+
+
+
+
 static const char *TAG = "example";
 static const char *TAG_TEST = "example task test";
+
+
+
+
+
+/* Used by some code below as an example datatype. */
+struct dipstructjson
+{
+	const char *name_command;
+    int  number_command;
+    int velocity;
+    int aceleration;
+    int displacement;
+};
+
+
+///* Create a bunch of objects as demonstration. */
+//static int print_preallocated(cJSON *root)
+//{
+//    /* declarations */
+//    char *out = NULL;
+//    char *buf = NULL;
+//    char *buf_fail = NULL;
+//    size_t len = 0;
+//    size_t len_fail = 0;
+//
+//    /* formatted print */
+//    out = cJSON_Print(root);
+//
+//    /* create buffer to succeed */
+//    /* the extra 5 bytes are because of inaccuracies when reserving memory */
+//    len = strlen(out) + 5;
+//    buf = (char*)malloc(len);
+//    if (buf == NULL)
+//    {
+//        printf("Failed to allocate memory.\n");
+//        exit(1);
+//    }
+//
+//    /* create buffer to fail */
+//    len_fail = strlen(out);
+//    buf_fail = (char*)malloc(len_fail);
+//    if (buf_fail == NULL)
+//    {
+//        printf("Failed to allocate memory.\n");
+//        exit(1);
+//    }
+//
+//    /* Print to buffer */
+//    if (!cJSON_PrintPreallocated(root, buf, (int)len, 1)) {
+//        printf("cJSON_PrintPreallocated failed!\n");
+//        if (strcmp(out, buf) != 0) {
+//            printf("cJSON_PrintPreallocated not the same as cJSON_Print!\n");
+//            printf("cJSON_Print result:\n%s\n", out);
+//            printf("cJSON_PrintPreallocated result:\n%s\n", buf);
+//        }
+//        free(out);
+//        free(buf_fail);
+//        free(buf);
+//        return -1;
+//    }
+//
+//    /* success */
+//    printf("%s\n", buf);
+//
+//    /* force it to fail */
+//    if (cJSON_PrintPreallocated(root, buf_fail, (int)len_fail, 1)) {
+//        printf("cJSON_PrintPreallocated failed to show error with insufficient memory!\n");
+//        printf("cJSON_Print result:\n%s\n", out);
+//        printf("cJSON_PrintPreallocated result:\n%s\n", buf_fail);
+//        free(out);
+//        free(buf_fail);
+//        free(buf);
+//        return -1;
+//    }
+//
+//    free(out);
+//    free(buf_fail);
+//    free(buf);
+//    return 0;
+//}
+
+/* Create a bunch of objects as demonstration. */
+static void create_objects(void)
+{
+
+	cJSON *root = NULL;
+	cJSON *item = NULL;
+	char *out = NULL;
+	char *test = NULL;
+
+	struct dipstructjson  field = {
+		.name_command = "LOADPROGRAMSTANDARD",
+		.number_command = 12,
+		.velocity = 323232323,
+		.aceleration= 22212,
+		.displacement= 32232
+	};
+
+
+	struct dipstructjson  data_receive = {
+		.name_command = "CACA",
+		.number_command = 0,
+		.velocity= 998989,
+		.aceleration= 77777,
+		.displacement= 354
+	};
+
+	root = cJSON_CreateObject();
+
+    cJSON_AddStringToObject(root, "Name Command", field.name_command);
+    cJSON_AddNumberToObject(root, "Number Command",field.number_command);
+    cJSON_AddNumberToObject(root, "Velocity",field.velocity);
+    cJSON_AddNumberToObject(root, "Aceleration",field.aceleration);
+    cJSON_AddNumberToObject(root, "Displacement",field.displacement);
+
+    out = cJSON_Print(root);
+    printf("%s\r\n", out);    //-> Funciona
+
+
+    item = cJSON_Parse(out);
+
+
+    data_receive.aceleration= (int) cJSON_GetObjectItem(item, "Aceleration")->valueint;
+
+    printf("velocidad  -> %d!! \r\n",data_receive.velocity);
+    printf("aceleracion recibida por JSON -> %d !!\r\n",data_receive.aceleration);
+
+    printf("nombre comando  ori  -> %s !!\r\n",data_receive.name_command);
+    data_receive.name_command=(char *)cJSON_GetObjectItem(item, "Name Command")->valuestring;
+    printf("nombre comando  recibida por JSON -> %s !!\r\n",data_receive.name_command);
+
+//    printf("%s\r\n", test);
+
+
+    cJSON_Delete(root);
+    cJSON_Delete(item);
+
+    free(out);
+    free(test);
+
+}
+
+
+
 static void test_task(void *pvParameters){
 
 	while (1){
 
 		 ESP_LOGE(TAG_TEST, "Ejecuto tarea test!");
-		 vTaskDelay(2000 / portTICK_RATE_MS);
+		 /* print the version */
+		 printf("Version: %s\n", cJSON_Version());
+
+		 /* Now some samplecode for building objects concisely: */
+		 create_objects();
+
+		 vTaskDelay(5000 / portTICK_RATE_MS);
 	}
 
 }

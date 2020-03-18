@@ -28,9 +28,9 @@ typedef struct {
 } processCommandArg4Int32_t;
 
 typedef struct {
-	int velocity;
-	int acceleration;
-	int displacement_z;
+	uint32_t velocity;
+	uint32_t acceleration;
+	uint32_t displacement_z;
 
 } processCommandArgSpin_t;
 

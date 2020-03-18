@@ -187,9 +187,9 @@ spi_device_handle_t tmc_spi_init()
 			//.max_transfer_sz=16376
 	};
 	spi_device_interface_config_t devcfg={
-			//.clock_speed_hz=100000,
+			.clock_speed_hz=100000,
 			//.clock_speed_hz=2000000,
-			.clock_speed_hz=4000000,
+			//.clock_speed_hz=4000000,
 			.mode=3,                            //SPI mode 3
 			.spics_io_num=15,       			//CS pin
 			.queue_size=1                       //We want to be able to queue 7 transactions at a time

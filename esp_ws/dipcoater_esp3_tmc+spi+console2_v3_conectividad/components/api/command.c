@@ -209,21 +209,33 @@ void CommandCEROMACHINEHandler(int argc, char **argv){
 	//ProcessCeroMachineCommand();
 	processCommand_t aux_process_comand;
 	aux_process_comand.commandnumber= PROCESS_COMMAND_CERO_MACHINE;
-	modQueue_Write(&queueconsolareception, &aux_process_comand);
-}
+
+		if (processDipCoating.config.status == 0){
+			modQueue_Write(&queueconsolareception, &aux_process_comand);
+		}
+		else printf("Ejecutando, comando descartado!\r\n");
+
+	}
 
 /*RUN PROCESS HANDLER*/
 
 /*Handler to RUn the LOADED process,
  * turn on the RUN flag to RUN*/
 void CommandRUNHandler(int argc, char **argv){
-	entry=RUN;
+
 	printf("\r\n");
-//	ProcessRunCommand();
 	processCommand_t aux_process_comand;
 	aux_process_comand.commandnumber= PROCESS_COMMAND_RUN;
-	modQueue_Write(&queueconsolareception, &aux_process_comand);
 
+		if (processDipCoating.config.status == 0){
+			modQueue_Write(&queueconsolareception, &aux_process_comand);
+			entry=RUN;
+		}
+		else {
+
+			printf("Ejecutando, comando descartado!\r\n");
+			entry=STOP;
+		}
 }
 
 /*SINGLE MOVEMENT HANDLERS*/
@@ -233,30 +245,40 @@ void CommandUPFASTHandler(int argc, char **argv) {
 //	ProcessUpFastCommand();
 	processCommand_t aux_process_comand;
 	aux_process_comand.commandnumber= PROCESS_COMMAND_UPFAST;
-	modQueue_Write(&queueconsolareception, &aux_process_comand);
+
+	if (processDipCoating.config.status == 0){
+		modQueue_Write(&queueconsolareception, &aux_process_comand);
+	}
+	else printf("Ejecutando, comando descartado!\r\n");
 
 }
 
 void CommandUPHandler(int argc, char **argv) {
-	printf("\r\n");
 //	ProcessUpCommand();
 	processCommand_t aux_process_comand;
 	aux_process_comand.commandnumber= PROCESS_COMMAND_UP;
-	modQueue_Write(&queueconsolareception, &aux_process_comand);
+
+	if (processDipCoating.config.status == 0){
+		modQueue_Write(&queueconsolareception, &aux_process_comand);
+	}
+	else printf("Ejecutando, comando descartado!\r\n");
 
 }
 
 void CommandUPSLOWHandler(int argc, char **argv) {
-	printf("\r\n");
+
 //	ProcessUpSlowCommand();
 	processCommand_t aux_process_comand;
 	aux_process_comand.commandnumber= PROCESS_COMMAND_UPSLOW;
-	modQueue_Write(&queueconsolareception, &aux_process_comand);
+
+	if (processDipCoating.config.status == 0){
+		modQueue_Write(&queueconsolareception, &aux_process_comand);
+	}
+	else printf("Ejecutando, comando descartado!\r\n");
 
 }
 
 void CommandDOWNFASTHandler(int argc, char **argv) {
-	printf("\r\n");
 	processCommand_t aux_process_comand;
 	/*
 	 * comando nuevo
@@ -267,16 +289,22 @@ void CommandDOWNFASTHandler(int argc, char **argv) {
 	/* escribir en cola  */
 
 	aux_process_comand.commandnumber= PROCESS_COMMAND_DOWNFAST;
-	modQueue_Write(&queueconsolareception, &aux_process_comand);
 
+	if (processDipCoating.config.status == 0){
+		modQueue_Write(&queueconsolareception, &aux_process_comand);
+	}
+	else printf("Ejecutando, comando descartado!\r\n");
 	//ProcessDownFastCommand();
 }
 
 void CommandDOWNHandler(int argc, char **argv) {
 	processCommand_t aux_process_comand;
 	aux_process_comand.commandnumber= PROCESS_COMMAND_DOWN;
-	modQueue_Write(&queueconsolareception, &aux_process_comand);
-	printf("\r\n");
+
+	if (processDipCoating.config.status == 0){
+		modQueue_Write(&queueconsolareception, &aux_process_comand);
+	}
+	else printf("Ejecutando, comando descartado!\r\n");
 
 //	ProcessDownCommand();
 }
@@ -284,8 +312,12 @@ void CommandDOWNHandler(int argc, char **argv) {
 void CommandDOWNSLOWHandler(int argc, char **argv) {
 	processCommand_t aux_process_comand;
 	aux_process_comand.commandnumber= PROCESS_COMMAND_DOWNSLOW;
-	modQueue_Write(&queueconsolareception, &aux_process_comand);
-	printf("\r\n");
+
+
+	if (processDipCoating.config.status == 0){
+		modQueue_Write(&queueconsolareception, &aux_process_comand);
+	}
+	else printf("Ejecutando, comando descartado!\r\n");
 //	ProcessDownSlowCommand();
 }
 
@@ -293,36 +325,73 @@ void CommandDOWNSLOWHandler(int argc, char **argv) {
 
 //VER ESTE COMANDO EN PARTICULAR
 void CommandSTOPHandler(int argc, char **argv) {
-	printf("\r\n");
 //	ProcessStopCommand();
+	int32_t lectura;
 	processCommand_t aux_process_comand;
 	aux_process_comand.commandnumber= PROCESS_COMMAND_STOP;
-	modQueue_Write(&queueconsolareception, &aux_process_comand);
+
+//	if (processDipCoating.config.status == 1){
+//		printf("antes de enviar STOP Command a cola\r\n ");
+//		modQueue_Write(&queueconsolareception, &aux_process_comand);
+//		printf("luego de enviar STOP Command a cola\r\n ");
+		//deberia deshabilitar el driver y parar el proceso si se esta ejecutando
+		//}
+	//else printf("Ejecutando, comando descartado!\r\n");
+	Evalboards.ch1.enableDriver(DRIVER_DISABLE);
+	processDipCoating.config.status=0;
+	processDipCoating.state.commandActualIndex = MAX_ESTATIC_COMMAND;
+
+	Evalboards.ch1.readRegister(0, 0x21, &lectura);
+	Evalboards.ch1.writeRegister(0, 0x26, 0x00000000 );
+	Evalboards.ch1.writeRegister(0, 0x27, 0x00000000 );
+
+
+	Evalboards.ch1.writeRegister(0, 0x21, lectura);
+	Evalboards.ch1.writeRegister(0, 0x2D, lectura);
+
+
+
+
 }
 
 
 void CommandREADDATAHandler(int argc, char **argv) {
-	printf("\r\n");
 //	ProcessREADDATACommand();
 	processCommand_t aux_process_comand;
 	aux_process_comand.commandnumber= PROCESS_COMMAND_READDATA;
-	modQueue_Write(&queueconsolareception, &aux_process_comand);
+
+	if (processDipCoating.config.status == 0){
+		modQueue_Write(&queueconsolareception, &aux_process_comand);
+	}
+	else printf("Ejecutando, comando descartado!\r\n");
+
+
 }
 
 void CommandENA_DRIVERHandler(int argc, char **argv) {
-	printf("\r\n");
+
 //	ProcessENA_DRIVERCommand();
 	processCommand_t aux_process_comand;
 	aux_process_comand.commandnumber= PROCESS_COMMAND_ENA_DRIVER;
-	modQueue_Write(&queueconsolareception, &aux_process_comand);
+
+	if (processDipCoating.config.status == 0){
+		modQueue_Write(&queueconsolareception, &aux_process_comand);
+	}
+	else printf("Ejecutando, comando descartado!\r\n");
+
 }
 
 void CommandDIS_DRIVERHandler(int argc, char **argv) {
-	printf("\r\n");
+
 //	ProcessDIS_DRIVERCommand();
 	processCommand_t aux_process_comand;
-	aux_process_comand.commandnumber= PROCESS_COMMAND_DIS_DRIVER;
-	modQueue_Write(&queueconsolareception, &aux_process_comand);
+	aux_process_comand.commandnumber = PROCESS_COMMAND_DIS_DRIVER;
+
+	if (processDipCoating.config.status == 0) {
+		modQueue_Write(&queueconsolareception, &aux_process_comand);
+	} else
+		printf("Ejecutando, comando descartado!\r\n");
+
 }
 
 

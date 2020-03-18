@@ -67,13 +67,13 @@ processCommand_t cmdProcessCustom[MAX_ESTATIC_COMMAND] = {
 		/*Al setear el custom program arrancamos desde el comando numero 0*/
 
 //		{ .commandnumber = PROCESS_COMMAND_CERO_MACHINE,.argument.spin.velocity = 200000,	.argument.spin.acceleration = 20000, .fpcommandhandler = HandlerCeroMachine },
-		{ .commandnumber = PROCESS_COMMAND_DOWN, 		.argument.spin.velocity = 400000,	.argument.spin.acceleration = 40000 , .fpcommandhandler = HandlerDown },
-		{ .commandnumber = PROCESS_COMMAND_WAIT, 		.argument.spin.velocity = 0,	.argument.spin.acceleration = 0 , .fpcommandhandler = HandlerWait},
+		{ .commandnumber = PROCESS_COMMAND_DOWN, 		.argument.spin.velocity = 400000,	.argument.spin.acceleration = 40000 , 	.fpcommandhandler = HandlerDown },
+		{ .commandnumber = PROCESS_COMMAND_WAIT, 		.argument.wait.time = 0,												  	.fpcommandhandler = HandlerWait},
 		/*start of the DWUW cycle*/
-		{ .commandnumber = PROCESS_COMMAND_DOWN, 		.argument.spin.velocity = 400000,	.argument.spin.acceleration = 40000 , .fpcommandhandler = HandlerDownLoop },
-		{ .commandnumber = PROCESS_COMMAND_WAIT, 		.argument.spin.velocity = 0,	.argument.spin.acceleration = 0 , .fpcommandhandler = HandlerWait },
-		{ .commandnumber = PROCESS_COMMAND_UP, 			.argument.spin.velocity = 400000,	.argument.spin.acceleration = 40000 , .fpcommandhandler = HandlerUpLoop },
-		{ .commandnumber = PROCESS_COMMAND_WAIT, 		.argument.spin.velocity = 0,	.argument.spin.acceleration = 0 , .fpcommandhandler = HandlerWait },
+		{ .commandnumber = PROCESS_COMMAND_DOWN, 		.argument.spin.velocity = 400000,	.argument.spin.acceleration = 40000 , 	.fpcommandhandler = HandlerDownLoop },
+		{ .commandnumber = PROCESS_COMMAND_WAIT, 		.argument.wait.time = 0,													.fpcommandhandler = HandlerWaitDown },
+		{ .commandnumber = PROCESS_COMMAND_UP, 			.argument.spin.velocity = 400000,	.argument.spin.acceleration = 40000 , 	.fpcommandhandler = HandlerUpLoop },
+		{ .commandnumber = PROCESS_COMMAND_WAIT, 		.argument.wait.time = 0,													.fpcommandhandler = HandlerWaitUp },
 		/*LOOP repeats N times the DWUW cycle */
 		{ .commandnumber =  PROCESS_COMMAND_LOOP, 		.argument.value.val = 0 },
 

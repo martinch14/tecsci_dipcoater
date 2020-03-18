@@ -120,6 +120,8 @@ int HandlerCeroMachine(processCommandArgSpin_t *arg) {
 	// Seteo aceleracion y velocidad
 	Evalboards.ch1.writeRegister(0, 0x26,  arg->acceleration);
 	Evalboards.ch1.writeRegister(0, 0x27, arg->velocity);
+	// Seteo desaceleracion
+	Evalboards.ch1.writeRegister(0, 0x28,  arg->acceleration);
 
 
 	//Detecto flag de stallguard
@@ -208,6 +210,9 @@ int HandlerUp(processCommandArgSpin_t*	arg) {
 	Evalboards.ch1.writeRegister(0, 0x26,  arg->acceleration);
 	Evalboards.ch1.writeRegister(0, 0x27, arg->velocity);
 
+	// Seteo desaceleracion
+	Evalboards.ch1.writeRegister(0, 0x28,  arg->acceleration);
+
 	//Una vez detectado el cero realizo un movimiento fijo con 512000 pasos hacia abajo, detecto el flag que detecta XACTUAL=XTARGET
 	while (1) {
 
@@ -245,6 +250,9 @@ int HandlerUp_without_program(processCommandArgSpin_t*	arg) {
 	// Seteo aceleracion y velocidad
 	Evalboards.ch1.writeRegister(0, 0x26,  arg->acceleration);
 	Evalboards.ch1.writeRegister(0, 0x27, arg->velocity);
+
+	// Seteo desaceleracion
+	Evalboards.ch1.writeRegister(0, 0x28,  arg->acceleration);
 
 
 	// Seteo de registro XTARGET
@@ -287,6 +295,9 @@ int HandlerDown_without_program(processCommandArgSpin_t*	arg) {
 	// Seteo aceleracion y velocidad
 	Evalboards.ch1.writeRegister(0, 0x26,  arg->acceleration);
 	Evalboards.ch1.writeRegister(0, 0x27, arg->velocity);
+
+	// Seteo desaceleracion
+	Evalboards.ch1.writeRegister(0, 0x28,  arg->acceleration);
 
 	// Seteo de registro XTARGET
 	Evalboards.ch1.writeRegister(0, 0x2D, lectura + arg->displacement_z );
@@ -342,6 +353,9 @@ int HandlerDown(processCommandArgSpin_t*	arg) {
 	Evalboards.ch1.writeRegister(0, 0x26,  arg->acceleration);
 	Evalboards.ch1.writeRegister(0, 0x27, arg->velocity);
 
+	// Seteo desaceleracion
+	Evalboards.ch1.writeRegister(0, 0x28,  arg->acceleration);
+
 	//Una vez detectado el cero realizo un movimiento fijo con 512000 pasos hacia abajo, detecto el flag que detecta XACTUAL=XTARGET
 	while (1) {
 
@@ -375,6 +389,9 @@ int HandlerDownLoop(processCommandArgSpin_t*	arg) {
 	// Seteo aceleracion y velocidad
 	Evalboards.ch1.writeRegister(0, 0x26,  arg->acceleration);
 	Evalboards.ch1.writeRegister(0, 0x27, arg->velocity);
+
+	//desaceleracion
+	Evalboards.ch1.writeRegister(0, 0x28,  arg->acceleration);
 
 	// Seteo de registro XTARGET
 	Evalboards.ch1.writeRegister(0, 0x2D, lectura + processDipCoating.config.displacement_delta_sample  );
@@ -412,6 +429,10 @@ int HandlerUpLoop(processCommandArgSpin_t*	arg) {
 	Evalboards.ch1.writeRegister(0, 0x26,  arg->acceleration);
 	Evalboards.ch1.writeRegister(0, 0x27, arg->velocity);
 
+	//desaceleracion
+	Evalboards.ch1.writeRegister(0, 0x28,  arg->acceleration);
+
+
 	// Seteo de registro XTARGET
 	Evalboards.ch1.writeRegister(0, 0x2D, lectura - processDipCoating.config.displacement_delta_sample  );
 
@@ -436,9 +457,28 @@ int HandlerUpLoop(processCommandArgSpin_t*	arg) {
 int HandlerWait(processCommandArgSpin_t*	arg) {
 	printf("Muestra en espera!!\r\n");
 //	Evalboards.ch1.rotate(0,0x00000000); // writing value 0x00000000 = 0 = 0.0 to address 18 = 0x2C(TZEROWAIT)
+
 	sleep(2);
 	return 0;
 }
+
+int HandlerWaitDown(processCommandArgSpin_t*	arg) {
+	printf("Muestra en espera!!\r\n");
+//	Evalboards.ch1.rotate(0,0x00000000); // writing value 0x00000000 = 0 = 0.0 to address 18 = 0x2C(TZEROWAIT)
+
+	sleep(processDipCoating.command[3].argument.wait.time);
+	return 0;
+}
+
+
+int HandlerWaitUp(processCommandArgSpin_t*	arg) {
+	printf("Muestra en espera!!\r\n");
+//	Evalboards.ch1.rotate(0,0x00000000); // writing value 0x00000000 = 0 = 0.0 to address 18 = 0x2C(TZEROWAIT)
+
+	sleep(processDipCoating.command[5].argument.wait.time);
+	return 0;
+}
+
 
 int HandlerRun() {
 
@@ -473,26 +513,41 @@ int HandlerFinish(processCommandArgSpin_t*	arg) {
 int HandlerREADDATA() {
 
 	int32_t lectura1,lectura2, i;
-//	float cuenta=0;
-//
-//	Evalboards.ch1.readRegister(0,0x21,&lectura1);
-//	printf("VALOR XACTUAL (t1) :%d\r\n",lectura1);
-//	Evalboards.ch1.writeRegister(0, 0x26,  60000);
-//	Evalboards.ch1.writeRegister(0, 0x27, 10000);
-//	Evalboards.ch1.rotate(0,10000);
-//	sleep(0.5);
-//	Evalboards.ch1.readRegister(0,0x21,&lectura2);
-//	Evalboards.ch1.writeRegister(0, 0x27, 0);
-//	Evalboards.ch1.rotate(0,0);
-//
-//	printf("VALOR XACTUAL (t2) :%d\r\n",lectura2);
-//
-//	cuenta=(10000*0.5)/(lectura2-lectura1);
-//	printf("El factor de escala es -> %f\r\n",cuenta);
 
-	for (i=0; i<8 ;i++){
-		printf( "%d %d %d %d \r\n" ,processDipCoating.command[i].commandnumber,processDipCoating.command[i].argument.spin.velocity ,processDipCoating.command[i].argument.spin.acceleration,processDipCoating.command[i].argument.spin.displacement_z  );
-	}
+	int32_t lectura;
+
+//	for (i=0; i<8 ;i++){
+//		printf( "%d %d %d %d \r\n" ,processDipCoating.command[i].commandnumber,processDipCoating.command[i].argument.spin.velocity ,processDipCoating.command[i].argument.spin.acceleration,processDipCoating.command[i].argument.spin.displacement_z  );
+//	}
+	Evalboards.ch1.enableDriver(DRIVER_ENABLE);
+
+	//Leo Actual
+
+	Evalboards.ch1.readRegister(0, 0x21, &lectura);
+	printf("Posicion inicial%d\r\n",lectura);
+
+	// Seteo aceleracion y velocidad
+	Evalboards.ch1.writeRegister(0, 0x26,  60000);
+	Evalboards.ch1.writeRegister(0, 0x27, 100000);
+
+	// Seteo desaceleracion
+	Evalboards.ch1.writeRegister(0, 0x28,  60000);
+
+
+
+	// Seteo de registro XTARGET
+	Evalboards.ch1.writeRegister(0, 0x2D, lectura + 1273722 );
+
+	sleep(2);
+
+
+	Evalboards.ch1.readRegister(0, 0x21, &lectura);
+	Evalboards.ch1.writeRegister(0, 0x2D, lectura );
+	printf("Posicion final%d\r\n",lectura);
+
+	Evalboards.ch1.enableDriver(DRIVER_DISABLE);
+
+
 
 
 	return 0;

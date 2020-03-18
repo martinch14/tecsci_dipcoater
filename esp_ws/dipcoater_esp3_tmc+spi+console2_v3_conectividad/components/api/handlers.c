@@ -50,19 +50,31 @@ extern int sock_global;
 #define  K_DEZPLAZAMIENTO_LINEAL   0.00007851   //  78.51E-6
 
 // Constante de diferencia de velocidad debido a que no esta el clk de 16MHZ externo en nuestro diseño
-
 #define K_VELOCIDAD  1.34
 
 
-
-// Constante de convesion de velocidad y desplazamineto   de mm/s a o mm/min    -> pasos
-
+//Funcion que limita los dezplazamientos fuera de la zona segura de trabajo    en TOP   5 mm en botton algunos cm
+uint8_t controlLimit(void){
+	int32_t lectura;
+	Evalboards.ch1.readRegister(0, 0x21, &lectura);
+		if (lectura  <  0x0000F8C6  ){
+				Evalboards.ch1.enableDriver(DRIVER_DISABLE);
+				ProcessCeroMachineCommand();
+				return 1;
+			}
+		else if ( lectura > 0x003E3186){
+				Evalboards.ch1.enableDriver(DRIVER_DISABLE);
+				ProcessCeroMachineCommand();
+				return 1;
+			}
+		else return 0;
+}
 
 
 //Handler Functions
 int HandlerCeroMachine(processCommandArgSpin_t *arg) {
 
-	int32_t lectura;
+	int32_t lectura, lecturaActualTarget;
 
 	printf("Buscando Cero Machine!!\t");
 	printf("velocidad:%d\t", arg->velocity);
@@ -128,7 +140,8 @@ int HandlerCeroMachine(processCommandArgSpin_t *arg) {
 	while (1) {
 
 		Evalboards.ch1.readRegister(0, TMC5130_RAMPSTAT, &lectura);
-		printf("Posicion RAMPSTAT :%x\r\n", lectura);
+		Evalboards.ch1.readRegister(0, 0x21, &lecturaActualTarget);
+		printf("Posicion ActualTarget: :%d\r\n", lecturaActualTarget);
 
 		if (lectura & 0x0000040) {
 
@@ -256,8 +269,10 @@ int HandlerUp_without_program(processCommandArgSpin_t*	arg) {
 			Evalboards.ch1.enableDriver(DRIVER_DISABLE);
 			break;
 		}
-		else
-			sleep(0.1);
+		else{
+			if (controlLimit())break;
+			else sleep(0.1);
+		}
 	}
 
 	processDipCoating.config.status=0;
@@ -294,7 +309,7 @@ int HandlerDown_without_program(processCommandArgSpin_t*	arg) {
 	Evalboards.ch1.writeRegister(0, 0x2D, lectura + arg->displacement_z );
 
 	// Detecto el flag que detecta XACTUAL=XTARGET y apago driver
-		while (1) {
+		while (processDipCoating.config.status) {
 
 			Evalboards.ch1.readRegister(0, TMC5130_RAMPSTAT, &lectura);
 			if (lectura & 0x00000200){
@@ -302,11 +317,14 @@ int HandlerDown_without_program(processCommandArgSpin_t*	arg) {
 				break;
 			}
 			else{
-				printf ("STATUS:%d\r\n",processDipCoating.config.status);
+				//printf ("STATUS:%d\r\n",processDipCoating.config.status);
 				//sleep(0.1);
-				//sleep(0.5);
-				vTaskDelay(0.2 / portTICK_RATE_MS);
 
+				if (controlLimit())break;
+				else sleep(0.1);
+
+				//sleep(0.5);
+				//vTaskDelay(0.2 / portTICK_RATE_MS);
 			}
 		}
 
@@ -400,6 +418,9 @@ int HandlerDownLoop(processCommandArgSpin_t*	arg) {
 
 }
 
+
+//Subida dentro del proceso de ejecucion de programas
+
 int HandlerUpLoop(processCommandArgSpin_t*	arg) {
 
 
@@ -481,9 +502,11 @@ int HandlerStop(processCommandArgSpin_t*	arg) {
 	printf("velocidad:%d\t",arg->velocity);
 	printf("aceleracion:%d\r\n",arg->acceleration);
 
+	printf("handler STOP Command a cola\r\n ");
 	// Seteo aceleracion y velocidad en cero
 	Evalboards.ch1.writeRegister(0, 0x26,  arg->acceleration);
 	Evalboards.ch1.writeRegister(0, 0x27, arg->velocity);
+	Evalboards.ch1.enableDriver(DRIVER_DISABLE);
 
 	return 0;
 }
@@ -511,6 +534,13 @@ int HandlerREADDATA() {
 	printf ("CERO_SAMPLE:%d\r\n",processDipCoating.config.displacement_to_sample);
 	printf ("STATUS:%d\r\n",processDipCoating.config.status);
 
+	//Leo Actual
+
+	Evalboards.ch1.readRegister(0, 0x21, &lectura);
+	printf("Posicion ACTUAL TARGET:%d\r\n", lectura);
+
+	Evalboards.ch1.readRegister(0, 0x2D, &lectura);
+	printf("Posicion  XTARGET:%d\r\n", lectura);
 
 
 //	Evalboards.ch1.enableDriver(DRIVER_ENABLE);

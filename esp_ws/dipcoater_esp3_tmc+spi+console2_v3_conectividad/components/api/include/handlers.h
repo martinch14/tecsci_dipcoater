@@ -40,5 +40,8 @@ int HandlerDELTADIP();
 //Handler para realizar TESTS
 int HandlerREADDATA();
 
+uint8_t controlLimit(void);
+
+
 
 #endif /* COMPONENTS_API_INCLUDE_HANDLERS_H_ */

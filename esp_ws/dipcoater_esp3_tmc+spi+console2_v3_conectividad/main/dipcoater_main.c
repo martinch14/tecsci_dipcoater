@@ -48,27 +48,18 @@
 #include "include/app_main_dipcoater.h"
 
 
-
-
 /*TODO    BUGS
  * LOADPROGRAMSTANDARD    se tiene q cargar antes de SETSTANDARDPROGRAM para que se pueda ejecutar
- * COMANDO STOP O FINISH  VER DE DARLE MAS PRIORIDAD PARA QUE SE EJECUTEN SIN ESPERAR A QUE TERMINE EL CICLO DE TRABAJO
- * -->>>  EN COMANDO STOP AUMENTAR EL INDEX HASTA 10
- *
  * Al ingresar el comando setstandarprogram verificar que ingrese  un argumento con el loop
- *
  *
  *
  * revisar CUSTOM ALL
  * multiplicacion x constantes de desplazamiento
  * json
  * carga de comando wait
- * hacer una maquina de estado para customprogram y customprogramall
  *
- *VER /home/martin/Programas/esp/esp-idf/examples/provisioning/softap_prov
+ * COMANDO STOP CUANDO SE ESTA EJECUTANDO EL PROCESO -> (SE DEBERIA REINICIAR EL PROCESO)
  *
- *
- *VER: porque no lo toma del archivo sdkconfig
  * */
 
 
@@ -132,14 +123,6 @@ static tinysh_cmd_t commandCERO_SAMPLE = 					{NULL,"CERO_SAMPLE", NULL, NULL, C
 static tinysh_cmd_t commandDELTADIP = 					{NULL,"DELTADIP", NULL, NULL, CommandDELTADIPHandler, NULL, NULL, NULL};
 
 
-
-//ENVIROMENTAL CHAMBER:
-//	static tinysh_cmd_t commandSETRH = 						{NULL,"SETRH", NULL, NULL, CommandSETRHHandler, NULL, NULL, NULL};
-//	static tinysh_cmd_t commandSETTEMP = 					{NULL,"SETTEMP", NULL, NULL, CommandSETTEMPHandler, NULL, NULL, NULL};
-//	static tinysh_cmd_t commandACTIVATEENVIROMENTALCHAMBER ={NULL,"ACTIVATEENVIROMENTALCHAMBER", NULL, NULL, CommandACTIVATEENVIROMENTALCHAMBERHandler, NULL, NULL, NULL};
-//	static tinysh_cmd_t commandDEACTIVATEENVIROMENTALCHAMBER ={NULL,"DEACTIVATEENVIROMENTALCHAMBER", NULL, NULL, CommandDEACTIVATEENVIROMENTALCHAMBERHandler, NULL, NULL, NULL};
-
-
 void xtaskprocess(void *pvParameter) {
 
 	ProcessInit(&processDipCoating);
@@ -147,15 +130,7 @@ void xtaskprocess(void *pvParameter) {
 
 	while (1) {
 
-		/* leo la cola de comandos
-		 * comand = read(cola)
-		 * numero_comando = comand.head.number
-		 * handler = arrayJanlder[numero_comando];
-		 * handler(&comand)
-		 *
-		 * */
-
-		if (entry == RUN) {
+		if (entry == RUN ) {
 			processDipCoating.config.status=1;
 			ProcessRun(&processDipCoating);
 			entry = STOP;
@@ -167,7 +142,6 @@ void xtaskprocess(void *pvParameter) {
 
 void xtasktinysh(void *pvParameter) {
 
-//	static char c = 0;
 	char c = 0;
 	tinysh_init();
 	//queue initialization
@@ -187,8 +161,6 @@ void xtasktinysh(void *pvParameter) {
 
 	tinysh_add_command(&commandSETSTANDARDPROGRAM);
 	tinysh_add_command(&commandSETALLCUSTOMPROGRAM);
-//	tinysh_add_command(&commandCLEANPROGRAMDINAMIC);
-//	tinysh_add_command(&commandADDSETALLCOMANDDINAMIC);
 	tinysh_add_command(&commandRUN);
 	tinysh_add_command(&commandCERO_MACHINE);
 	tinysh_add_command(&commandUPFAST);
@@ -207,29 +179,12 @@ void xtasktinysh(void *pvParameter) {
 	tinysh_add_command(&commandCERO_SAMPLE);
 	tinysh_add_command(&commandDELTADIP);
 
-//	tinysh_add_command(&commandSETRH);
-//	tinysh_add_command(&commandSETTEMP);
-//	tinysh_add_command(&commandACTIVATEENVIROMENTALCHAMBER);
-//	tinysh_add_command(&commandDEACTIVATEENVIROMENTALCHAMBER);
-
-
 	while (1) {
-
-		if (processDipCoating.config.status == 0){
 				c = getchar();
-
 				//Para que no devuelva basura por la consola
 				if (c != 0xFF){
-
 					tinysh_char_in(c);
-						}
-
-		}
-		else {
-			// si llega algun comando mientras el config.status == 1 lo descarto porque la maquina ya esta realizando alguna accion
-			c = getchar();
-
-		}
+				}
 		vTaskDelay(100 / portTICK_RATE_MS);
 	}
 }
@@ -247,52 +202,6 @@ void xtaskmotor(void *pvParameter) {
 	vTaskDelay(250 / portTICK_RATE_MS);
 	Evalboards.ch1.enableDriver(DRIVER_ENABLE);
 	vTaskDelay(250 / portTICK_RATE_MS);
-
-
-//	Evalboards.ch1.writeRegister(0,0x00, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 0 = 0x00(GCONF)
-//	Evalboards.ch1.writeRegister(0,0x03, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 1 = 0x03(SLAVECONF)
-//	Evalboards.ch1.writeRegister(0,0x05, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 2 = 0x05(X_COMPARE)
-//	Evalboards.ch1.writeRegister(0,0x10, 	0x00070500); 		// writing value 0x00070500 = 460032 = 0.0 to address 3 = 0x10(IHOLD_IRUN)
-//	Evalboards.ch1.writeRegister(0,0x11, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 4 = 0x11(TPOWERDOWN)
-//	Evalboards.ch1.writeRegister(0,0x13, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 5 = 0x13(TPWMTHRS)
-//	Evalboards.ch1.writeRegister(0,0x14, 	0x0000068D); 		// writing value 0x0000068D = 1677 = 0.0 to address 6 = 0x14(TCOOLTHRS)
-//	Evalboards.ch1.writeRegister(0,0x15, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 7 = 0x15(THIGH)
-//	Evalboards.ch1.writeRegister(0,0x20, 	0x00000000); 		// writing value 0x00000001 = 1 = 0.0 to address 8 = 0x20(RAMPMODE)
-//	Evalboards.ch1.writeRegister(0,0x21, 	0x000000FF); 		// writing value 0x00000000 = 0 = 0.0 to address 9 = 0x21(XACTUAL)
-//	Evalboards.ch1.writeRegister(0,0x23, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 10 = 0x23(VSTART)
-//	Evalboards.ch1.writeRegister(0,0x24, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 11 = 0x24(A1)
-//	Evalboards.ch1.writeRegister(0,0x25, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 12 = 0x25(V1)
-//	Evalboards.ch1.writeRegister(0,0x26, 	0x000003E8); 		// writing value 0x000003E8 = 1000 = 0.0 to address 13 = 0x26(AMAX)
-//	Evalboards.ch1.writeRegister(0,0x27, 	0x0000C350); 		// writing value 0x00000000 = 0 = 0.0 to address 14 = 0x27(VMAX)
-//	Evalboards.ch1.writeRegister(0,0x28, 	0x000003E8); 		// writing value 0x00000000 = 0 = 0.0 to address 15 = 0x28(DMAX)
-//	Evalboards.ch1.writeRegister(0,0x2A, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 16 = 0x2A(D1)
-//	Evalboards.ch1.writeRegister(0,0x2B, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 17 = 0x2B(VSTOP)
-//	Evalboards.ch1.writeRegister(0,0x2C, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 18 = 0x2C(TZEROWAIT)
-//	Evalboards.ch1.writeRegister(0,0x2D, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 19 = 0x2D(XTARGET)
-//	Evalboards.ch1.writeRegister(0,0x33, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 20 = 0x33(VDCMIN)
-//	//Evalboards.ch1.writeRegister(0,0x34, 	0x00000400); 		// writing value 0x00000400 = 1024 = 0.0 to address 21 = 0x34(SW_MODE)  ->> stallguard activado
-//	Evalboards.ch1.writeRegister(0,0x34, 	0x00000000); 		// writing value 0x00000400 = 1024 = 0.0 to address 21 = 0x34(SW_MODE)
-//	Evalboards.ch1.writeRegister(0,0x38, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 22 = 0x38(ENCMODE)
-//	Evalboards.ch1.writeRegister(0,0x39, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 23 = 0x39(X_ENC)
-//	Evalboards.ch1.writeRegister(0,0x3A, 	0x00010000); 		// writing value 0x00010000 = 65536 = 0.0 to address 24 = 0x3A(ENC_CONST)
-//	Evalboards.ch1.writeRegister(0,0x60, 	0xAAAAB554); 		// writing value 0xAAAAB554 = 0 = 0.0 to address 25 = 0x60(MSLUT[0])
-//	Evalboards.ch1.writeRegister(0,0x61, 	0x4A9554AA); 		// writing value 0x4A9554AA = 1251300522 = 0.0 to address 26 = 0x61(MSLUT[1])
-//	Evalboards.ch1.writeRegister(0,0x62, 	0x24492929); 		// writing value 0x24492929 = 608774441 = 0.0 to address 27 = 0x62(MSLUT[2])
-//	Evalboards.ch1.writeRegister(0,0x63, 	0x10104222); 		// writing value 0x10104222 = 269500962 = 0.0 to address 28 = 0x63(MSLUT[3])
-//	Evalboards.ch1.writeRegister(0,0x64, 	0xFBFFFFFF); 		// writing value 0xFBFFFFFF = 0 = 0.0 to address 29 = 0x64(MSLUT[4])
-//	Evalboards.ch1.writeRegister(0,0x65, 	0xB5BB777D); 		// writing value 0xB5BB777D = 0 = 0.0 to address 30 = 0x65(MSLUT[5])
-//	Evalboards.ch1.writeRegister(0,0x66, 	0x49295556); 		// writing value 0x49295556 = 1227445590 = 0.0 to address 31 = 0x66(MSLUT[6])
-//	Evalboards.ch1.writeRegister(0,0x67, 	0x00404222); 		// writing value 0x00404222 = 4211234 = 0.0 to address 32 = 0x67(MSLUT[7])
-//	Evalboards.ch1.writeRegister(0,0x68, 	0xFFFF8056); 		// writing value 0xFFFF8056 = 0 = 0.0 to address 33 = 0x68(MSLUTSEL)
-//	Evalboards.ch1.writeRegister(0,0x69, 	0x00F70000); 		// writing value 0x00F70000 = 16187392 = 0.0 to address 34 = 0x69(MSLUTSTART)
-//	Evalboards.ch1.writeRegister(0,0x6C, 	0x000101D5); 		// writing value 0x000101D5 = 66005 = 0.0 to address 35 = 0x6C(CHOPCONF)
-//	Evalboards.ch1.writeRegister(0,0x6D, 	0x01020000); 		// writing value 0x01020000 = 16908288 = 0.0 to address 36 = 0x6D(COOLCONF)
-//	Evalboards.ch1.writeRegister(0,0x6E, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 37 = 0x6E(DCCTRL)
-//	Evalboards.ch1.writeRegister(0,0x70, 	0x000504C8); 		// writing value 0x000504C8 = 328904 = 0.0 to address 38 = 0x70(PWMCONF)
-//	Evalboards.ch1.writeRegister(0,0x72, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 39 = 0x72(ENCM_CTRL)
-
-
-
 
 
 	Evalboards.ch1.writeRegister(0,0x00, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 0 = 0x00(GCONF)
@@ -337,64 +246,11 @@ void xtaskmotor(void *pvParameter) {
 	Evalboards.ch1.writeRegister(0,0x72, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 39 = 0x72(ENCM_CTRL)
 
 
-//	//====================================================================================================//
-//	// ACTUAL SETTINGS FOR TMC5130 (created: 2019/11/28 12:38:01)                                        //
-//	//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv//
-//
-//		Evalboards.ch1.writeRegister(0,0x00, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 0 = 0x00(GCONF)
-//		Evalboards.ch1.writeRegister(0,0x03, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 1 = 0x03(SLAVECONF)
-//		Evalboards.ch1.writeRegister(0,0x05, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 2 = 0x05(X_COMPARE)
-//		Evalboards.ch1.writeRegister(0,0x10, 	0x00071405); 		// writing value 0x00071405 = 463877 = 0.0 to address 3 = 0x10(IHOLD_IRUN)
-//		Evalboards.ch1.writeRegister(0,0x11, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 4 = 0x11(TPOWERDOWN)
-//		Evalboards.ch1.writeRegister(0,0x13, 	0x00000053); 		// writing value 0x00000053 = 83 = 0.0 to address 5 = 0x13(TPWMTHRS)
-//		Evalboards.ch1.writeRegister(0,0x14, 	0x00000010); 		// writing value 0x00000010 = 16 = 0.0 to address 6 = 0x14(TCOOLTHRS)
-//		Evalboards.ch1.writeRegister(0,0x15, 	0x00000010); 		// writing value 0x00000010 = 16 = 0.0 to address 7 = 0x15(THIGH)
-//		Evalboards.ch1.writeRegister(0,0x20, 	0x00000001); 		// writing value 0x00000001 = 1 = 0.0 to address 8 = 0x20(RAMPMODE)
-//		Evalboards.ch1.writeRegister(0,0x21, 	0x00136F7A); 		// writing value 0x00136F7A = 1273722 = 0.0 to address 9 = 0x21(XACTUAL)
-//		Evalboards.ch1.writeRegister(0,0x23, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 10 = 0x23(VSTART)
-//		Evalboards.ch1.writeRegister(0,0x24, 	0x000003E8); 		// writing value 0x000003E8 = 1000 = 0.0 to address 11 = 0x24(A1)
-//		Evalboards.ch1.writeRegister(0,0x25, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 12 = 0x25(V1)
-//		Evalboards.ch1.writeRegister(0,0x26, 	0x0000EA60); 		// writing value 0x0000EA60 = 60000 = 0.0 to address 13 = 0x26(AMAX)
-//		Evalboards.ch1.writeRegister(0,0x27, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 14 = 0x27(VMAX)
-//		Evalboards.ch1.writeRegister(0,0x28, 	0x0000EA60); 		// writing value 0x0000EA60 = 60000 = 0.0 to address 15 = 0x28(DMAX)
-//		Evalboards.ch1.writeRegister(0,0x2A, 	0x00000578); 		// writing value 0x00000578 = 1400 = 0.0 to address 16 = 0x2A(D1)
-//		Evalboards.ch1.writeRegister(0,0x2B, 	0x0000000A); 		// writing value 0x0000000A = 10 = 0.0 to address 17 = 0x2B(VSTOP)
-//		Evalboards.ch1.writeRegister(0,0x2C, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 18 = 0x2C(TZEROWAIT)
-//		Evalboards.ch1.writeRegister(0,0x2D, 	0x00136F7A); 		// writing value 0x00136F7A = 1273722 = 0.0 to address 19 = 0x2D(XTARGET)
-//		Evalboards.ch1.writeRegister(0,0x33, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 20 = 0x33(VDCMIN)
-//		Evalboards.ch1.writeRegister(0,0x34, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 21 = 0x34(SW_MODE)
-//		Evalboards.ch1.writeRegister(0,0x38, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 22 = 0x38(ENCMODE)
-//		Evalboards.ch1.writeRegister(0,0x39, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 23 = 0x39(X_ENC)
-//		Evalboards.ch1.writeRegister(0,0x3A, 	0x00010000); 		// writing value 0x00010000 = 65536 = 0.0 to address 24 = 0x3A(ENC_CONST)
-//		Evalboards.ch1.writeRegister(0,0x60, 	0xAAAAB554); 		// writing value 0xAAAAB554 = 0 = 0.0 to address 25 = 0x60(MSLUT[0])
-//		Evalboards.ch1.writeRegister(0,0x61, 	0x4A9554AA); 		// writing value 0x4A9554AA = 1251300522 = 0.0 to address 26 = 0x61(MSLUT[1])
-//		Evalboards.ch1.writeRegister(0,0x62, 	0x24492929); 		// writing value 0x24492929 = 608774441 = 0.0 to address 27 = 0x62(MSLUT[2])
-//		Evalboards.ch1.writeRegister(0,0x63, 	0x10104222); 		// writing value 0x10104222 = 269500962 = 0.0 to address 28 = 0x63(MSLUT[3])
-//		Evalboards.ch1.writeRegister(0,0x64, 	0xFBFFFFFF); 		// writing value 0xFBFFFFFF = 0 = 0.0 to address 29 = 0x64(MSLUT[4])
-//		Evalboards.ch1.writeRegister(0,0x65, 	0xB5BB777D); 		// writing value 0xB5BB777D = 0 = 0.0 to address 30 = 0x65(MSLUT[5])
-//		Evalboards.ch1.writeRegister(0,0x66, 	0x49295556); 		// writing value 0x49295556 = 1227445590 = 0.0 to address 31 = 0x66(MSLUT[6])
-//		Evalboards.ch1.writeRegister(0,0x67, 	0x00404222); 		// writing value 0x00404222 = 4211234 = 0.0 to address 32 = 0x67(MSLUT[7])
-//		Evalboards.ch1.writeRegister(0,0x68, 	0xFFFF8056); 		// writing value 0xFFFF8056 = 0 = 0.0 to address 33 = 0x68(MSLUTSEL)
-//		Evalboards.ch1.writeRegister(0,0x69, 	0x00F70000); 		// writing value 0x00F70000 = 16187392 = 0.0 to address 34 = 0x69(MSLUTSTART)
-//		Evalboards.ch1.writeRegister(0,0x6C, 	0x000101D5); 		// writing value 0x000101D5 = 66005 = 0.0 to address 35 = 0x6C(CHOPCONF)
-//		Evalboards.ch1.writeRegister(0,0x6D, 	0x01030000); 		// writing value 0x01030000 = 16973824 = 0.0 to address 36 = 0x6D(COOLCONF)
-//		Evalboards.ch1.writeRegister(0,0x6E, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 37 = 0x6E(DCCTRL)
-//		Evalboards.ch1.writeRegister(0,0x70, 	0x000501C8); 		// writing value 0x000501C8 = 328136 = 0.0 to address 38 = 0x70(PWMCONF)
-//		Evalboards.ch1.writeRegister(0,0x72, 	0x00000000); 		// writing value 0x00000000 = 0 = 0.0 to address 39 = 0x72(ENCM_CTRL)
-//
-//	//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^//
-
-
-
-
-
 	vTaskDelay(250 / portTICK_RATE_MS);
 	Evalboards.ch1.enableDriver(DRIVER_DISABLE);
-	//borro la tarea, solo la necesitaba para la configuracion inicial con delay entre habilitaciones y envios por spi de conf
+	//borro la tarea, solo se necesita para la configuracion inicial con delay entre habilitaciones y envios por spi de conf
 	vTaskDelete(NULL);
-//	while (1) {
-//			vTaskDelay(10000 / portTICK_RATE_MS);
-//	}
+
 }
 
 static void tcp_server_task(void *pvParameters) {
@@ -508,7 +364,7 @@ static void tcp_server_task(void *pvParameters) {
 //
 //				}
 
-				if (processDipCoating.config.status == 0){
+///				if (processDipCoating.config.status == 0){
 
 				for (i = 0; i < len; i++) {
 					tinysh_char_in(rx_buffer[i]);
@@ -518,8 +374,8 @@ static void tcp_server_task(void *pvParameters) {
 
 				//test para devolucion de datos -- devuelvo un dato de la estructura del proceso , el index
 				// int err = send(sock_global, rx_buffer, len, 0);
-				}
-				else tinysh_char_in('\n');
+///				}
+///				else tinysh_char_in('\n');
 
 				if (err < 0) {
 				ESP_LOGE(TAG_TASK_SOCKET, "Error occurred during sending: errno %d",errno);
@@ -547,13 +403,26 @@ static void tcp_server_task(void *pvParameters) {
 
 
 void xtaskemergencystop(void *pvParameter) {
-
-
-		vTaskDelay(1000 / portTICK_RATE_MS);
-		ProcessCeroMachineCommand();
+	int32_t lectura;
+	vTaskDelay(1000 / portTICK_RATE_MS);
+	ProcessCeroMachineCommand();
+//	vTaskDelay(15000 / portTICK_RATE_MS);
+	//Limites superior e inferior de la maquina, si se sobrepasan los limites ejecuto un CEROMACHINE
+//	while (1){
+//		//LIMITE SUPERIOR en posicion: 127372 +1      x2 = 254744
+//		//LIMITE INFERIOR en posicion: 4445287
+//		Evalboards.ch1.readRegister(0, 0x21, &lectura);
+//		if (lectura  <=  0x0000F8C6  ){
+//			ProcessCeroMachineCommand();
+//			vTaskDelay(10000 / portTICK_RATE_MS);
+//		}
+//		if ( lectura >= 0x0043d467){
+//			ProcessCeroMachineCommand();
+//		}
+//		vTaskDelay(250 / portTICK_RATE_MS);
+//		}
 		//Testear el estado de algun pin, deshabilitar driver ,reiniciar dispositivo
-		vTaskDelete(NULL);
-
+	vTaskDelete(NULL);
 }
 
 
@@ -592,16 +461,8 @@ void xtaskcommand(void *pvParameter) {
 /* brief this is an exemple of a callback that you can setup in your own app to get notified of wifi manager event */
 void cb_connection_ok(void *pvParameter){
 	ESP_LOGI(TAG_TASK_WIFI_MANAGER, "I have a connection!");
-
-
-
-	xTaskCreate(&xtasktinysh, "Tinysh Task", 8192, NULL, 2, NULL);
-	xTaskCreate(&xtaskprocess, "Process Task", 8192, NULL, 2, NULL);
-	xTaskCreate(&xtaskcommand, "Command Task", 8192, NULL, 2, NULL);
-	xTaskCreate(&xtaskmotor, "Process Motor Task", 8192, NULL, 2, NULL);
-	xTaskCreate(&tcp_server_task, "tcp_server Task", 8192, NULL, 2, NULL);
-	xTaskCreate(&xtaskmonitorstatus, "Monitor Status Task", 8192, NULL, 2, NULL);
-	xTaskCreate(&xtaskemergencystop, "Emergency STOP  Task", 8192, NULL, 2, NULL);
+	//Se ejecuta esta funcion cuando el dispositivo se conecta a la red WIFI configurada
+	//No se ejecuta si esta en modo Access Point
 
 }
 
@@ -609,41 +470,19 @@ void cb_connection_ok(void *pvParameter){
 
 void app_main(void) {
 
-
-
-
 	/* start the wifi manager */
 	wifi_manager_start();
 
 	/* register a callback as an example to how you can integrate your code with the wifi manager */
 	wifi_manager_set_callback(EVENT_STA_GOT_IP, &cb_connection_ok);
 
-
-
-
-
-
-//
-//	ESP_ERROR_CHECK(nvs_flash_init());
-//	tcpip_adapter_init();
-//	ESP_ERROR_CHECK(esp_event_loop_create_default());
-//
-//	/* This helper function configures Wi-Fi or Ethernet, as selected in menuconfig.
-//	 * Read "Establishing Wi-Fi or Ethernet Connection" section in
-//	 * examples/protocols/README.md for more information about this function.
-//	 */
-//	ESP_ERROR_CHECK(example_connect());
-
-
-//	xTaskCreate(&xtasktinysh, "Tinysh Task", 16384, NULL, 2, NULL);
-//	xTaskCreate(&xtaskprocess, "Process Task", 8192, NULL, 2, NULL);
-//	xTaskCreate(&xtaskmotor, "Process Motor Task", 16384, NULL, 2, NULL);
-//	xTaskCreate(&tcp_server_task, "tcp_server Task", 4096, NULL, 2, NULL);
-//	xTaskCreate(&xtaskmonitorstatus, "Monitor Status Task", 4096, NULL, 2, NULL);
-//	xTaskCreate(&xtaskemergencystop, "Emergency STOP  Task", 1024, NULL, 2, NULL);
-
-
-
+	xTaskCreate(&xtasktinysh, "Tinysh Task", 8192, NULL, 2, NULL);
+	xTaskCreate(&xtaskprocess, "Process Task", 8192, NULL, 4, NULL);
+	xTaskCreate(&xtaskcommand, "Command Task", 8192, NULL, 2, NULL);
+	xTaskCreate(&xtaskmotor, "Process Motor Task", 8192, NULL, 2, NULL);
+	xTaskCreate(&tcp_server_task, "tcp_server Task", 8192, NULL, 2, NULL);
+	xTaskCreate(&xtaskmonitorstatus, "Monitor Status Task", 8192, NULL, 2, NULL);
+	xTaskCreate(&xtaskemergencystop, "Emergency STOP  Task", 8192, NULL, 2, NULL);
 
 }
 

@@ -94,20 +94,32 @@ void CommandSETCOMMANDCUSTOMPROGRAMAPPHandler(int argc, char **argv) {
 	printf("\r\n");
 	if (15 == argc) { /*SETCUSTOMPROGRAMAPP 2 XX XX 3 XX 4 XX XX 5 XX 6 X X X  	*/
 
-		processDipCoating.command[2].argument.spin.velocity = tinysh_get_arg_int(argc, argv,2);
-		processDipCoating.command[2].argument.spin.acceleration = tinysh_get_arg_int(argc, argv,3);
+		//vel acel down loop
+		processDipCoating.command[2].argument.spin.velocity = (tinysh_get_arg_int(argc, argv,2) * 212.2719735 * 1.34 );
+		processDipCoating.command[2].argument.spin.acceleration = (tinysh_get_arg_int(argc, argv,3) * 3.537866);
 
-		processDipCoating.command[3].argument.spin.velocity = tinysh_get_arg_int(argc, argv,5);
+		//wait down
+		processDipCoating.command[3].argument.wait.time = tinysh_get_arg_int(argc, argv,5);
 
-		processDipCoating.command[4].argument.spin.velocity = tinysh_get_arg_int(argc, argv,7);
-		processDipCoating.command[4].argument.spin.acceleration = tinysh_get_arg_int(argc, argv,8);
+		//vel acel up loop
+		processDipCoating.command[4].argument.spin.velocity = (tinysh_get_arg_int(argc, argv,7) * 212.2719735 * 1.34 );
 
-		processDipCoating.command[5].argument.spin.velocity = tinysh_get_arg_int(argc, argv,10);
 
+		processDipCoating.command[4].argument.spin.acceleration = (tinysh_get_arg_int(argc, argv,8) * 3.537866);
+
+		//wait up
+		processDipCoating.command[5].argument.wait.time = tinysh_get_arg_int(argc, argv,10);
+
+
+		//Loop
 		processDipCoating.command[6].argument.spin.velocity = tinysh_get_arg_int(argc, argv,12);
 
 
+		//Desplazamiento hasta muestra
 		processDipCoating.config.displacement_to_sample =    tinysh_get_arg_int(argc, argv,13);
+
+
+		//Profundidad DIP
 		processDipCoating.config.displacement_delta_sample = ( tinysh_get_arg_int(argc, argv,14) / 0.00007851 );
 
 		printf("Datos Cargados!!!\r\n");

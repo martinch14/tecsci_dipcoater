@@ -84,6 +84,7 @@ void ProcessInit(process_t* process){
 
 	process->commandlen=0;
 	process->state.commandIndex=MAX_ESTATIC_COMMAND;
+	process->state.commandActualIndex=0;
 	process->state.flags=0;
 }
 
@@ -94,30 +95,37 @@ void ProcessInit(process_t* process){
 void ProcessRun(process_t *process) {
 
 	uint8_t ci;
-	uint8_t index = 0;
+	//uint8_t index = 0;
 	uint8_t loop_ori,loop;
+
+	process->state.commandActualIndex = 0;
 
 	if (process->command != NULL) {
 		ci = process->state.commandIndex; // command index
 		loop_ori = process->command[PROCESS_COMMAND_LOOP-2].argument.value.val;
 		loop=loop_ori;
 		printf("\r\nProceso Iniciado - Motor Encendido\r\n");
-		while (index < ci) {
-			if (process->command[index].commandnumber != PROCESS_COMMAND_LOOP) {
+		while (process->state.commandActualIndex < ci) {
+			if (process->command[process->state.commandActualIndex].commandnumber != PROCESS_COMMAND_LOOP) {
 				//VER LO QUE ESTAMOS PONIENDO EN EL PUNTERO A FUNCION (PASAR DIRECTAMENTE EL ARGUMENTO )
 				//process->command[index].fpcommandhandler(&(process->command[index].argument.spin));
-				process->command[index].fpcommandhandler(&(process->command[index].argument));
-				index++;
+				process->command[process->state.commandActualIndex].fpcommandhandler(&(process->command[process->state.commandActualIndex].argument));
+				//index++;
+				process->state.commandActualIndex++;
 			}
-			if (process->command[index].commandnumber == PROCESS_COMMAND_LOOP){
+			if (process->command[process->state.commandActualIndex].commandnumber == PROCESS_COMMAND_LOOP){
 				if (loop > 0 ){
 					loop--;
 					printf("Loop number:%d\r\n",loop_ori - loop);
 
 					//Desde comando LOOP vuelve 4 comandos hacia atras para hacer secuencia DWUW
-					index -=4;
+					//index -=4;
+					process->state.commandActualIndex-=4;
+
+
 			}
-				else index++;
+					//else index++;
+				else process->state.commandActualIndex++;
 			}
 		}
 	} else {
@@ -327,6 +335,7 @@ void ProcessStopCommand(){
 	parameters.acceleration=0;
 	parameters.displacement_z=0;
 
+	printf("process Command a cola\r\n ");
 	HandlerStop(&parameters);
 }
 

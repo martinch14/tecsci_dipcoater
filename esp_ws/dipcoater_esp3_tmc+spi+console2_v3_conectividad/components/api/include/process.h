@@ -10,6 +10,31 @@
 
 #include <stdint.h>
 
+
+
+
+
+/*  Estructura del Proceso + Comando
+ *
+ *
+ *
+ *
+ *						|Arreglo de comando  processCommand_t			|
+ *						|												|
+ *						|-----------------------------------------------|
+ *						|												|
+ *						|Estructura de configuracion  processConfig_t	|
+ * Estructura process_t	|												|
+ *						|-----------------------------------------------|
+ *						|												|
+ *						|Estructura de estado  processState_t			|
+ *						|												|
+ *						|-----------------------------------------------|
+ *
+ *
+ *
+ */
+
 /*DEFINED VALUES*/
 #define _FLAG_ERROR          	1<< 8
 
@@ -110,6 +135,7 @@ typedef struct {
 typedef struct {
 
 	uint8_t commandIndex;
+	uint8_t commandActualIndex;
 	uint8_t flags;
 
 } processState_t;
