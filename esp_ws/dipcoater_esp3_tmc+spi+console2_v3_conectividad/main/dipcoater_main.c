@@ -14,6 +14,10 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/event_groups.h"
+
+
+#include "freertos/semphr.h"
+
 #include "esp_log.h"
 #include "esp_websocket_client.h"
 #include "esp_event.h"
@@ -44,21 +48,23 @@
 #include "dns_server.h"
 #include "json.h"
 #include "wifi_manager.h"
-
 #include "include/app_main_dipcoater.h"
 
 
 /*TODO    BUGS
- * LOADPROGRAMSTANDARD    se tiene q cargar antes de SETSTANDARDPROGRAM para que se pueda ejecutar
- * Al ingresar el comando setstandarprogram verificar que ingrese  un argumento con el loop
+ *
+ * x) perdida de pasos al tirar comandos individuales
+ * x) stop cuanto se esta ejecutando el programa      COMANDO STOP CUANDO SE ESTA EJECUTANDO EL PROCESO -> (SE DEBERIA REINICIAR EL PROCESO)
+ * ver pequeña diferencia en la posicion luego del STOP
+ * x) los comandos individuales van por cola, pero el seteo de los procesos no ,,,, todo debe ir por cola      DELTADIP  y CERO_SAMPLE tmb por cola
  *
  *
- * revisar CUSTOM ALL
- * multiplicacion x constantes de desplazamiento
- * json
- * carga de comando wait
+ * x) agregar validacion de todos los argumentos en CommandSETCOMMANDCUSTOMPROGRAMAPPHandler
  *
- * COMANDO STOP CUANDO SE ESTA EJECUTANDO EL PROCESO -> (SE DEBERIA REINICIAR EL PROCESO)
+ *
+ *
+ * FALLA de APP
+ * x) boton establecer ( sin movimiento anterior)
  *
  * */
 
@@ -72,7 +78,6 @@
 static const char *TAG_TASK_SOCKET = "task_socket";
 static const char *TAG_TASK_WIFI_MANAGER = "task_wifi_manager_main";
 flagRun_t entry = STOP;
-
 
 
 extern void TMC5130_init(void);
@@ -123,12 +128,19 @@ static tinysh_cmd_t commandCERO_SAMPLE = 					{NULL,"CERO_SAMPLE", NULL, NULL, C
 static tinysh_cmd_t commandDELTADIP = 					{NULL,"DELTADIP", NULL, NULL, CommandDELTADIPHandler, NULL, NULL, NULL};
 
 
+
+
 void xtaskprocess(void *pvParameter) {
 
 	ProcessInit(&processDipCoating);
 	processDipCoating.config.status=0;
 
+	vTaskDelay(1000 / portTICK_RATE_MS);
+	ProcessCeroMachineCommand();
+
 	while (1) {
+
+		ProcessCommand();
 
 		if (entry == RUN ) {
 			processDipCoating.config.status=1;
@@ -136,10 +148,14 @@ void xtaskprocess(void *pvParameter) {
 			entry = STOP;
 			processDipCoating.config.status=0;
 		}
-		vTaskDelay(500 / portTICK_RATE_MS);
+		vTaskDelay(200 / portTICK_RATE_MS);
 	}
 }
 
+
+
+
+// Task para el procesamiento de todos los comandos que llegan por consola o por tcp port
 void xtasktinysh(void *pvParameter) {
 
 	char c = 0;
@@ -147,9 +163,8 @@ void xtasktinysh(void *pvParameter) {
 	//queue initialization
 	modQueue_Init(&queueconsolareception, bufferreception, 10, sizeof(processCommand_t));
 	modQueue_Init(&queueconsolatransmit,  buffertransmit, 10, sizeof(int));
+
 	/*MOVEMENT COMMANDS*/
-
-
 	//command initialization
 	tinysh_add_command(&commandLOADPROGRAMSTANDARD);
 	tinysh_add_command(&commandLOADPROGRAMCUSTOM);
@@ -185,7 +200,7 @@ void xtasktinysh(void *pvParameter) {
 				if (c != 0xFF){
 					tinysh_char_in(c);
 				}
-		vTaskDelay(100 / portTICK_RATE_MS);
+		vTaskDelay(20 / portTICK_RATE_MS);
 	}
 }
 
@@ -325,6 +340,12 @@ static void tcp_server_task(void *pvParameters) {
 			// Error occurred during receiving
 			if (len < 0) {
 				ESP_LOGE(TAG_TASK_SOCKET, "recv failed: errno %d", errno);
+
+				///////////****************////////////////////////////
+				/////prueba por desconexion aleatoria mensaje -->  recv failed: errno 104
+				close(sock_global);
+				close(listen_sock);
+				///////////////***********/////////////////////////
 				break;
 			}
 			// Connection closed
@@ -348,23 +369,6 @@ static void tcp_server_task(void *pvParameters) {
 				ESP_LOGI(TAG_TASK_SOCKET, "Received %d bytes from %s:", len, addr_str);
 				ESP_LOGI(TAG_TASK_SOCKET, "%s", rx_buffer);
 
-//				if (processDipCoating.config.status == 0){
-//						c = getchar();
-//
-//						//Para que no devuelva basura por la consola
-//						if (c != 0xFF){
-//
-//							tinysh_char_in(c);
-//								}
-//
-//				}
-//				else {
-//					// si llega algun comando mientras el config.status == 1 lo descarto porque la maquina ya esta realizando alguna accion
-//					c = getchar();
-//
-//				}
-
-///				if (processDipCoating.config.status == 0){
 
 				for (i = 0; i < len; i++) {
 					tinysh_char_in(rx_buffer[i]);
@@ -372,10 +376,6 @@ static void tcp_server_task(void *pvParameters) {
 				//Para que  valide lo recibido!
 				tinysh_char_in('\n');
 
-				//test para devolucion de datos -- devuelvo un dato de la estructura del proceso , el index
-				// int err = send(sock_global, rx_buffer, len, 0);
-///				}
-///				else tinysh_char_in('\n');
 
 				if (err < 0) {
 				ESP_LOGE(TAG_TASK_SOCKET, "Error occurred during sending: errno %d",errno);
@@ -402,29 +402,6 @@ static void tcp_server_task(void *pvParameters) {
 }
 
 
-void xtaskemergencystop(void *pvParameter) {
-	int32_t lectura;
-	vTaskDelay(1000 / portTICK_RATE_MS);
-	ProcessCeroMachineCommand();
-//	vTaskDelay(15000 / portTICK_RATE_MS);
-	//Limites superior e inferior de la maquina, si se sobrepasan los limites ejecuto un CEROMACHINE
-//	while (1){
-//		//LIMITE SUPERIOR en posicion: 127372 +1      x2 = 254744
-//		//LIMITE INFERIOR en posicion: 4445287
-//		Evalboards.ch1.readRegister(0, 0x21, &lectura);
-//		if (lectura  <=  0x0000F8C6  ){
-//			ProcessCeroMachineCommand();
-//			vTaskDelay(10000 / portTICK_RATE_MS);
-//		}
-//		if ( lectura >= 0x0043d467){
-//			ProcessCeroMachineCommand();
-//		}
-//		vTaskDelay(250 / portTICK_RATE_MS);
-//		}
-		//Testear el estado de algun pin, deshabilitar driver ,reiniciar dispositivo
-	vTaskDelete(NULL);
-}
-
 
 
 void xtaskmonitorstatus(void *pvParameter) {
@@ -446,15 +423,15 @@ void xtaskmonitorstatus(void *pvParameter) {
 	}
 }
 
-void xtaskcommand(void *pvParameter) {
-
-	while (1) {
-
-		ProcessCommand();
-		vTaskDelay(200 / portTICK_RATE_MS);
-		}
-
-}
+//void xtaskcommand(void *pvParameter) {
+//
+//	while (1) {
+//
+//		ProcessCommand();
+//		vTaskDelay(200 / portTICK_RATE_MS);
+//		}
+//
+//}
 
 
 
@@ -476,13 +453,14 @@ void app_main(void) {
 	/* register a callback as an example to how you can integrate your code with the wifi manager */
 	wifi_manager_set_callback(EVENT_STA_GOT_IP, &cb_connection_ok);
 
-	xTaskCreate(&xtasktinysh, "Tinysh Task", 8192, NULL, 2, NULL);
-	xTaskCreate(&xtaskprocess, "Process Task", 8192, NULL, 4, NULL);
-	xTaskCreate(&xtaskcommand, "Command Task", 8192, NULL, 2, NULL);
+
+	xTaskCreate(&xtasktinysh, "Tinysh Task", 8192, NULL, 4, NULL);
+	xTaskCreate(&xtaskprocess, "Process Task", 8192, NULL, 2, NULL);
+//	xTaskCreate(&xtaskcommand, "Command Task", 8192, NULL, 2, NULL);
 	xTaskCreate(&xtaskmotor, "Process Motor Task", 8192, NULL, 2, NULL);
 	xTaskCreate(&tcp_server_task, "tcp_server Task", 8192, NULL, 2, NULL);
 	xTaskCreate(&xtaskmonitorstatus, "Monitor Status Task", 8192, NULL, 2, NULL);
-	xTaskCreate(&xtaskemergencystop, "Emergency STOP  Task", 8192, NULL, 2, NULL);
+
 
 }
 

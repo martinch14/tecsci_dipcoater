@@ -26,6 +26,16 @@ extern flagRun_t entry;
 #define MAX_ESTATIC_COMMAND 	8
 
 
+// Constante de diferencia de velocidad debido a que no esta el clk de 16MHZ externo en nuestro diseño
+//#define K_VELOCIDAD  1.34
+#define K_VELOCIDAD  1
+
+
+
+// Constante de dezplazamiento lineal   , expresadda en mm/micropasos         ->   una vuelta   1 paso  ==   0.00007851  mm     -->    (una vuelta) 51200   ==   4.02 mm
+#define  K_DEZPLAZAMIENTO_LINEAL   0.00007851   //  78.51E-6
+
+
 /*PROCESS STANDARD HANDLERS*/
 
 void CommandLOADPROGRAMSTANDARDHandler(int argc, char **argv){
@@ -40,8 +50,7 @@ void CommandSETSTANDARDPROGRAMHandler(int argc, char **argv) {
 	printf("\r\n");
 	if (2 == argc) {
 		aux_process_comand.commandnumber = PROCESS_COMMAND_LOOP - 2;
-		aux_process_comand.argument.value.val = tinysh_get_arg_int(argc, argv,
-				1);
+		aux_process_comand.argument.value.val = tinysh_get_arg_int(argc, argv,1);
 		modQueue_Write(&queueconsolareception, &aux_process_comand);
 		ProcessSetProgramStandard();
 
@@ -94,15 +103,19 @@ void CommandSETCOMMANDCUSTOMPROGRAMAPPHandler(int argc, char **argv) {
 	printf("\r\n");
 	if (15 == argc) { /*SETCUSTOMPROGRAMAPP 2 XX XX 3 XX 4 XX XX 5 XX 6 X X X  	*/
 
+
+		//agregar validacion de todos los argumentos en CommandSETCOMMANDCUSTOMPROGRAMAPPHandler
+
+
 		// DOWN LOOP vel acel
-		processDipCoating.command[2].argument.spin.velocity = (tinysh_get_arg_int(argc, argv,2) * 212.2719735 * 1.34 );
+		processDipCoating.command[2].argument.spin.velocity = (tinysh_get_arg_int(argc, argv,2) * 212.2719735 * K_VELOCIDAD );
 		processDipCoating.command[2].argument.spin.acceleration = (tinysh_get_arg_int(argc, argv,3) * 3.537866);
 
 		//WAIT DOWN
 		processDipCoating.command[3].argument.wait.time = tinysh_get_arg_int(argc, argv,5);
 
 		//UP LOOP vel acel
-		processDipCoating.command[4].argument.spin.velocity = (tinysh_get_arg_int(argc, argv,7) * 212.2719735 * 1.34 );
+		processDipCoating.command[4].argument.spin.velocity = (tinysh_get_arg_int(argc, argv,7) * 212.2719735 * K_VELOCIDAD );
 		processDipCoating.command[4].argument.spin.acceleration = (tinysh_get_arg_int(argc, argv,8) * 3.537866);
 
 		//WAIT UP
@@ -114,7 +127,7 @@ void CommandSETCOMMANDCUSTOMPROGRAMAPPHandler(int argc, char **argv) {
 
 
 		//Desplazamiento hasta muestra
-		processDipCoating.config.displacement_to_sample =    tinysh_get_arg_int(argc, argv,13);
+		processDipCoating.config.displacement_to_sample =   ( tinysh_get_arg_int(argc, argv,13) * 12737 );    // Expresado en mm
 
 
 		//Profundidad DELTADIP
@@ -171,30 +184,51 @@ void CommandSETALLCUSTOMPROGRAMHandler(int argc, char **argv){
 }
 
 
+
+
+
+///////////////////////////////////////////////////////////////////////******Comandos que mandan por cola *****************////////////////////////////////////////////////////
+
+
+
 void CommandCERO_SAMPLEHandler(int argc, char **argv) {
 
-//	processConfig_t aux_process_config;
 
 	printf("\r\n");
-	if (2 == argc) {
-		processDipCoating.config.displacement_to_sample = tinysh_get_arg_int(argc, argv,1);
+	processCommand_t aux_process_comand;
+	aux_process_comand.commandnumber= PROCESS_COMMAND_CERO_SAMPLE;
+
+
+
+	if (processDipCoating.config.status == 0 &&  2 == argc) {
+
+		processDipCoating.config.displacement_to_sample = (tinysh_get_arg_int(argc, argv,1)*12737) ;    // 12737  --> 1 mm
 
 	}
 	else{
-	ProcessCERO_SAMPLECommand();
+		if (processDipCoating.config.status == 0){
+		modQueue_Write(&queueconsolareception, &aux_process_comand);
+		//ProcessCERO_SAMPLECommand();
+		}else printf("Ejecutando, comando descartado!\r\n");
+
 	}
 }
 
 void CommandDELTADIPHandler(int argc, char **argv) {
 
-	int deltadip;
+	int32_t deltadip;
 	printf("\r\n");
-	if (2 == argc) {
+	processCommand_t aux_process_comand;
+	aux_process_comand.commandnumber= PROCESS_COMMAND_DELTADIP;
+
+
+	if (processDipCoating.config.status == 0   && 2 == argc) {
 
 		deltadip=tinysh_get_arg_int(argc, argv,1);
-		processDipCoating.config.displacement_delta_sample = deltadip / 0.00007851;
+		processDipCoating.config.displacement_delta_sample = deltadip  / 0.00007851;
 
-		ProcessDELTADIPCommand();
+		//ProcessDELTADIPCommand();
+		modQueue_Write(&queueconsolareception, &aux_process_comand);
 
 	} else {
 		printf(
@@ -326,31 +360,26 @@ void CommandDOWNSLOWHandler(int argc, char **argv) {
 //VER ESTE COMANDO EN PARTICULAR
 void CommandSTOPHandler(int argc, char **argv) {
 //	ProcessStopCommand();
-	int32_t lectura;
-	processCommand_t aux_process_comand;
-	aux_process_comand.commandnumber= PROCESS_COMMAND_STOP;
+	int32_t lectura,lecturaBanderas;
+//	processCommand_t aux_process_comand;
+//	aux_process_comand.commandnumber= PROCESS_COMMAND_STOP;
 
-//	if (processDipCoating.config.status == 1){
-//		printf("antes de enviar STOP Command a cola\r\n ");
-//		modQueue_Write(&queueconsolareception, &aux_process_comand);
-//		printf("luego de enviar STOP Command a cola\r\n ");
-		//deberia deshabilitar el driver y parar el proceso si se esta ejecutando
-		//}
-	//else printf("Ejecutando, comando descartado!\r\n");
 	Evalboards.ch1.enableDriver(DRIVER_DISABLE);
 	processDipCoating.config.status=0;
 	processDipCoating.state.commandActualIndex = MAX_ESTATIC_COMMAND;
 
 	Evalboards.ch1.readRegister(0, 0x21, &lectura);
-	Evalboards.ch1.writeRegister(0, 0x26, 0x00000000 );
-	Evalboards.ch1.writeRegister(0, 0x27, 0x00000000 );
-
 
 	Evalboards.ch1.writeRegister(0, 0x21, lectura);
 	Evalboards.ch1.writeRegister(0, 0x2D, lectura);
 
+	Evalboards.ch1.readRegister(0, 0x35, &lecturaBanderas);
 
+	Evalboards.ch1.writeRegister(0, 0x21, lectura);
+	Evalboards.ch1.writeRegister(0, 0x2D, lectura);
 
+	Evalboards.ch1.readRegister(0, 0x35, &lecturaBanderas);
+	//ver este tema de banderas
 
 }
 
@@ -386,6 +415,8 @@ void CommandDIS_DRIVERHandler(int argc, char **argv) {
 //	ProcessDIS_DRIVERCommand();
 	processCommand_t aux_process_comand;
 	aux_process_comand.commandnumber = PROCESS_COMMAND_DIS_DRIVER;
+
+	Evalboards.ch1.enableDriver(DRIVER_DISABLE);
 
 	if (processDipCoating.config.status == 0) {
 		modQueue_Write(&queueconsolareception, &aux_process_comand);

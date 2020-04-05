@@ -49,14 +49,22 @@ extern int sock_global;
 // Constante de dezplazamiento lineal   , expresadda en mm/micropasos         ->   una vuelta   1 paso  ==   0.00007851  mm     -->    (una vuelta) 51200   ==   4.02 mm
 #define  K_DEZPLAZAMIENTO_LINEAL   0.00007851   //  78.51E-6
 
-// Constante de diferencia de velocidad debido a que no esta el clk de 16MHZ externo en nuestro diseño
-#define K_VELOCIDAD  1.34
 
 
-//Funcion que limita los dezplazamientos fuera de la zona segura de trabajo    en TOP   5 mm en botton algunos cm
+
+//Funcion que limita los dezplazamientos fuera de la zona segura de trabajo    en TOP   5 mm en BOTTON algunos cm
+// LIMITES EN EL RECORRIDO
+
 uint8_t controlLimit(void){
-	int32_t lectura;
+	int32_t lectura,lecturaXtarget;
+
 	Evalboards.ch1.readRegister(0, 0x21, &lectura);
+	printf("Posicion ACTUAL :%d\r\n", lectura);
+	Evalboards.ch1.readRegister(0, 0x2D, &lecturaXtarget);
+	printf("Posicion XTARGET :%d\r\n", lecturaXtarget);
+
+
+
 		if (lectura  <  0x0000F8C6  ){
 				Evalboards.ch1.enableDriver(DRIVER_DISABLE);
 				ProcessCeroMachineCommand();
@@ -82,40 +90,9 @@ int HandlerCeroMachine(processCommandArgSpin_t *arg) {
 
 	Evalboards.ch1.enableDriver(DRIVER_ENABLE);
 
-	//TEST DEZPLAZAMINETO LINEAL CONFIGURADO DESDE MODO POSICION
-//	Evalboards.ch1.writeRegister(0, 0x21, 0x00000000);
-//	Evalboards.ch1.readRegister(0,0x21,&lectura);
-//	printf("Posicion XACTUAL :%d\r\n",lectura);
-//	Evalboards.ch1.writeRegister(0, 0x2D, 0x00000000);
-//	Evalboards.ch1.readRegister(0,0x2D,&lectura);
-//	printf("Posicion XTARGET :%d\r\n",lectura);
-//	//MODO POSICION
-//	Evalboards.ch1.writeRegister(0, 0x2D, 0x0007D000);
-//	printf("Write XTARGET!\r\n");
-//	Evalboards.ch1.readRegister(0,0x27,&lectura);
-//	printf("Velocidad leida:%d  ------> deberia ser 200.000\r\n",lectura);
-//	Evalboards.ch1.readRegister(0,0x26,&lectura);
-//	printf("Aceleracion leida:%d ---------> deberia ser 20.000\r\n",lectura);
-//	while (1){
-//
-//		Evalboards.ch1.readRegister(0,TMC5130_RAMPSTAT,&lectura);
-//		if ( lectura & 0x00000200 )break;
-//		else sleep(0.1);
-//
-//	}
-//	Evalboards.ch1.readRegister(0,0x2D,&lectura);
-//	printf("Termino movimiento y continuo programa...   Posicion XTARGET::%d\r\n",lectura);
-//	sleep(0.1);
-
-// Activo flag para encender StallGuard
-
+// Activo flag para encender STALLGUARD
 	Evalboards.ch1.writeRegister(0, 0x34, 0x00000400);
 	Evalboards.ch1.writeRegister(0, TMC5130_RAMPMODE, 0x00000000);
-
-	// Me muevo para arriba  hasta encontrar el limite superior 360 mm para arriba   360/K_DEZPLAZAMIENTO_LINEAL
-
-//	Evalboards.ch1.writeRegister(0, 0x2D, -(360/K_DEZPLAZAMIENTO_LINEAL));
-//	Evalboards.ch1.writeRegister(0, 0x2D, ~(360/K_DEZPLAZAMIENTO_LINEAL));
 
 	Evalboards.ch1.readRegister(0, 0x21, &lectura);
 	printf("Posicion ACTUAL TARGET :%d\r\n", lectura);
@@ -147,7 +124,6 @@ int HandlerCeroMachine(processCommandArgSpin_t *arg) {
 
 			Evalboards.ch1.writeRegister(0, TMC5130_RAMPMODE, 0x00000000);
 			Evalboards.ch1.writeRegister(0, 0x21, 0x00000000);
-//			Evalboards.ch1.writeRegister(0, 0x2D, 0x0007D000);  //512000    127372  -> 10mm
 			Evalboards.ch1.writeRegister(0, 0x2D, 127372);
 			Evalboards.ch1.readRegister(0, TMC5130_RAMPSTAT, &lectura);
 			Evalboards.ch1.writeRegister(0, 0x34, 0x00000000);
@@ -193,6 +169,10 @@ int HandlerSpin(processCommandArgSpin_t*	arg) {
 	return 0;
 }
 
+
+
+/*********************************************************UP*********************************************************************************************************/
+
 int HandlerUp(processCommandArgSpin_t*	arg) {
 
 	int32_t lectura;
@@ -218,7 +198,7 @@ int HandlerUp(processCommandArgSpin_t*	arg) {
 	Evalboards.ch1.writeRegister(0, 0x28,  arg->acceleration);
 
 	//Una vez detectado el cero realizo un movimiento fijo con 512000 pasos hacia abajo, detecto el flag que detecta XACTUAL=XTARGET
-	while (1) {
+	while (processDipCoating.config.status) {
 
 		Evalboards.ch1.readRegister(0, TMC5130_RAMPSTAT, &lectura);
 		if (lectura & 0x00000200)
@@ -231,6 +211,43 @@ int HandlerUp(processCommandArgSpin_t*	arg) {
 	Evalboards.ch1.readRegister(0, 0x2D, &lectura);
 	printf("Posicion ATARGET :%d\r\n", lectura);
 
+	return 0;
+}
+
+//Subida dentro del proceso de ejecucion de programas
+
+int HandlerUpLoop(processCommandArgSpin_t*	arg) {
+	int32_t lectura;
+
+	printf("Subiendo muestra!!\t");
+	printf("velocidad:%d\t",arg->velocity);
+	printf("aceleracion:%d\r\n",arg->acceleration);
+
+	//Leo Actual
+
+	Evalboards.ch1.readRegister(0, 0x21, &lectura);
+
+	// Seteo aceleracion y velocidad
+	Evalboards.ch1.writeRegister(0, 0x26,  arg->acceleration);
+	Evalboards.ch1.writeRegister(0, 0x27, arg->velocity);
+
+	//desaceleracion
+	Evalboards.ch1.writeRegister(0, 0x28,  arg->acceleration);
+
+
+	// Seteo de registro XTARGET
+	Evalboards.ch1.writeRegister(0, 0x2D, lectura - processDipCoating.config.displacement_delta_sample  );
+
+
+	//Una vez detectado el cero realizo un movimiento fijo con 512000 pasos hacia abajo, detecto el flag que detecta XACTUAL=XTARGET
+	while (processDipCoating.config.status) {
+
+		Evalboards.ch1.readRegister(0, TMC5130_RAMPSTAT, &lectura);
+		if (lectura & 0x00000200)
+			break;
+		else
+			sleep(0.1);
+	}
 	return 0;
 }
 
@@ -263,7 +280,7 @@ int HandlerUp_without_program(processCommandArgSpin_t*	arg) {
 	Evalboards.ch1.writeRegister(0, 0x2D, lectura - arg->displacement_z );
 
 	// Detecto el flag que detecta XACTUAL=XTARGET y apago driver
-	while (1) {
+	while (processDipCoating.config.status) {
 		Evalboards.ch1.readRegister(0, TMC5130_RAMPSTAT, &lectura);
 		if (lectura & 0x00000200){
 			Evalboards.ch1.enableDriver(DRIVER_DISABLE);
@@ -281,8 +298,87 @@ int HandlerUp_without_program(processCommandArgSpin_t*	arg) {
 }
 
 
-int HandlerDown_without_program(processCommandArgSpin_t*	arg) {
+/*********************************************************DOWN*********************************************************************************************************/
 
+
+int HandlerDown(processCommandArgSpin_t*	arg) {
+	int32_t lectura;
+
+	printf("\r\n");
+	printf("Bajando muestra!!\t");
+	printf("velocidad:%d\t",arg->velocity);
+	printf("aceleracion:%d\t",arg->acceleration);
+
+	// Seteo de registro XTARGET
+	arg->displacement_z = processDipCoating.config.displacement_to_sample;
+
+	printf("desplazamiento hasta fluido en pasos:%d\r\n",arg->displacement_z);
+
+	Evalboards.ch1.readRegister(0, 0x21, &lectura);
+	printf("Posicion ACTUAL TARGET :%d\r\n", lectura);
+
+
+	Evalboards.ch1.writeRegister(0, 0x2D, arg->displacement_z );
+
+	// Seteo aceleracion y velocidad
+	Evalboards.ch1.writeRegister(0, 0x26,  arg->acceleration);
+	Evalboards.ch1.writeRegister(0, 0x27, arg->velocity);
+
+	// Seteo desaceleracion
+	Evalboards.ch1.writeRegister(0, 0x28,  arg->acceleration);
+
+	//Una vez detectado el cero realizo un movimiento fijo con 512000 pasos hacia abajo, detecto el flag que detecta XACTUAL=XTARGET
+	while (processDipCoating.config.status) {
+
+		Evalboards.ch1.readRegister(0, TMC5130_RAMPSTAT, &lectura);
+		if (lectura & 0x00000200)
+			break;
+		else{
+			sleep(0.1);
+		}
+	}
+	Evalboards.ch1.readRegister(0, 0x21, &lectura);
+	printf("Posicion ACTUAL TARGET :%d\r\n", lectura);
+
+	return 0;
+}
+
+
+int HandlerDownLoop(processCommandArgSpin_t*	arg) {
+	int32_t lectura;
+
+	printf("Bajando muestra!!\t");
+	printf("velocidad:%d\t",arg->velocity);
+	printf("aceleracion:%d\r\n",arg->acceleration);
+
+	//Leo Actual
+
+	Evalboards.ch1.readRegister(0, 0x21, &lectura);
+
+	// Seteo aceleracion y velocidad
+	Evalboards.ch1.writeRegister(0, 0x26,  arg->acceleration);
+	Evalboards.ch1.writeRegister(0, 0x27, arg->velocity);
+
+	//desaceleracion
+	Evalboards.ch1.writeRegister(0, 0x28,  arg->acceleration);
+
+	// Seteo de registro XTARGET
+	Evalboards.ch1.writeRegister(0, 0x2D, lectura + processDipCoating.config.displacement_delta_sample  );
+
+	//Una vez detectado el cero realizo un movimiento fijo con 512000 pasos hacia abajo, detecto el flag que detecta XACTUAL=XTARGET
+	while (processDipCoating.config.status) {
+
+		Evalboards.ch1.readRegister(0, TMC5130_RAMPSTAT, &lectura);
+		if (lectura & 0x00000200)
+			break;
+		else
+			sleep(0.1);
+	}
+	return 0;
+}
+
+
+int HandlerDown_without_program(processCommandArgSpin_t*	arg) {
 	int32_t lectura;
 
 	printf("Bajando muestra!!\t");
@@ -317,9 +413,6 @@ int HandlerDown_without_program(processCommandArgSpin_t*	arg) {
 				break;
 			}
 			else{
-				//printf ("STATUS:%d\r\n",processDipCoating.config.status);
-				//sleep(0.1);
-
 				if (controlLimit())break;
 				else sleep(0.1);
 
@@ -331,135 +424,6 @@ int HandlerDown_without_program(processCommandArgSpin_t*	arg) {
 	processDipCoating.config.status=0;
 
 	return 0;
-}
-
-
-
-
-int HandlerDown(processCommandArgSpin_t*	arg) {
-	int32_t lectura;
-
-	printf("\r\n");
-	printf("Bajando muestra!!\t");
-	printf("velocidad:%d\t",arg->velocity);
-	printf("aceleracion:%d\t",arg->acceleration);
-
-	// Seteo de registro XTARGET
-	arg->displacement_z = processDipCoating.config.displacement_to_sample;
-
-	printf("desplazamiento hasta fluido en pasos:%d\r\n",arg->displacement_z);
-
-	Evalboards.ch1.readRegister(0, 0x21, &lectura);
-	printf("Posicion ACTUAL TARGET :%d\r\n", lectura);
-
-
-	Evalboards.ch1.writeRegister(0, 0x2D, arg->displacement_z );
-
-	// Seteo aceleracion y velocidad
-	Evalboards.ch1.writeRegister(0, 0x26,  arg->acceleration);
-	Evalboards.ch1.writeRegister(0, 0x27, arg->velocity);
-
-	// Seteo desaceleracion
-	Evalboards.ch1.writeRegister(0, 0x28,  arg->acceleration);
-
-	//Una vez detectado el cero realizo un movimiento fijo con 512000 pasos hacia abajo, detecto el flag que detecta XACTUAL=XTARGET
-	while (1) {
-
-		Evalboards.ch1.readRegister(0, TMC5130_RAMPSTAT, &lectura);
-		if (lectura & 0x00000200)
-			break;
-		else
-			sleep(0.1);
-
-	}
-
-	Evalboards.ch1.readRegister(0, 0x21, &lectura);
-	printf("Posicion ACTUAL TARGET :%d\r\n", lectura);
-
-	return 0;
-}
-
-
-int HandlerDownLoop(processCommandArgSpin_t*	arg) {
-
-	int32_t lectura;
-
-	printf("Bajando muestra!!\t");
-	printf("velocidad:%d\t",arg->velocity);
-	printf("aceleracion:%d\r\n",arg->acceleration);
-
-	//Leo Actual
-
-	Evalboards.ch1.readRegister(0, 0x21, &lectura);
-
-	// Seteo aceleracion y velocidad
-	Evalboards.ch1.writeRegister(0, 0x26,  arg->acceleration);
-	Evalboards.ch1.writeRegister(0, 0x27, arg->velocity);
-
-	//desaceleracion
-	Evalboards.ch1.writeRegister(0, 0x28,  arg->acceleration);
-
-	// Seteo de registro XTARGET
-	Evalboards.ch1.writeRegister(0, 0x2D, lectura + processDipCoating.config.displacement_delta_sample  );
-
-	//Una vez detectado el cero realizo un movimiento fijo con 512000 pasos hacia abajo, detecto el flag que detecta XACTUAL=XTARGET
-	while (1) {
-
-		Evalboards.ch1.readRegister(0, TMC5130_RAMPSTAT, &lectura);
-		if (lectura & 0x00000200)
-			break;
-		else
-			sleep(0.1);
-
-	}
-
-	return 0;
-
-
-}
-
-
-//Subida dentro del proceso de ejecucion de programas
-
-int HandlerUpLoop(processCommandArgSpin_t*	arg) {
-
-
-	int32_t lectura;
-
-	printf("Subiendo muestra!!\t");
-	printf("velocidad:%d\t",arg->velocity);
-	printf("aceleracion:%d\r\n",arg->acceleration);
-
-	//Leo Actual
-
-	Evalboards.ch1.readRegister(0, 0x21, &lectura);
-
-	// Seteo aceleracion y velocidad
-	Evalboards.ch1.writeRegister(0, 0x26,  arg->acceleration);
-	Evalboards.ch1.writeRegister(0, 0x27, arg->velocity);
-
-	//desaceleracion
-	Evalboards.ch1.writeRegister(0, 0x28,  arg->acceleration);
-
-
-	// Seteo de registro XTARGET
-	Evalboards.ch1.writeRegister(0, 0x2D, lectura - processDipCoating.config.displacement_delta_sample  );
-
-
-	//Una vez detectado el cero realizo un movimiento fijo con 512000 pasos hacia abajo, detecto el flag que detecta XACTUAL=XTARGET
-	while (1) {
-
-		Evalboards.ch1.readRegister(0, TMC5130_RAMPSTAT, &lectura);
-		if (lectura & 0x00000200)
-			break;
-		else
-			sleep(0.1);
-
-	}
-
-
-	return 0;
-
 
 }
 
@@ -584,7 +548,7 @@ int HandlerENA_DRIVER() {
 
 int HandlerDIS_DRIVER() {
 	Evalboards.ch1.enableDriver(DRIVER_DISABLE);
-	printf("\r\n");
+	printf("Driver Deshabilitado!\r\n");
 	return 0;
 }
 
@@ -597,10 +561,10 @@ int HandlerCERO_SAMPLE() {
 
 	printf("\r\n");
 	Evalboards.ch1.readRegister(0, 0x21, &lectura);     //
-	printf("CERO_SAMPLE %d\r\n", lectura);
+	printf("CERO_SAMPLE %d\r\n", lectura / 12737  );              //12737   --> 1 mm
 
 	if (sock_global > 0){
-		sprintf(datos,"CERO_SAMPLE %d\r\n", lectura);
+		sprintf(datos,"CERO_SAMPLE %d\r\n", lectura / 12737);
 		send(sock_global, &datos, sizeof(datos) , 0);
 	}
 

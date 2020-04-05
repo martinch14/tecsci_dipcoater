@@ -32,6 +32,11 @@ process_t processDipCoating;
 enviromental_chamber_t enviromentalChamberDipCoating;
 
 
+/*Semaphore */
+
+
+
+
 /*Queue for comunication with Process */
 mod_queue_t queueconsolareception;
 mod_queue_t queueconsolatransmit;

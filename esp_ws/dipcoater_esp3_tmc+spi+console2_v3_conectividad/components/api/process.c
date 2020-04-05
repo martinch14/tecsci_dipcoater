@@ -105,32 +105,29 @@ void ProcessRun(process_t *process) {
 		loop_ori = process->command[PROCESS_COMMAND_LOOP-2].argument.value.val;
 		loop=loop_ori;
 		printf("\r\nProceso Iniciado - Motor Encendido\r\n");
-		while (process->state.commandActualIndex < ci) {
-			if (process->command[process->state.commandActualIndex].commandnumber != PROCESS_COMMAND_LOOP) {
-				//VER LO QUE ESTAMOS PONIENDO EN EL PUNTERO A FUNCION (PASAR DIRECTAMENTE EL ARGUMENTO )
-				//process->command[index].fpcommandhandler(&(process->command[index].argument.spin));
-				process->command[process->state.commandActualIndex].fpcommandhandler(&(process->command[process->state.commandActualIndex].argument));
-				//index++;
-				process->state.commandActualIndex++;
-			}
-			if (process->command[process->state.commandActualIndex].commandnumber == PROCESS_COMMAND_LOOP){
-				if (loop > 0 ){
-					loop--;
-					printf("Loop number:%d\r\n",loop_ori - loop);
 
-					//Desde comando LOOP vuelve 4 comandos hacia atras para hacer secuencia DWUW
-					//index -=4;
-					process->state.commandActualIndex-=4;
-
-
-			}
-					//else index++;
+		if (processDipCoating.config.status){
+			while (process->state.commandActualIndex < ci) {
+				if (process->command[process->state.commandActualIndex].commandnumber != PROCESS_COMMAND_LOOP) {
+					//VER LO QUE ESTAMOS PONIENDO EN EL PUNTERO A FUNCION (PASAR DIRECTAMENTE EL ARGUMENTO )
+					//process->command[index].fpcommandhandler(&(process->command[index].argument.spin));
+					process->command[process->state.commandActualIndex].fpcommandhandler(&(process->command[process->state.commandActualIndex].argument));
+					//index++;
+					process->state.commandActualIndex++;
+				}
+				if (process->command[process->state.commandActualIndex].commandnumber == PROCESS_COMMAND_LOOP){
+					if (loop > 0 ){
+						loop--;
+						printf("Loop number:%d\r\n",loop_ori - loop);
+						//Desde comando LOOP vuelve 4 comandos hacia atras para hacer secuencia DWUW
+						process->state.commandActualIndex-=4;
+					}
+				//else index++;
 				else process->state.commandActualIndex++;
+				}
 			}
 		}
-	} else {
-		printf("Without program to execute!!\r\n");
-	}
+	} else  printf("Without program to execute!!\r\n");
 }
 
 
@@ -227,6 +224,14 @@ void ProcessCommand(){
 			ProcessDIS_DRIVERCommand();
 			break;
 
+		case PROCESS_COMMAND_DELTADIP:
+			ProcessDELTADIPCommand();
+			break;
+
+		case PROCESS_COMMAND_CERO_SAMPLE:
+			ProcessCERO_SAMPLECommand();
+			break;
+
 		default:
 			break;
 
@@ -234,6 +239,10 @@ void ProcessCommand(){
 	}
 
 }
+
+
+
+
 
 
 //SINGLE MOVEMENT COMMAND FUNCTIONS
@@ -381,7 +390,7 @@ void ProcessRunCommand(){
 
 
 
-//Process DINAMICO
+//Process DINAMIC
 
 ///* cmdProcessDinamic is an empty process that it can fill to get a personalized process, up to MAX_DINAMIC_COMMAND commands can be added and set up */
 //processCommand_t cmdProcessDinamic[MAX_DINAMIC_COMMAND] ={
