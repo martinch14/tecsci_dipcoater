@@ -65,7 +65,7 @@
  *
  * FALLA de APP
  * x) boton establecer ( sin movimiento anterior)
- *
+ * x) cuando vulevo de ajustes se desconecta
  * */
 
 
