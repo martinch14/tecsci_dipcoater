@@ -10,8 +10,9 @@
 
 
 #include "process.h"
+#include "LinearRamp.h"
 
-
+extern TMC_LinearRamp rampGenerator[1];
 
 
 int HandlerRight(processCommandArgSpin_t 	*arg);

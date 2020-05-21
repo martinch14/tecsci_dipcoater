@@ -151,7 +151,7 @@ void ProcessRightFastCommand(){
 
 	processCommandArgSpin_t parameters;
 
-	parameters.velocity=2800;
+	parameters.velocity=1800;
 	parameters.acceleration=1000;
 
 
@@ -163,7 +163,7 @@ void ProcessRightCommand(){
 	processCommandArgSpin_t parameters;
 
 	parameters.velocity=1800;
-	parameters.acceleration=1000;
+	parameters.acceleration=100;
 
 
 	HandlerRight_without_program(&parameters);
@@ -173,8 +173,8 @@ void ProcessRightSlowCommand(){
 
 	processCommandArgSpin_t parameters;
 
-	parameters.velocity=800;
-	parameters.acceleration=1000;
+	parameters.velocity=1000;
+	parameters.acceleration=10;
 
 
 	HandlerRight_without_program(&parameters);
@@ -209,8 +209,8 @@ void ProcessLeftSlowCommand(){
 
 	processCommandArgSpin_t parameters;
 
-	parameters.velocity=800;
-	parameters.acceleration=1000;
+	parameters.velocity=1000;
+	parameters.acceleration=100;
 
 
 	HandlerLeft_without_program(&parameters);

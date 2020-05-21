@@ -37,7 +37,7 @@ void CommandSETCOMMANDCUSTOMPROGRAMAPPHandler(int argc, char **argv) {
 	/*SETCUSTOMPROGRAMAPP 2 XX XX XX XX XX XX   	*/
 	/*
 	 *
-	 * 	2 representa la cantidad de pasos  , puede se la cantidad que el usuario desee segun el programa
+	 * 	2 representa la cantidad de pasos  , puede ser la cantidad que el usuario desee segun el programa
 	*	Casa paso es definido por 3 valores   aceleracion velocidad tiempo_espera
 	*
 	*	Por lo tanto la cantidad de comando a pasar deberan ser , por ejemplo para este caso:
@@ -52,6 +52,12 @@ void CommandSETCOMMANDCUSTOMPROGRAMAPPHandler(int argc, char **argv) {
 	*	SETCUSTOMPROGRAMAPP 	3		 XX 	XX 		XX		XX 		XX 		XX		XX 		XX 		XX
 	*		(0)					(1)		(2)  	(3) 	(4)		(5)		(6)		(7)		(8)		(9)		(10)
 	*									|__________________|    |__________________|	|__________________|
+	*
+	*
+	*
+	*
+	*	ACELERACION VELOCIDAD ESPERA
+	*
 	*
 	*/
 

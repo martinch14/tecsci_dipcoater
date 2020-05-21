@@ -19,6 +19,7 @@
 
 #include "freertos/semphr.h"
 
+
 #include "esp_log.h"
 #include "esp_websocket_client.h"
 #include "esp_event.h"
@@ -43,6 +44,8 @@
 #include "TMC5130.h"
 #include "SysTick.h"
 
+
+
 #include "http_server.h"
 #include "dns_server.h"
 #include "include/app_main_spincoater.h"
@@ -57,6 +60,7 @@
  *Crear proceso para ejecutar desde el comando SETCOMMAND..APP
  *Luego lanzarlo desde comando RUN
  *Reportar tiempo y velocidad (buscar registro de velocidad actual)
+ *Tunear el pid del motor
  *
  *
  *
@@ -116,6 +120,10 @@ void xtaskprocess(void *pvParameter) {
 
 	ProcessInit(&processSpinCoating);
 	processSpinCoating.config.status=0;
+
+	QueueHandle_t
+
+
 
 	vTaskDelay(1000 / portTICK_RATE_MS);
 
@@ -721,6 +729,10 @@ void app_main(void) {
 
 	/* register a callback as an example to how you can integrate your code with the wifi manager */
 //	wifi_manager_set_callback(EVENT_STA_GOT_IP, &cb_connection_ok);
+
+
+	/*   Inicializacion Rampa de Aceleracion*/
+	tmc_linearRamp_init(rampGenerator);
 
 
 	xTaskCreate(&xtasktinysh, "Tinysh Task", 8192, NULL, 4, NULL);

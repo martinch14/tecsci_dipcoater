@@ -18,6 +18,12 @@
 #include "tinysh.h"
 #include "TMCL.h"
 
+#include "LinearRamp.h"
+
+
+#include "freertos/queue.h"
+
+
 spi_device_handle_t  spi_dev;
 
 
@@ -27,8 +33,11 @@ process_t processSpinCoating;
 
 
 /*Queue for comunication with Process */
-mod_queue_t queueconsolareception;
-mod_queue_t queueconsolatransmit;
+//mod_queue_t queueconsolareception;
+//mod_queue_t queueconsolatransmit;
+
+
+
 processCommand_t bufferreception[10];
 
 
@@ -39,6 +48,8 @@ int buffertransmit[10];
 
 // Socket TCP-IP global para envíar desde los handlers de los comandos para informar estado a la aplicación
 int sock_global;
+
+extern TMC_LinearRamp rampGenerator[1];
 
 
 

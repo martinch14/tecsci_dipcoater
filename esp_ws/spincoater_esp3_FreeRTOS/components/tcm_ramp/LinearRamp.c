@@ -22,44 +22,78 @@ void tmc_linearRamp_init(TMC_LinearRamp *linearRamp)
 	linearRamp->lastdVRest      = 0;
 	linearRamp->lastdXRest      = 0;
 	linearRamp->rampEnabled     = false;
+
+	printf("Paso por funcion : Ramp_init\r\n");
 }
 
-void tmc_linearRamp_computeRampVelocity(TMC_LinearRamp *linearRamp)
-{
-	if (linearRamp->rampEnabled)
-	{
+void tmc_linearRamp_computeRampVelocity(TMC_LinearRamp *linearRamp) {
+
+	if (linearRamp->rampEnabled) {
 		// update target velocity according actual set acceleration
 		// (scaling pre-factor of 1000 used for 1ms velocity ramp handling)
+
+//		printf(
+//				"Paso por funcion :  IF computeRampVelocity_init   Habilitada!\r\n");
 
 		int dV = linearRamp->acceleration;
 
 		// to ensure that small velocity changes at high set acceleration are also possible
+
+		// Utilizo un pre factor de 100 y un velocity ramp handling de 10ms  - De esta manera de confirma la rampa a traves de cronometro
+		// con un handling de 1ms por alguna razon se acelera mas rapido la cronometracion es erronae
+
+
 		int maxDTV = abs(linearRamp->targetVelocity - linearRamp->rampVelocity);
 		if (maxDTV < (dV/1000))
 			dV = maxDTV*1000;
 
-		dV += linearRamp->lastdVRest;
-		linearRamp->lastdVRest = dV % 1000;
+		dV =   dV +  linearRamp->lastdVRest;
+		linearRamp->lastdVRest = dV % 100;
 
 		if (linearRamp->rampVelocity < linearRamp->targetVelocity)
 		{
 			// accelerate motor
-			linearRamp->rampVelocity += dV/1000;	// divide with pre-factor
+			linearRamp->rampVelocity += dV/100;	// divide with pre-factor
 		}
 		else if (linearRamp->rampVelocity > linearRamp->targetVelocity)
 		{
 			// decelerate motor
-			linearRamp->rampVelocity -= dV/1000;	// divide with pre-factor
+			linearRamp->rampVelocity -= dV/100;	// divide with pre-factor
 		}
-	}
-	else
-	{
+
+//		int dV = linearRamp->acceleration;
+//
+//		// to ensure that small velocity changes at high set acceleration are also possible
+//		int maxDTV = abs(linearRamp->targetVelocity - linearRamp->rampVelocity);
+//		if (maxDTV < (dV / 1000))
+//			dV = maxDTV * 1000;
+//
+//		dV += linearRamp->lastdVRest;
+//		linearRamp->lastdVRest = dV % 1;
+//
+//		if (linearRamp->rampVelocity < linearRamp->targetVelocity) {
+//			// accelerate motor
+//			linearRamp->rampVelocity += dV / 1;	// divide with pre-factor
+//		} else if (linearRamp->rampVelocity > linearRamp->targetVelocity) {
+//			// decelerate motor
+//			linearRamp->rampVelocity -= dV / 1;	// divide with pre-factor
+//		}
+
+	} else {
 		// use target velocity directly
 		linearRamp->rampVelocity = linearRamp->targetVelocity;
+//		printf(
+//				"Paso por funcion  ELSE : computeRampVelocity_init   Habilitada!\r\n");
+
 	}
 
 	// limit ramp velocity
-	linearRamp->rampVelocity = tmc_limitInt(linearRamp->rampVelocity, -linearRamp->maxVelocity, linearRamp->maxVelocity);
+	linearRamp->rampVelocity = tmc_limitInt(linearRamp->rampVelocity,
+			-linearRamp->maxVelocity, linearRamp->maxVelocity);
+
+//	printf(
+//			"Paso por funcion  FINAL : computeRampVelocity_init   Habilitada!\r\n");
+
 }
 
 void tmc_linearRamp_computeRampPosition(TMC_LinearRamp *linearRamp)
