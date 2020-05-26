@@ -1,3 +1,9 @@
+/*
+ * handlers.c
+ *
+ *  Created on: 12 sep. 2019
+ *      Author: martin
+ */
 #include <stdio.h>
 
 #ifndef TECSCI_ARCH_X86
@@ -422,6 +428,7 @@ int HandlerDown_without_program(processCommandArgSpin_t*	arg) {
 		}
 
 	processDipCoating.config.status=0;
+	printf("BAJANDO ESP32D!\r\n");
 
 	return 0;
 

@@ -40,6 +40,8 @@ int HandlerDELTADIP();
 //Handler para realizar TESTS
 int HandlerREADDATA();
 
+
+//Control del limite mecanico (recorrido) de la maquina, los valores aqui dependen del largo del eje Z
 uint8_t controlLimit(void);
 
 

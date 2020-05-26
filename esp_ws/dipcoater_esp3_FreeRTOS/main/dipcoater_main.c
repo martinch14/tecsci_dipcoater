@@ -51,7 +51,19 @@
 #include "include/app_main_dipcoater.h"
 
 
-/*TODO    BUGS
+/*TODO
+ *
+ * CAMBIOs
+ *
+ * pasar a queue de RTOS
+ * agregar comentarios y licencias
+ *
+ *
+ *
+ *
+ *
+ *
+ * BUGS
  *
  * x) perdida de pasos al tirar comandos individuales
  * x) stop cuanto se esta ejecutando el programa      COMANDO STOP CUANDO SE ESTA EJECUTANDO EL PROCESO -> (SE DEBERIA REINICIAR EL PROCESO)
@@ -63,9 +75,16 @@
  *
  *
  *
+ *
+ * PARA AGREGAR APP
+ * modulo bluetooth
+ *
  * FALLA de APP
+ *
+ *
  * x) boton establecer ( sin movimiento anterior)
  * x) cuando vulevo de ajustes se desconecta
+ *
  * */
 
 
