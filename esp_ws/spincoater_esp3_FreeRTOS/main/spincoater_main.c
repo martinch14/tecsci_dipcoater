@@ -121,9 +121,6 @@ void xtaskprocess(void *pvParameter) {
 	ProcessInit(&processSpinCoating);
 	processSpinCoating.config.status=0;
 
-	QueueHandle_t
-
-
 
 	vTaskDelay(1000 / portTICK_RATE_MS);
 
@@ -148,10 +145,11 @@ void xtasktinysh(void *pvParameter) {
 
 	char c = 0;
 	tinysh_init();
-	//queue initialization
-	modQueue_Init(&queueconsolareception, bufferreception, 10, sizeof(processCommand_t));
-	modQueue_Init(&queueconsolatransmit,  buffertransmit, 10, sizeof(int));
 
+	/* Creo Cola de mensajes para los comandos recibidos por pantalla
+	 * los comandos pueden llegar por el puerto serie, con por el socket TCP
+	 * */
+	xQueueConsolaReception= xQueueCreate( 10, sizeof( processCommand_t) );
 
 	tinysh_add_command(&commandSETCOMMANDCUSTOMPROGRAMAPP);
 

@@ -31,20 +31,11 @@ spi_device_handle_t  spi_dev;
 // Global process_t for tinysh handler use
 process_t processSpinCoating;
 
-
-/*Queue for comunication with Process */
-//mod_queue_t queueconsolareception;
-//mod_queue_t queueconsolatransmit;
-
-
-
-processCommand_t bufferreception[10];
-
-
 /*Creo queue de FreRTOS*/
+//Cola de mensajes para pasar los comandos recibidos por la consola
+QueueHandle_t xQueueConsolaReception;
 
 
-int buffertransmit[10];
 
 // Socket TCP-IP global para envíar desde los handlers de los comandos para informar estado a la aplicación
 int sock_global;
@@ -53,10 +44,10 @@ extern TMC_LinearRamp rampGenerator[1];
 
 
 
-void init(void);
-void deinit(void);
+//void init(void);
+//void deinit(void);
 void reset(void);
-void app_main(void);
+//void app_main(void);
 
 
 

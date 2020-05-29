@@ -14,7 +14,7 @@
 
 #include "process.h"
 #include "tinysh.h"
-#include "mod_queue.h"
+
 #include "command.h"
 #include "app_main_spincoater.h"
 
@@ -61,8 +61,6 @@ void CommandSETCOMMANDCUSTOMPROGRAMAPPHandler(int argc, char **argv) {
 	*
 	*/
 
-
-
 	if ( argc != (2 + (tinysh_get_arg_int(argc, argv,1)*3) ) ){
 		printf ("Comando mal ensamblado!\r\n");
 	}
@@ -72,7 +70,7 @@ void CommandSETCOMMANDCUSTOMPROGRAMAPPHandler(int argc, char **argv) {
 
 		numberDinamicStep= tinysh_get_arg_int(argc, argv,1);
 
-		processSpinCoating.state.commandIndex = numberDinamicStep*2 +1 ;   // +1 por el comando stop que se agraga al final
+		processSpinCoating.state.commandIndex = numberDinamicStep*2 +1 ;   // +1 por el comando stop que se agrega al final
 
 		for (i=0 , j=0; i < (numberDinamicStep*2) ; i=i+2, j=j+3){
 			processSpinCoating.command[i].commandnumber= PROCESS_COMMAND_LEFT;
@@ -109,11 +107,18 @@ void CommandRIGHTFASTHandler(int argc, char **argv) {
 	aux_process_comand.commandnumber= PROCESS_COMMAND_RIGHTFAST;
 
 	if (processSpinCoating.config.status == 0){
-		modQueue_Write(&queueconsolareception, &aux_process_comand);
+
+		  if( xQueueSend( xQueueConsolaReception, &aux_process_comand, ( TickType_t ) 10 ) != pdPASS )
+		    {
+		        // Failed to post the message, even after 10 ticks.
+		    }
+
+
 	}
 	else printf("Ejecutando, comando descartado!\r\n");
 
 }
+
 
 void CommandRIGHTHandler(int argc, char **argv) {
 
@@ -122,7 +127,13 @@ void CommandRIGHTHandler(int argc, char **argv) {
 
 	printf("\r\n");
 	if (processSpinCoating.config.status == 0){
-		modQueue_Write(&queueconsolareception, &aux_process_comand);
+
+		 if( xQueueSend( xQueueConsolaReception, &aux_process_comand, ( TickType_t ) 10 ) != pdPASS )
+		    {
+		        // Failed to post the message, even after 10 ticks.
+		    }
+
+
 	}
 	else printf("Ejecutando, comando descartado!\r\n");
 
@@ -136,7 +147,11 @@ void CommandRIGHTSLOWHandler(int argc, char **argv) {
 
 	printf("\r\n");
 	if (processSpinCoating.config.status == 0){
-		modQueue_Write(&queueconsolareception, &aux_process_comand);
+
+		 if( xQueueSend( xQueueConsolaReception, &aux_process_comand, ( TickType_t ) 10 ) != pdPASS )
+		    {
+		        // Failed to post the message, even after 10 ticks.
+		    }
 	}
 	else printf("Ejecutando, comando descartado!\r\n");
 
@@ -149,7 +164,11 @@ void CommandLEFTFASTHandler(int argc, char **argv) {
 
 	printf("\r\n");
 	if (processSpinCoating.config.status == 0) {
-		modQueue_Write(&queueconsolareception, &aux_process_comand);
+
+		 if( xQueueSend( xQueueConsolaReception, &aux_process_comand, ( TickType_t ) 10 ) != pdPASS )
+		    {
+		        // Failed to post the message, even after 10 ticks.
+		    }
 	} else
 		printf("Ejecutando, comando descartado!\r\n");
 
@@ -162,7 +181,12 @@ void CommandLEFTHandler(int argc, char **argv) {
 
 	printf("\r\n");
 	if (processSpinCoating.config.status == 0) {
-		modQueue_Write(&queueconsolareception, &aux_process_comand);
+
+		 if( xQueueSend( xQueueConsolaReception, &aux_process_comand, ( TickType_t ) 10 ) != pdPASS )
+		    {
+		        // Failed to post the message, even after 10 ticks.
+		    }
+
 	} else
 		printf("Ejecutando, comando descartado!\r\n");
 
@@ -175,7 +199,12 @@ void CommandLEFTSLOWHandler(int argc, char **argv) {
 
 	printf("\r\n");
 	if (processSpinCoating.config.status == 0) {
-		modQueue_Write(&queueconsolareception, &aux_process_comand);
+
+		 if( xQueueSend( xQueueConsolaReception, &aux_process_comand, ( TickType_t ) 10 ) != pdPASS )
+		    {
+		        // Failed to post the message, even after 10 ticks.
+		    }
+
 	} else
 		printf("Ejecutando, comando descartado!\r\n");
 
@@ -191,7 +220,12 @@ void CommandSTOPHandler(int argc, char **argv) {
 
 	printf("\r\n");
 	if (processSpinCoating.config.status == 0) {
-		modQueue_Write(&queueconsolareception, &aux_process_comand);
+
+		 if( xQueueSend( xQueueConsolaReception, &aux_process_comand, ( TickType_t ) 10 ) != pdPASS )
+		    {
+		        // Failed to post the message, even after 10 ticks.
+		    }
+
 	} else
 		printf("Ejecutando, comando descartado!\r\n");
 
@@ -207,8 +241,12 @@ void CommandRUNHandler(int argc, char **argv) {
 
 	printf("\r\n");
 	if (processSpinCoating.config.status == 0) {
+		 if( xQueueSend( xQueueConsolaReception, &aux_process_comand, ( TickType_t ) 10 ) != pdPASS )
+		    {
+		        // Failed to post the message, even after 10 ticks.
+		    }
 
-		modQueue_Write(&queueconsolareception, &aux_process_comand);
+
 	} else
 		printf("Ejecutando, comando descartado!\r\n");
 
@@ -224,7 +262,16 @@ void CommandREADDATAHandler(int argc, char **argv) {
 
 	printf("\r\n");
 	if (processSpinCoating.config.status == 0){
-		modQueue_Write(&queueconsolareception, &aux_process_comand);
+
+		 if( xQueueSend( xQueueConsolaReception, &aux_process_comand, ( TickType_t ) 10 ) != pdPASS )
+		    {
+		        // Failed to post the message, even after 10 ticks.
+		    }
+
+
+
+
+
 	}
 	else printf("Ejecutando, comando descartado!\r\n");
 

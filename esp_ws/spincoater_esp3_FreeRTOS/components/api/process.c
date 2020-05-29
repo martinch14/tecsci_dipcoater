@@ -12,7 +12,8 @@
 
 #include "app_main_spincoater.h"
 #include "handlers.h"
-#include "mod_queue.h"
+
+
 
 
 
@@ -46,7 +47,7 @@ processCommand_t cmdProcessCustomRight[MAX_ESTATIC_COMMAND] = {
 
 		/*Al setear el custom program arrancamos desde el comando numero 0*/
 
-		{ .commandnumber = PROCESS_COMMAND_LEFT, 		.spin.velocity = ~(2000),	.spin.acceleration = 1000 , 	.fpcommandhandler = HandlerLeft },
+		{ .commandnumber = PROCESS_COMMAND_RIGHT, 		.spin.velocity = 2000,	.spin.acceleration = 1000 , 	.fpcommandhandler = HandlerRight },
 		{ .commandnumber = PROCESS_COMMAND_WAIT, 		.spin.wait = 10,												  	.fpcommandhandler = HandlerWait},
 		{ .commandnumber = PROCESS_COMMAND_STOP,		.spin.velocity = 0,			.spin.acceleration = 0, 			.fpcommandhandler = HandlerStop},
 
@@ -96,8 +97,11 @@ void ProcessRun(process_t *process) {
 void ProcessCommand(){
 	processCommand_t readed_Command;
 
-	if (modQueue_Read(&queueconsolareception, &readed_Command)){
-		switch (readed_Command.commandnumber){
+
+
+	if (xQueueReceive(xQueueConsolaReception, &readed_Command,
+			(TickType_t) 10)) {
+		switch (readed_Command.commandnumber) {
 
 		case PROCESS_COMMAND_LEFTFAST:
 			ProcessLeftFastCommand();
@@ -145,13 +149,22 @@ void ProcessCommand(){
 
 //SINGLE MOVEMENT COMMAND FUNCTIONS
 
+
+/***
+ *
+ *
+ * Valores muy chicos de aceleracion generan un mal movimiento a bajas velocidades!
+ *
+ *
+ */
+
 /*++++++++++++++++++++++++++++++++++++FAST+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
 void ProcessRightFastCommand(){
 
 	processCommandArgSpin_t parameters;
 
-	parameters.velocity=1800;
+	parameters.velocity=2800;
 	parameters.acceleration=1000;
 
 
@@ -163,7 +176,7 @@ void ProcessRightCommand(){
 	processCommandArgSpin_t parameters;
 
 	parameters.velocity=1800;
-	parameters.acceleration=100;
+	parameters.acceleration=1000;
 
 
 	HandlerRight_without_program(&parameters);
@@ -174,7 +187,7 @@ void ProcessRightSlowCommand(){
 	processCommandArgSpin_t parameters;
 
 	parameters.velocity=1000;
-	parameters.acceleration=10;
+	parameters.acceleration=100;
 
 
 	HandlerRight_without_program(&parameters);
