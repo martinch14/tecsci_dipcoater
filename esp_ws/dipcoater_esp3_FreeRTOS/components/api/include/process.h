@@ -151,7 +151,7 @@ typedef struct {
 
 typedef struct {
 
-	/*Configuracion ->  status  -> 1  cuando se esta ejecutando un programa    -> 0 cunado no se esta ejecutando ningun programa        desplazamiento en eje Y segun pasos del motor   */
+	/*Configuracion ->  status  -> 1  cuando se esta ejecutando un programa o se corre un comando individual   -> 0 cuando no se esta ejecutando ningun programa        desplazamiento en eje Y segun pasos del motor   */
 	uint8_t	status;
 
 

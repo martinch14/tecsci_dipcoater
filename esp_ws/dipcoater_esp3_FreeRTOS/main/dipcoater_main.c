@@ -102,7 +102,7 @@
  * modulo bluetooth
  *
  * FALLA de APP
- *
+ * x) cuando STATUS en 1 la aplicacion muestra como que se desconecto , 1 significa que esta ejecutando un comando o corriendo un programa , no deberia aparecer desconectado
  * x) boton establecer ( sin movimiento anterior)
  * x) cuando vulevo de ajustes se desconecta
  *
@@ -202,6 +202,8 @@ void xtaskprocess(void *pvParameter) {
 
 	vTaskDelay(1000 / portTICK_RATE_MS);
 	ProcessCeroMachineCommand();
+
+	xQueueConsolaReceptionPrograma= xQueueCreate( 5, sizeof( process_t) );
 
 	while (TRUE) {
 
@@ -490,15 +492,6 @@ void xtaskmonitorstatus(void *pvParameter) {
 	}
 }
 
-//void xtaskcommand(void *pvParameter) {
-//
-//	while (1) {
-//
-//		ProcessCommand();
-//		vTaskDelay(200 / portTICK_RATE_MS);
-//		}
-//
-//}
 
 
 
@@ -523,7 +516,6 @@ void app_main(void) {
 
 	xTaskCreate(&xtasktinysh, "Tinysh Task", 8192, NULL, 4, NULL);
 	xTaskCreate(&xtaskprocess, "Process Task", 8192, NULL, 2, NULL);
-//	xTaskCreate(&xtaskcommand, "Command Task", 8192, NULL, 2, NULL);
 	xTaskCreate(&xtaskmotor, "Process Motor Task", 8192, NULL, 2, NULL);
 	xTaskCreate(&tcp_server_task, "tcp_server Task", 8192, NULL, 2, NULL);
 	xTaskCreate(&xtaskmonitorstatus, "Monitor Status Task", 8192, NULL, 2, NULL);

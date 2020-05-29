@@ -74,6 +74,7 @@ process_t processDipCoating;
 /*Creo queue de FreRTOS*/
 //Cola de mensajes para pasar los comandos recibidos por la consola
 QueueHandle_t xQueueConsolaReception;
+QueueHandle_t xQueueConsolaReceptionPrograma;
 
 
 int buffertransmit[10];
