@@ -131,6 +131,8 @@ void ProcessRun(process_t *process) {
 
 void ProcessCommand(){
 	processCommand_t readed_Command;
+	process_t  aux_processDipCoating;
+
 
 	if (xQueueReceive(xQueueConsolaReception, &readed_Command,
 			(TickType_t) 10)){
@@ -199,6 +201,12 @@ void ProcessCommand(){
 			break;
 
 		}
+	}
+	if (xQueueReceive(xQueueConsolaReceptionPrograma, &aux_processDipCoating,
+				(TickType_t) 10)){
+
+		processDipCoating=  aux_processDipCoating;
+
 	}
 
 }

@@ -79,50 +79,59 @@ static const char *TAG_TASK_TINYCOMMAND = "task_tiny_command";
 /*Handler to set up APP command of the custom Process
  4 arguments must be passed: command number (see manual), velocity, acceleration and the test parameter */
 void CommandSETCOMMANDCUSTOMPROGRAMAPPHandler(int argc, char **argv) {
-	processCommand_t aux_process_comand;
-	printf("\r\n");
+	process_t aux_processDipCoating;
+
+	ProcessInit(&aux_processDipCoating);
+
 	if (15 == argc) { /*SETCUSTOMPROGRAMAPP 2 XX XX 3 XX 4 XX XX 5 XX 6 X X X  	*/
 
 		//agregar validacion de todos los argumentos en CommandSETCOMMANDCUSTOMPROGRAMAPPHandler
 
 		// DOWN LOOP vel acel
-		processDipCoating.command[2].argument.spin.velocity =
+		aux_processDipCoating.command[2].argument.spin.velocity =
 				(tinysh_get_arg_int(argc, argv, 2) * 212.2719735 * K_VELOCIDAD);
-		processDipCoating.command[2].argument.spin.acceleration =
+		aux_processDipCoating.command[2].argument.spin.acceleration =
 				(tinysh_get_arg_int(argc, argv, 3) * 3.537866);
 
 		//WAIT DOWN
-		processDipCoating.command[3].argument.wait.time = tinysh_get_arg_int(
+		aux_processDipCoating.command[3].argument.wait.time = tinysh_get_arg_int(
 				argc, argv, 5);
 
 		//UP LOOP vel acel
-		processDipCoating.command[4].argument.spin.velocity =
+		aux_processDipCoating.command[4].argument.spin.velocity =
 				(tinysh_get_arg_int(argc, argv, 7) * 212.2719735 * K_VELOCIDAD);
-		processDipCoating.command[4].argument.spin.acceleration =
+		aux_processDipCoating.command[4].argument.spin.acceleration =
 				(tinysh_get_arg_int(argc, argv, 8) * 3.537866);
 
 		//WAIT UP
-		processDipCoating.command[5].argument.wait.time = tinysh_get_arg_int(
+		aux_processDipCoating.command[5].argument.wait.time = tinysh_get_arg_int(
 				argc, argv, 10);
 
 		//NUMBER OF LOOP
-		processDipCoating.command[6].argument.spin.velocity =
+		aux_processDipCoating.command[6].argument.spin.velocity =
 				tinysh_get_arg_int(argc, argv, 12);
 
 		//Desplazamiento hasta muestra
-		processDipCoating.config.displacement_to_sample = (tinysh_get_arg_int(
+		aux_processDipCoating.config.displacement_to_sample = (tinysh_get_arg_int(
 				argc, argv, 13) * 12737);    // Expresado en mm
 
 		//Profundidad DELTADIP
-		processDipCoating.config.displacement_delta_sample =
+		aux_processDipCoating.config.displacement_delta_sample =
 				(tinysh_get_arg_int(argc, argv, 14) / 0.00007851);
 
+
+		if (xQueueSend(xQueueConsolaReceptionPrograma, &aux_processDipCoating,
+						(TickType_t) 10) != pdPASS) {
+					// Failed to post the message, even after 10 ticks.
+					ESP_LOGE(TAG_TASK_TINYCOMMAND,
+							"Comando descartado, fallo al enviar mensaje por cola");
+				}
+		ESP_LOGI(TAG_TASK_TINYCOMMAND, "Comando SETCOMMANDAPP recibido");
 		ESP_LOGI(TAG_TASK_TINYCOMMAND, "Datos Cargados!");
 
 	}
 }
 
-///////////////////////////////////////////////////////////////////////******Comandos que mandan por cola *****************////////////////////////////////////////////////////
 
 void CommandCERO_SAMPLEHandler(int argc, char **argv) {
 

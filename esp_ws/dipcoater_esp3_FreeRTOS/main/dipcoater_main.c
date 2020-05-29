@@ -71,11 +71,12 @@
 
 #include "http_server.h"
 #include "dns_server.h"
-//#include "json.h"
+
 #include "wifi_manager.h"
 
 
 #include <cJSON.h>
+#include "../components/api/include/socket_tcp_server.h"
 
 
 /*TODO
@@ -113,7 +114,10 @@
 /*=====[Macros de definición de constantes privadas]=========================*/
 
 //#define PORT CONFIG_EXAMPLE_PORT
-#define PORT 3333
+
+//#define PORT 3333
+
+
 //#define CONFIG_EXAMPLE_IPV4
 //#define CONFIG_EXAMPLE_IPV4 192.168.100.110
 
@@ -121,8 +125,8 @@
 /*=====[Definiciones de variables globales privadas]=========================*/
 
 
-static const char *TAG_TASK_SOCKET = "task_socket";
-static const char *TAG_TASK_WIFI_MANAGER = "task_wifi_manager_main";
+//static const char *TAG_TASK_SOCKET = "task_socket";
+//static const char *TAG_TASK_WIFI_MANAGER = "task_wifi_manager_main";
 
 
 
@@ -192,9 +196,6 @@ extern void TMC5130_init(void);
 /*=====[Implementaciones de funciones publicas]==============================*/
 
 
-
-
-
 void xtaskprocess(void *pvParameter) {
 
 	ProcessInit(&processDipCoating);
@@ -228,7 +229,7 @@ void xtasktinysh(void *pvParameter) {
 	char c = 0;
 	tinysh_init();
 
-	/* Creo Cola de mensajes para los comandos recibidos por pantalla
+	/* Creo Cola de mensajes para los comandos individuales recibidos por pantalla
 	 * los comandos pueden llegar por el puerto serie, con por el socket TCP
 	 * */
 	xQueueConsolaReception= xQueueCreate( 10, sizeof( processCommand_t) );
@@ -337,137 +338,8 @@ void xtaskmotor(void *pvParameter) {
 
 }
 
-static void tcp_server_task(void *pvParameters) {
-	char rx_buffer[128];
-	char addr_str[128];
-	int addr_family;
-	int ip_protocol;
-	int i;
-
-	while (1) {
-
-//#ifdef CONFIG_EXAMPLE_IPV4
-		struct sockaddr_in dest_addr;
-		dest_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-		dest_addr.sin_family = AF_INET;
-		dest_addr.sin_port = htons(PORT);
-		addr_family = AF_INET;
-		ip_protocol = IPPROTO_IP;
-		inet_ntoa_r(dest_addr.sin_addr, addr_str, sizeof(addr_str) - 1);
-
-//#else 	//IPV6
-//        struct sockaddr_in6 dest_addr;
-//        bzero(&dest_addr.sin6_addr.un, sizeof(dest_addr.sin6_addr.un));
-//        dest_addr.sin6_family = AF_INET6;
-//        dest_addr.sin6_port = htons(PORT);
-//        addr_family = AF_INET6;
-//        ip_protocol = IPPROTO_IPV6;
-//        inet6_ntoa_r(dest_addr.sin6_addr, addr_str, sizeof(addr_str) - 1);
-//#endif
-
-		int listen_sock = socket(addr_family, SOCK_STREAM, ip_protocol);
-		if (listen_sock < 0) {
-			ESP_LOGE(TAG_TASK_SOCKET, "Unable to create socket: errno %d", errno);
-			break;
-		}
-		ESP_LOGI(TAG_TASK_SOCKET, "Socket created");
-
-		int err = bind(listen_sock, (struct sockaddr*) &dest_addr,
-				sizeof(dest_addr));
-		if (err != 0) {
-			ESP_LOGE(TAG_TASK_SOCKET, "Socket unable to bind: errno %d", errno);
-			break;
-		}
-		ESP_LOGI(TAG_TASK_SOCKET, "Socket bound, port %d", PORT);
-
-		err = listen(listen_sock, 1);
-		if (err != 0) {
-			ESP_LOGE(TAG_TASK_SOCKET, "Error occurred during listen: errno %d", errno);
-			break;
-		}
-		ESP_LOGI(TAG_TASK_SOCKET, "Socket listening");
-
-		struct sockaddr_in6 source_addr; // Large enough for both IPv4 or IPv6
-		uint addr_len = sizeof(source_addr);
-//      int sock = accept(listen_sock, (struct sockaddr *)&source_addr, &addr_len);
-//      int sock_global = accept(listen_sock, (struct sockaddr *)&source_addr, &addr_len);
-		sock_global = accept(listen_sock, (struct sockaddr*) &source_addr,
-				&addr_len);
-
-		printf("Numero de Socket: %d\r\n", sock_global);
-
-		if (sock_global < 0) {
-			ESP_LOGE(TAG_TASK_SOCKET, "Unable to accept connection: errno %d", errno);
-			break;
-		}
-		ESP_LOGI(TAG_TASK_SOCKET, "Socket accepted");
-
-		while (1) {
-
-			int len = recv(sock_global, rx_buffer, sizeof(rx_buffer) - 1, 0);
-
-			// Error occurred during receiving
-			if (len < 0) {
-				ESP_LOGE(TAG_TASK_SOCKET, "recv failed: errno %d", errno);
-
-				///////////****************////////////////////////////
-				/////prueba por desconexion aleatoria mensaje -->  recv failed: errno 104
-				close(sock_global);
-				close(listen_sock);
-				///////////////***********/////////////////////////
-				break;
-			}
-			// Connection closed
-			else if (len == 0) {
-				ESP_LOGI(TAG_TASK_SOCKET, "Connection closed");
-				break;
-			}
-			// Data received
-			else {
-				// Get the sender's ip address as string
-				if (source_addr.sin6_family == PF_INET) {
-					inet_ntoa_r(
-							((struct sockaddr_in*) &source_addr)->sin_addr.s_addr,
-							addr_str, sizeof(addr_str) - 1);
-				} else if (source_addr.sin6_family == PF_INET6) {
-					inet6_ntoa_r(source_addr.sin6_addr, addr_str,
-							sizeof(addr_str) - 1);
-				}
-
-				rx_buffer[len] = 0; // Null-terminate whatever we received and treat like a string
-				ESP_LOGI(TAG_TASK_SOCKET, "Received %d bytes from %s:", len, addr_str);
-				ESP_LOGI(TAG_TASK_SOCKET, "%s", rx_buffer);
-
-
-				for (i = 0; i < len; i++) {
-					tinysh_char_in(rx_buffer[i]);
-				}
-				//Para que  valide lo recibido!
-				tinysh_char_in('\n');
-
-
-				if (err < 0) {
-				ESP_LOGE(TAG_TASK_SOCKET, "Error occurred during sending: errno %d",errno);
-				break;
-				}
-			}
-		}
-
-		if (sock_global != -1) {
-			ESP_LOGE(TAG_TASK_SOCKET, "Shutting down socket and restarting...");
-			//shutdown(sock_global, 0);   /*TEST MARTES SOCKET*/
-			close(sock_global); /*TEST MARTES SOCKET*/
-
-			////FIX sacado de internet  https://www.esp32.com/viewtopic.php?t=10335
-			//shutdown(listen_sock,0);  /*TEST MARTES SOCKET*/
-			close(listen_sock);
-			vTaskDelay(10);
-
-		}
-	}
-
-	//vTaskDelete(NULL); /*TEST MARTES SOCKET*/
-
+void xtaskTcpSocketServer(void *pvParameters) {
+		socket_tcp_run();
 }
 
 
@@ -485,6 +357,9 @@ void xtaskmonitorstatus(void *pvParameter) {
 
 		sprintf(datos,"STATUS %d\r\n",processDipCoating.config.status);
 
+		/*Configuracion ->  processDipCoating.config.status  =  1(UNO)  cuando se esta ejecutando un programa o se corre un comando individual   o  0(CERO) cuando no se esta ejecutando ningun programa */
+
+
 		send(sock_global, &datos, sizeof(datos) , 0);
 		//send(sock_global, &processDipCoating.config.status, sizeof(processDipCoating.config.status) , 0);
 
@@ -493,35 +368,35 @@ void xtaskmonitorstatus(void *pvParameter) {
 }
 
 
-
-
-/* brief this is an exemple of a callback that you can setup in your own app to get notified of wifi manager event */
-void cb_connection_ok(void *pvParameter){
-	ESP_LOGI(TAG_TASK_WIFI_MANAGER, "I have a connection!");
-	//Se ejecuta esta funcion cuando el dispositivo se conecta a la red WIFI configurada
-	//No se ejecuta si esta en modo Access Point
-
-}
-
-
-
 void app_main(void) {
 
-	/* start the wifi manager */
+//	/* start the wifi manager */
 	wifi_manager_start();
 
-	/* register a callback as an example to how you can integrate your code with the wifi manager */
-	wifi_manager_set_callback(EVENT_STA_GOT_IP, &cb_connection_ok);
+//	/* register a callback as an example to how you can integrate your code with the wifi manager */
+//	wifi_manager_set_callback(EVENT_STA_GOT_IP, &cb_connection_ok);
 
 
 	xTaskCreate(&xtasktinysh, "Tinysh Task", 8192, NULL, 4, NULL);
 	xTaskCreate(&xtaskprocess, "Process Task", 8192, NULL, 2, NULL);
 	xTaskCreate(&xtaskmotor, "Process Motor Task", 8192, NULL, 2, NULL);
-	xTaskCreate(&tcp_server_task, "tcp_server Task", 8192, NULL, 2, NULL);
+	xTaskCreate(&xtaskTcpSocketServer,"Tcp Socket Server Task", 8192, NULL, 2, NULL);
 	xTaskCreate(&xtaskmonitorstatus, "Monitor Status Task", 8192, NULL, 2, NULL);
 
 
 }
+
+
+
+
+///* brief this is an exemple of a callback that you can setup in your own app to get notified of wifi manager event */
+//void cb_connection_ok(void *pvParameter){
+//	ESP_LOGI(TAG_TASK_WIFI_MANAGER, "I have a connection!");
+//	//Se ejecuta esta funcion cuando el dispositivo se conecta a la red WIFI configurada
+//	//No se ejecuta si esta en modo Access Point
+//
+//}
+
 
 
 
