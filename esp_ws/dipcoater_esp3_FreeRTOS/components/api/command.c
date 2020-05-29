@@ -44,12 +44,13 @@
 
 
 
-
 /*=====[Macros de definicion de constantes privadas]=========================*/
 #define MAX_ESTATIC_COMMAND 	8
+
 // Constante de diferencia de velocidad debido a que no esta el clk de 16MHZ externo en nuestro diseño
 //#define K_VELOCIDAD  1.34
 #define K_VELOCIDAD  1
+
 // Constante de dezplazamiento lineal   , expresadda en mm/micropasos         ->   una vuelta   1 paso  ==   0.00007851  mm     -->    (una vuelta) 51200   ==   4.02 mm
 #define  K_DEZPLAZAMIENTO_LINEAL   0.00007851   //  78.51E-6
 
@@ -71,71 +72,6 @@ extern flagRun_t entry;
 
 
 /*=====[Implementaciones de funciones publicas]==============================*/
-void CommandLOADPROGRAMSTANDARDHandler(int argc, char **argv){
-	printf("\r\n");
-	ProcessLoadProgramStandard(&processDipCoating);
-}
-
-/*Handler to set up the LOOP COMMAND of the process standard
- 1 arguments must be passed: N corresponding to the number of repetitions of the DWUW cycle  */
-void CommandSETSTANDARDPROGRAMHandler(int argc, char **argv) {
-	processCommand_t aux_process_comand;
-	printf("\r\n");
-	if (2 == argc) {
-		aux_process_comand.commandnumber = PROCESS_COMMAND_LOOP - 2;
-		aux_process_comand.argument.value.val = tinysh_get_arg_int(argc, argv,1);
-		//modQueue_Write(&queueconsolareception, &aux_process_comand);
-		  if( xQueueSend( xQueueConsolaReception, &aux_process_comand, ( TickType_t ) 10 ) != pdPASS )
-		    {
-		        // Failed to post the message, even after 10 ticks.
-		    }
-
-
-		ProcessSetProgramStandard();
-
-	} else {
-		printf(
-				"Ingrese 2 argumentos -> SETSTANDARDPROGRAM X(numero de loops)\r\n");
-	}
-
-}
-
-/*PROCESS CUSTOM HANDLERS*/
-
-/*Handler to LOAD the custom process,
- the process it should have been set up before (if there is no set up the standard parameters will be loaded)  */
-void CommandLOADPROGRAMCUSTOMHandler(int argc, char **argv){
-	printf("\r\n");
-	ProcessLoadProgramCustom(&processDipCoating);
-}
-
-
-/*Handler to set up a single command of the custom Process
- 4 arguments must be passed: command number (see manual), velocity, acceleration and the test parameter */
-void CommandSETCOMMANDCUSTOMPROGRAMHandler(int argc, char **argv) {
-	processCommand_t aux_process_comand;
-	printf("\r\n");
-	if (5 == argc) { /*SETCUSTOMPROGRAM  XX XX XX XX representa 5 comandos 	argc = 5*/
-		aux_process_comand.commandnumber = tinysh_get_arg_int(argc, argv, 1);
-
-		if (aux_process_comand.commandnumber == 6) {
-			aux_process_comand.argument.value.val = tinysh_get_arg_int(argc,argv, 2);
-		}
-
-		else {
-			aux_process_comand.argument.spin.velocity = tinysh_get_arg_int(argc,argv, 2);
-			aux_process_comand.argument.spin.acceleration = tinysh_get_arg_int(argc,argv, 3);
-			aux_process_comand.argument.spin.displacement_z = tinysh_get_arg_int(argc, argv,4);
-		}
-
-		//modQueue_Write(&queueconsolareception, &aux_process_comand);
-		  if( xQueueSend( xQueueConsolaReception, &aux_process_comand, ( TickType_t ) 10 ) != pdPASS )
-		    {
-		        // Failed to post the message, even after 10 ticks.
-		    }
-		ProcessSetProgramCustom();
-	}
-}
 
 
 
@@ -180,57 +116,6 @@ void CommandSETCOMMANDCUSTOMPROGRAMAPPHandler(int argc, char **argv) {
 
 	}
 }
-
-
-/*Handler to set up a all commands of the custom Process
- 25 arguments must be passed: the 3 parameters for each command in increasing order
- obs: for the LOOP comand it must be passed 3 parameters,
- but only the first one will be used the other two will be discarded
-  Example
-  SETALLCUSTOMPROGRAM   x x x  y y y c c c d d d s s s m m m w w w q q q
-  	  	  command ->  	  0		1		2	3		4	5		6	 7
-
-  */
-void CommandSETALLCUSTOMPROGRAMHandler(int argc, char **argv){
-	 processCommand_t aux_process_comand;
-	 uint8_t i=1;
-	 uint8_t j=0;
-	 uint8_t k=1;
-	 uint8_t l=2;
-
-	 printf("\r\n");
-	 printf("%d\n",argc);
-
-	 if(  25 == argc){
-
-		 printf("setall ok/r/n");
-
-		 for(i=1;i<=MAX_ESTATIC_COMMAND;i++){
-
-
-			 aux_process_comand.commandnumber=tinysh_get_arg_int(argc, argv, i-1);
-			 printf("%d \t %d\r\n",i-1,aux_process_comand.commandnumber);
-			 aux_process_comand.argument.spin.velocity=tinysh_get_arg_int(argc, argv, i+j);
-			 printf("%d \t %d\r\n",i+j, aux_process_comand.argument.spin.velocity);
-			 aux_process_comand.argument.spin.acceleration=tinysh_get_arg_int(argc, argv, i+k);
-			 printf("%d \t %d\r\n",i+k,aux_process_comand.argument.spin.acceleration);
-			 aux_process_comand.argument.spin.displacement_z=tinysh_get_arg_int(argc, argv, i+l);
-			 printf("%d \t %d\r\n",i+l,aux_process_comand.argument.spin.displacement_z);
-			 //modQueue_Write(&queueconsolareception,&aux_process_comand);
-			  if( xQueueSend( xQueueConsolaReception, &aux_process_comand, ( TickType_t ) 10 ) != pdPASS )
-			    {
-			        // Failed to post the message, even after 10 ticks.
-			    }
-			 ProcessSetProgramCustom();
-
-			 j+=2;
-			 k+=2;
-			 l+=2;
-		 }
-	 }
-}
-
-
 
 
 
@@ -548,6 +433,129 @@ void CommandRESETHandler(int argc, char **argv) {
 
 
 /*Implementacion de funciones para futuros desarrollos*/
+
+void CommandLOADPROGRAMCUSTOMHandler(int argc, char **argv){
+	printf("\r\n");
+	ProcessLoadProgramCustom(&processDipCoating);
+}
+
+//void CommandLOADPROGRAMSTANDARDHandler(int argc, char **argv){
+//	printf("\r\n");
+//	ProcessLoadProgramStandard(&processDipCoating);
+//}
+
+/*Handler to set up a all commands of the custom Process
+ 25 arguments must be passed: the 3 parameters for each command in increasing order
+ obs: for the LOOP comand it must be passed 3 parameters,
+ but only the first one will be used the other two will be discarded
+  Example
+  SETALLCUSTOMPROGRAM   x x x  y y y c c c d d d s s s m m m w w w q q q
+  	  	  command ->  	  0		1		2	3		4	5		6	 7
+
+  */
+//void CommandSETALLCUSTOMPROGRAMHandler(int argc, char **argv){
+//	 processCommand_t aux_process_comand;
+//	 uint8_t i=1;
+//	 uint8_t j=0;
+//	 uint8_t k=1;
+//	 uint8_t l=2;
+//
+//	 printf("\r\n");
+//	 printf("%d\n",argc);
+//
+//	 if(  25 == argc){
+//
+//		 printf("setall ok/r/n");
+//
+//		 for(i=1;i<=MAX_ESTATIC_COMMAND;i++){
+//
+//
+//			 aux_process_comand.commandnumber=tinysh_get_arg_int(argc, argv, i-1);
+//			 printf("%d \t %d\r\n",i-1,aux_process_comand.commandnumber);
+//			 aux_process_comand.argument.spin.velocity=tinysh_get_arg_int(argc, argv, i+j);
+//			 printf("%d \t %d\r\n",i+j, aux_process_comand.argument.spin.velocity);
+//			 aux_process_comand.argument.spin.acceleration=tinysh_get_arg_int(argc, argv, i+k);
+//			 printf("%d \t %d\r\n",i+k,aux_process_comand.argument.spin.acceleration);
+//			 aux_process_comand.argument.spin.displacement_z=tinysh_get_arg_int(argc, argv, i+l);
+//			 printf("%d \t %d\r\n",i+l,aux_process_comand.argument.spin.displacement_z);
+//			 //modQueue_Write(&queueconsolareception,&aux_process_comand);
+//			  if( xQueueSend( xQueueConsolaReception, &aux_process_comand, ( TickType_t ) 10 ) != pdPASS )
+//			    {
+//			        // Failed to post the message, even after 10 ticks.
+//			    }
+//			 ProcessSetProgramCustom();
+//
+//			 j+=2;
+//			 k+=2;
+//			 l+=2;
+//		 }
+//	 }
+//}
+
+
+///*Handler to set up the LOOP COMMAND of the process standard
+// 1 arguments must be passed: N corresponding to the number of repetitions of the DWUW cycle  */
+//void CommandSETSTANDARDPROGRAMHandler(int argc, char **argv) {
+//	processCommand_t aux_process_comand;
+//	printf("\r\n");
+//	if (2 == argc) {
+//		aux_process_comand.commandnumber = PROCESS_COMMAND_LOOP - 2;
+//		aux_process_comand.argument.value.val = tinysh_get_arg_int(argc, argv,1);
+//		//modQueue_Write(&queueconsolareception, &aux_process_comand);
+//		  if( xQueueSend( xQueueConsolaReception, &aux_process_comand, ( TickType_t ) 10 ) != pdPASS )
+//		    {
+//		        // Failed to post the message, even after 10 ticks.
+//		    }
+//
+//
+//		ProcessSetProgramStandard();
+//
+//	} else {
+//		printf(
+//				"Ingrese 2 argumentos -> SETSTANDARDPROGRAM X(numero de loops)\r\n");
+//	}
+//
+//}
+//
+///*PROCESS CUSTOM HANDLERS*/
+//
+///*Handler to LOAD the custom process,
+// the process it should have been set up before (if there is no set up the standard parameters will be loaded)  */
+//void CommandLOADPROGRAMCUSTOMHandler(int argc, char **argv){
+//	printf("\r\n");
+//	ProcessLoadProgramCustom(&processDipCoating);
+//}
+//
+//
+///*Handler to set up a single command of the custom Process
+// 4 arguments must be passed: command number (see manual), velocity, acceleration and the test parameter */
+//void CommandSETCOMMANDCUSTOMPROGRAMHandler(int argc, char **argv) {
+//	processCommand_t aux_process_comand;
+//	printf("\r\n");
+//	if (5 == argc) { /*SETCUSTOMPROGRAM  XX XX XX XX representa 5 comandos 	argc = 5*/
+//		aux_process_comand.commandnumber = tinysh_get_arg_int(argc, argv, 1);
+//
+//		if (aux_process_comand.commandnumber == 6) {
+//			aux_process_comand.argument.value.val = tinysh_get_arg_int(argc,argv, 2);
+//		}
+//
+//		else {
+//			aux_process_comand.argument.spin.velocity = tinysh_get_arg_int(argc,argv, 2);
+//			aux_process_comand.argument.spin.acceleration = tinysh_get_arg_int(argc,argv, 3);
+//			aux_process_comand.argument.spin.displacement_z = tinysh_get_arg_int(argc, argv,4);
+//		}
+//
+//		//modQueue_Write(&queueconsolareception, &aux_process_comand);
+//		  if( xQueueSend( xQueueConsolaReception, &aux_process_comand, ( TickType_t ) 10 ) != pdPASS )
+//		    {
+//		        // Failed to post the message, even after 10 ticks.
+//		    }
+//		ProcessSetProgramCustom();
+//	}
+//}
+
+
+
 
 
 /*ENVIROMENTAL CHAMBER HANDLERS*/

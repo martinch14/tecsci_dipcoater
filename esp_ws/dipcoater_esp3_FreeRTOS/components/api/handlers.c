@@ -74,7 +74,7 @@
 
 
 /*=====[Definiciones de Variables globales publicas externas]================*/
-//Variable Global con la direccion del socket creado, sirve para enviar mensajes al sokcet desde los handlers
+//Variable Global con la direccion del socket creado, sirve para enviar mensajes al socket desde los handlers
 extern int sock_global;
 
 
@@ -502,6 +502,8 @@ int HandlerREADDATA() {
 
 	int32_t lectura;
 
+	/*Lectura de datos configurados para el funcionamiento de la maquina*/
+
 	for (i=0; i<8 ;i++){
 		printf( "%d %d %d %d \r\n" ,processDipCoating.command[i].commandnumber,processDipCoating.command[i].argument.spin.velocity ,processDipCoating.command[i].argument.spin.acceleration,processDipCoating.command[i].argument.spin.displacement_z  );
 	}
@@ -516,35 +518,6 @@ int HandlerREADDATA() {
 
 	Evalboards.ch1.readRegister(0, 0x2D, &lectura);
 	printf("Posicion  XTARGET:%d\r\n", lectura);
-
-
-//	Evalboards.ch1.enableDriver(DRIVER_ENABLE);
-//
-//	//Leo Actual
-//
-//	Evalboards.ch1.readRegister(0, 0x21, &lectura);
-//	printf("Posicion inicial%d\r\n",lectura);
-//
-//	// Seteo aceleracion y velocidad
-//	Evalboards.ch1.writeRegister(0, 0x26,  60000);
-//	Evalboards.ch1.writeRegister(0, 0x27, 100000);
-//
-//	// Seteo desaceleracion
-//	Evalboards.ch1.writeRegister(0, 0x28,  60000);
-//
-//
-//
-//	// Seteo de registro XTARGET
-//	Evalboards.ch1.writeRegister(0, 0x2D, lectura + 1273722 );
-//
-//	sleep(2);
-//
-//
-//	Evalboards.ch1.readRegister(0, 0x21, &lectura);
-//	Evalboards.ch1.writeRegister(0, 0x2D, lectura );
-//	printf("Posicion final%d\r\n",lectura);
-//
-//	Evalboards.ch1.enableDriver(DRIVER_DISABLE);
 
 
 	return 0;

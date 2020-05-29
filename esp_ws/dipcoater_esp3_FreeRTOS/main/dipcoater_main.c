@@ -128,23 +128,25 @@ static const char *TAG_TASK_WIFI_MANAGER = "task_wifi_manager_main";
 
 flagRun_t entry = STOP;
 
+//Funciones para futuros desarrollos
 //PROCESS STANDARD:
-static tinysh_cmd_t commandSETSTANDARDPROGRAM = 		{NULL,"SETSTANDARDPROGRAM", NULL, NULL, CommandSETSTANDARDPROGRAMHandler, NULL, NULL, NULL};
-static tinysh_cmd_t commandLOADPROGRAMSTANDARD = 		{NULL,"LOADPROGRAMSTANDARD", NULL, NULL, CommandLOADPROGRAMSTANDARDHandler, NULL, NULL, NULL};
-
-//PROCESS CUSTOM:
-
-static tinysh_cmd_t commandLOADPROGRAMCUSTOM = 			{NULL,"LOADPROGRAMCUSTOM", NULL, NULL, CommandLOADPROGRAMCUSTOMHandler, NULL, NULL, NULL};
-
-static tinysh_cmd_t commandSETCOMMANDCUSTOMPROGRAM = 	{NULL,"SETCUSTOMPROGRAM", NULL, NULL, CommandSETCOMMANDCUSTOMPROGRAMHandler, NULL, NULL, NULL};
-static tinysh_cmd_t commandSETCOMMANDCUSTOMPROGRAMAPP = {NULL,"SETCUSTOMPROGRAMAPP", NULL, NULL, CommandSETCOMMANDCUSTOMPROGRAMAPPHandler, NULL, NULL, NULL};
-static tinysh_cmd_t commandSETALLCUSTOMPROGRAM = 		{NULL,"SETALLCUSTOMPROGRAM", NULL, NULL, CommandSETALLCUSTOMPROGRAMHandler, NULL, NULL, NULL};
-
-
+//static tinysh_cmd_t commandSETSTANDARDPROGRAM = 		{NULL,"SETSTANDARDPROGRAM", NULL, NULL, CommandSETSTANDARDPROGRAMHandler, NULL, NULL, NULL};
+//static tinysh_cmd_t commandLOADPROGRAMSTANDARD = 		{NULL,"LOADPROGRAMSTANDARD", NULL, NULL, CommandLOADPROGRAMSTANDARDHandler, NULL, NULL, NULL};
+//static tinysh_cmd_t commandSETCOMMANDCUSTOMPROGRAM = 	{NULL,"SETCUSTOMPROGRAM", NULL, NULL, CommandSETCOMMANDCUSTOMPROGRAMHandler, NULL, NULL, NULL};
+//static tinysh_cmd_t commandSETALLCUSTOMPROGRAM = 		{NULL,"SETALLCUSTOMPROGRAM", NULL, NULL, CommandSETALLCUSTOMPROGRAMHandler, NULL, NULL, NULL};
 //PROCESS DINAMIC:
 //	static tinysh_cmd_t commandCLEANPROGRAMDINAMIC = 		{NULL,"CLEANPROGRAMDINAMIC", NULL, NULL, CommandCLEANPROGRAMDINAMICHandler, NULL, NULL, NULL};
 //	static tinysh_cmd_t commandADDSETALLCOMANDDINAMIC = 	{NULL,"ADDSETALLCOMANDDINAMIC", NULL, NULL, CommandADDSETALLCOMANDDINAMICHandler, NULL, NULL, NULL};
 //	static tinysh_cmd_t commandLOADPROGRAMDINAMIC = 		{NULL,"LOADPROGRAMDINAMIC", NULL, NULL, CommandLOADPROGRAMDINAMICHandler, NULL, NULL, NULL};
+
+
+
+
+//PROCESS CUSTOM APP:
+
+static tinysh_cmd_t commandLOADPROGRAMCUSTOM = 			{NULL,"LOADPROGRAMCUSTOM", NULL, NULL, CommandLOADPROGRAMCUSTOMHandler, NULL, NULL, NULL};
+static tinysh_cmd_t commandSETCOMMANDCUSTOMPROGRAMAPP = {NULL,"SETCUSTOMPROGRAMAPP", NULL, NULL, CommandSETCOMMANDCUSTOMPROGRAMAPPHandler, NULL, NULL, NULL};
+
 
 //RUN LOADED PROCESS:
 static tinysh_cmd_t commandRUN = 						{NULL,"RUN", NULL, NULL, CommandRUNHandler, NULL, NULL, NULL};
@@ -181,6 +183,13 @@ extern void TMC5130_init(void);
 
 
 
+/*=====[Definiciones de Variables globales publicas]=========================*/
+/*=====[Definiciones de Variables globales privadas]=========================*/
+/*=====[Prototipos de funciones privadas]====================================*/
+
+
+
+/*=====[Implementaciones de funciones publicas]==============================*/
 
 
 
@@ -225,12 +234,14 @@ void xtasktinysh(void *pvParameter) {
 
 	/*MOVEMENT COMMANDS*/
 	//command initialization
-	tinysh_add_command(&commandLOADPROGRAMSTANDARD);
+//	tinysh_add_command(&commandLOADPROGRAMSTANDARD);
+//	tinysh_add_command(&commandSETCOMMANDCUSTOMPROGRAM);
+//	tinysh_add_command(&commandSETSTANDARDPROGRAM);
+//	tinysh_add_command(&commandSETALLCUSTOMPROGRAM);
+//
+
 	tinysh_add_command(&commandLOADPROGRAMCUSTOM);
-	tinysh_add_command(&commandSETCOMMANDCUSTOMPROGRAM);
 	tinysh_add_command(&commandSETCOMMANDCUSTOMPROGRAMAPP);
-	tinysh_add_command(&commandSETSTANDARDPROGRAM);
-	tinysh_add_command(&commandSETALLCUSTOMPROGRAM);
 	tinysh_add_command(&commandRUN);
 	tinysh_add_command(&commandCERO_MACHINE);
 	tinysh_add_command(&commandUPFAST);

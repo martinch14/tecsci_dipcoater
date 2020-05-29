@@ -45,52 +45,13 @@
 
 /*=====[Macros estilo funcion privadas]======================================*/
 /*=====[Definiciones de tipos de datos privados]=============================*/
-/*=====[Definiciones de Variables globales publicas externas]================*/
-/*=====[Definiciones de Variables globales publicas]=========================*/
-/*=====[Definiciones de Variables globales privadas]=========================*/
-/*=====[Prototipos de funciones privadas]====================================*/
-//static void funPrivada(void);
-/*=====[Implementaciones de funciones publicas]==============================*/
 
-//PROCESSES AVAILABLE
-
-/*cmdProcessStandard has the predefined values and only the N of the loop can be modified*/
-processCommand_t cmdProcessStandard[MAX_ESTATIC_COMMAND] = {
-//		{ .commandnumber = PROCESS_COMMAND_CERO_MACHINE,.argument.spin.velocity = 222000,	.argument.spin.acceleration = 1000, .fpcommandhandler = HandlerCeroMachine },
-
-
-		//Definir Z0 como la altura entre la interseccion del fluido con la muestra
-		//Bajar hasta Z0 + 10 mm
-		//DEBE BAJAR HASTA ANTES DE INGRESAR LA MUESTRA EN EL RECIPIENTE
-		/*{ .commandnumber = PROCESS_COMMAND_DOWN, 		.argument.spin.velocity = 222000,	.argument.spin.acceleration = 1000, .fpcommandhandler = array[PROCESS_COMMAND_DOWN] },*/
-
-
-		/*Al setear el custom program arrancamos desde el comando numero 0*/
-
-//		{ .commandnumber = PROCESS_COMMAND_DOWN, 		.argument.spin.velocity = 222000,	.argument.spin.acceleration = 1000, .fpcommandhandler = HandlerDown },
-		{ .commandnumber = PROCESS_COMMAND_WAIT, 		.argument.spin.velocity = 0,	.argument.spin.acceleration = 0 , .fpcommandhandler = HandlerWait},
-
-		/*start of the DWUW cycle*/
-		//DEBE BAJAR LA MUESTRA Y SUMERGIRLA EN EL  RECIPIENTE
-		//Tener valor de cuanto debe ingresar la muestra en el fluido -> ir hasta posicion Z0 - profundidad de inmersion
-		{ .commandnumber = PROCESS_COMMAND_DOWN, 		.argument.spin.velocity = 22258,	.argument.spin.acceleration = 32000 , .fpcommandhandler = HandlerDownLoop },
-		{ .commandnumber = PROCESS_COMMAND_WAIT, 		.argument.spin.velocity = 0,	.argument.spin.acceleration = 0 , .fpcommandhandler = HandlerWait },
-		{ .commandnumber = PROCESS_COMMAND_UP, 			.argument.spin.velocity = 22258,	.argument.spin.acceleration = 32000 , .fpcommandhandler = HandlerUpLoop },
-		{ .commandnumber = PROCESS_COMMAND_WAIT, 		.argument.spin.velocity = 0,	.argument.spin.acceleration = 0 , .fpcommandhandler = HandlerWait },
-		/*LOOP repeats N times the DWUW cycle */
-		{ .commandnumber =  PROCESS_COMMAND_LOOP, 		.argument.value.val = 0 },
-
-//		{ .commandnumber = PROCESS_COMMAND_CERO_MACHINE,.argument.spin.velocity = 5,	.argument.spin.acceleration = 10, .fpcommandhandler = HandlerCeroMachine},
-		{ .commandnumber = PROCESS_COMMAND_FINISH,		.argument.spin.velocity = 0,	.argument.spin.acceleration = 0, .fpcommandhandler = HandlerFinish},
-
-};
 
 /*CmdProcessCustom, the arguments can be modified to make a load and run after*/
 processCommand_t cmdProcessCustom[MAX_ESTATIC_COMMAND] = {
 
 		/*Al setear el custom program arrancamos desde el comando numero 0*/
 
-//		{ .commandnumber = PROCESS_COMMAND_CERO_MACHINE,.argument.spin.velocity = 200000,	.argument.spin.acceleration = 20000, .fpcommandhandler = HandlerCeroMachine },
 		{ .commandnumber = PROCESS_COMMAND_DOWN, 		.argument.spin.velocity = 400000,	.argument.spin.acceleration = 40000 , 	.fpcommandhandler = HandlerDown },
 		{ .commandnumber = PROCESS_COMMAND_WAIT, 		.argument.wait.time = 0,												  	.fpcommandhandler = HandlerWait},
 		/*start of the DWUW cycle*/
@@ -100,13 +61,16 @@ processCommand_t cmdProcessCustom[MAX_ESTATIC_COMMAND] = {
 		{ .commandnumber = PROCESS_COMMAND_WAIT, 		.argument.wait.time = 0,													.fpcommandhandler = HandlerWaitUp },
 		/*LOOP repeats N times the DWUW cycle */
 		{ .commandnumber =  PROCESS_COMMAND_LOOP, 		.argument.value.val = 0 },
-
-
-//		{ .commandnumber = PROCESS_COMMAND_CERO_MACHINE,.argument.spin.velocity = 5,	.argument.spin.acceleration = 10, .fpcommandhandler = HandlerCeroMachine},
 		{ .commandnumber = PROCESS_COMMAND_FINISH,		.argument.spin.velocity = 0,	.argument.spin.acceleration = 0, .fpcommandhandler = HandlerFinish},
 
 };
 
+
+/*=====[Definiciones de Variables globales publicas externas]================*/
+/*=====[Definiciones de Variables globales publicas]=========================*/
+/*=====[Definiciones de Variables globales privadas]=========================*/
+/*=====[Prototipos de funciones privadas]====================================*/
+/*=====[Implementaciones de funciones publicas]==============================*/
 
 
 void ProcessInit(process_t* process){
@@ -162,44 +126,6 @@ void ProcessRun(process_t *process) {
 		}
 	} else  printf("Without program to execute!!\r\n");
 }
-
-
-//PROCESS LOAD FUNCTIONS
-
-void ProcessLoadProgramStandard(process_t *process) {
-	process->command= cmdProcessStandard;
-	process->state.commandIndex=MAX_ESTATIC_COMMAND;
-	printf("Program Standard Load!!\r\n");
-}
-
-void ProcessLoadProgramCustom(process_t *process) {
-	process->command= cmdProcessCustom;
-	process->state.commandIndex=MAX_ESTATIC_COMMAND;
-	printf("Program Custom Load!!\r\n");
-}
-
-
-
-
-//PROCESS SET FUNCTIONS
-
-void ProcessSetProgramStandard() {
-	processCommand_t readed_Command;
-//	modQueue_Read(&queueconsolareception, &readed_Command);
-//	cmdProcessStandard[readed_Command.commandnumber].argument.value.val = readed_Command.argument.value.val;
-
-}
-
-void ProcessSetProgramCustom() {
-
-	printf("\r\n");
-	processCommand_t readed_Command;
-//	modQueue_Read(&queueconsolareception, &readed_Command);
-//	cmdProcessCustom[readed_Command.commandnumber].argument = readed_Command.argument;
-
-}
-
-
 
 // Process all individual Command
 
@@ -276,10 +202,6 @@ void ProcessCommand(){
 	}
 
 }
-
-
-
-
 
 
 //SINGLE MOVEMENT COMMAND FUNCTIONS
@@ -436,6 +358,61 @@ void ProcessRESETCommand(){
 /** @} Final de la definición del modulo para doxygen */
 
 
+//PROCESS LOAD FUNCTIONS
+
+//void ProcessLoadProgramStandard(process_t *process) {
+//	process->command= cmdProcessStandard;
+//	process->state.commandIndex=MAX_ESTATIC_COMMAND;
+//	printf("Program Standard Load!!\r\n");
+//}
+
+void ProcessLoadProgramCustom(process_t *process) {
+	process->command= cmdProcessCustom;
+	process->state.commandIndex=MAX_ESTATIC_COMMAND;
+	printf("Program Custom Load!!\r\n");
+}
+
+
+
+
+////PROCESS SET FUNCTIONS
+//
+//void ProcessSetProgramStandard() {
+//	processCommand_t readed_Command;
+////	modQueue_Read(&queueconsolareception, &readed_Command);
+////	cmdProcessStandard[readed_Command.commandnumber].argument.value.val = readed_Command.argument.value.val;
+//
+//}
+//
+//void ProcessSetProgramCustom() {
+//
+//	printf("\r\n");
+//	processCommand_t readed_Command;
+////	modQueue_Read(&queueconsolareception, &readed_Command);
+////	cmdProcessCustom[readed_Command.commandnumber].argument = readed_Command.argument;
+//
+//}
+
+
+///*cmdProcessStandard has the predefined values and only the N of the loop can be modified*/
+//processCommand_t cmdProcessStandard[MAX_ESTATIC_COMMAND] = {
+//		//Definir Z0 como la altura entre la interseccion del fluido con la muestra
+//		//Bajar hasta Z0 + 10 mm
+//		//DEBE BAJAR HASTA ANTES DE INGRESAR LA MUESTRA EN EL RECIPIENTE
+//		/*Al setear el custom program arrancamos desde el comando numero 0*/
+//		{ .commandnumber = PROCESS_COMMAND_WAIT, 		.argument.spin.velocity = 0,	.argument.spin.acceleration = 0 , .fpcommandhandler = HandlerWait},
+//
+//		/*start of the DWUW cycle*/
+//		//DEBE BAJAR LA MUESTRA Y SUMERGIRLA EN EL  RECIPIENTE
+//		{ .commandnumber = PROCESS_COMMAND_DOWN, 		.argument.spin.velocity = 22258,	.argument.spin.acceleration = 32000 , .fpcommandhandler = HandlerDownLoop },
+//		{ .commandnumber = PROCESS_COMMAND_WAIT, 		.argument.spin.velocity = 0,	.argument.spin.acceleration = 0 , .fpcommandhandler = HandlerWait },
+//		{ .commandnumber = PROCESS_COMMAND_UP, 			.argument.spin.velocity = 22258,	.argument.spin.acceleration = 32000 , .fpcommandhandler = HandlerUpLoop },
+//		{ .commandnumber = PROCESS_COMMAND_WAIT, 		.argument.spin.velocity = 0,	.argument.spin.acceleration = 0 , .fpcommandhandler = HandlerWait },
+//		/*LOOP repeats N times the DWUW cycle */
+//		{ .commandnumber =  PROCESS_COMMAND_LOOP, 		.argument.value.val = 0 },
+//		{ .commandnumber = PROCESS_COMMAND_FINISH,		.argument.spin.velocity = 0,	.argument.spin.acceleration = 0, .fpcommandhandler = HandlerFinish},
+//
+//};
 
 
 //Process DINAMIC
