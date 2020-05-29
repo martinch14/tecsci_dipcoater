@@ -1,25 +1,71 @@
-/*
- * command.h
- *
- *  Created on: 7 oct. 2019
- *      Author: martin
- */
+/**************************************************************************************************
+**  (c) Copyright 2019: Martin Abel Gambarotta <magambarotta@gmail.com>
+**  This file is part of DipCoater_Tecsci.
+**
+**  DipCoater_Tecsci is free software: you can redistribute it and/or modify
+**  it under the terms of the GNU General Public License as published by
+**  the Free Software Foundation, either version 3 of the License, or
+**  (at your option) any later version.
+**
+**  DipCoater_Tecsci is distributed in the hope that it will be useful,
+**  but WITHOUT ANY WARRANTY; without even the implied warranty of
+**  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+**  GNU General Public License for more details.
+**
+**  You should have received a copy of the GNU General Public License
+**  along with DipCoater_Tecsci.  If not, see <https://www.gnu.org/licenses/>.
+*************************************************************************************************/
 
+
+/** @file 	command.h
+ ** @brief 	Declaracion de funciones relacionadas con los comandos recibidos
+ **
+ **| REV | YYYY.MM.DD | Autor           | Descripción de los cambios                              |
+ **|-----|------------|-----------------|---------------------------------------------------------|
+ **|   1 | 2020.05.28 | magambarotta    | Version inicial 									      |
+ ** @addtogroup aplicacion
+ ** @{ */
+
+
+/*=====[Evitar inclusion multiple comienzo]==================================*/
 #ifndef COMPONENTS_API_INCLUDE_COMMAND_H_
 #define COMPONENTS_API_INCLUDE_COMMAND_H_
 
 
+/* === Cabecera C++ ============================================================================ */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 
-
+/**
+ * @brief Función para configurar los tiempos y opciones de una puerta
+ *
+ * @param   control         Referencia al objeto control de puerta que se desea configurar
+ * @param   configuracion   Referencia a la estructura con la configuracion del control de puerta
+ * @return  true            El control de puerta se configuro correctamente con los nuevos valores
+ * @return  false           No se pudo configurar el control de puerta porque alguno de los valores es erroneo
+ */
 /*Handler to LOAD the standard process */
 void CommandLOADPROGRAMSTANDARDHandler(int argc, char **argv);
+
+
 
 /*Handler to set up the LOOP COMMAND of the process standard
  1 arguments must be passed: N corresponding to the number of repetitions of the DWUW cycle  */
 void CommandSETSTANDARDPROGRAMHandler(int argc, char **argv);
 /*PROCESS CUSTOM HANDLERS*/
 
+
+
+/**
+ * @brief Función para configurar los tiempos y opciones de una puerta
+ *
+ * @param   control         Referencia al objeto control de puerta que se desea configurar
+ * @param   configuracion   Referencia a la estructura con la configuracion del control de puerta
+ * @return  true            El control de puerta se configuro correctamente con los nuevos valores
+ * @return  false           No se pudo configurar el control de puerta porque alguno de los valores es erroneo
+ */
 /*Handler to LOAD the custom process,
  the process it should have been set up before (if there is no set up the standard parameters will be loaded)  */
 void CommandLOADPROGRAMCUSTOMHandler(int argc, char **argv);
@@ -62,9 +108,16 @@ void CommandCEROMACHINEHandler(int argc, char **argv);
 
 void CommandCERO_SAMPLEHandler(int argc, char **argv);
 void CommandDELTADIPHandler(int argc, char **argv);
-
+void CommandRESETHandler(int argc, char **argv);
 
 void CommandSETCOMMANDCUSTOMPROGRAMAPPHandler(int argc, char **argv);
 
+
+/* === Ciere de documentacion ================================================================== */
+#ifdef __cplusplus
+}
+#endif
+
+/** @} Final de la definición del modulo para doxygen */
 
 #endif /* COMPONENTS_API_INCLUDE_COMMAND_H_ */

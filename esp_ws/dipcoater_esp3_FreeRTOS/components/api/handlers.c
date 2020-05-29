@@ -1,12 +1,40 @@
-/*
- * handlers.c
- *
- *  Created on: 12 sep. 2019
- *      Author: martin
- */
-#include <stdio.h>
+/**************************************************************************************************
+**  (c) Copyright 2019: Martin Abel Gambarotta <magambarotta@gmail.com>
+**  This file is part of DipCoater_Tecsci.
+**
+**  DipCoater_Tecsci is free software: you can redistribute it and/or modify
+**  it under the terms of the GNU General Public License as published by
+**  the Free Software Foundation, either version 3 of the License, or
+**  (at your option) any later version.
+**
+**  DipCoater_Tecsci is distributed in the hope that it will be useful,
+**  but WITHOUT ANY WARRANTY; without even the implied warranty of
+**  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+**  GNU General Public License for more details.
+**
+**  You should have received a copy of the GNU General Public License
+**  along with DipCoater_Tecsci.  If not, see <https://www.gnu.org/licenses/>.
+*************************************************************************************************/
 
-#ifndef TECSCI_ARCH_X86
+
+/** @file 	handlers.c
+ ** @brief 	Implementacion
+ **
+ **| REV | YYYY.MM.DD | Autor           | Descripción de los cambios                              |
+ **|-----|------------|-----------------|---------------------------------------------------------|
+ **|   1 | 2020.05.28 | magambarotta    | Version inicial 									      |
+ ** @addtogroup aplicacion
+ ** @{ */
+
+
+/*=====[Inclusion de su propia cabecera]=====================================*/
+#include "handlers.h"
+
+
+
+/*=====[Inclusiones de dependencias de funciones privadas]===================*/
+#include <stdio.h>
+//#ifndef TECSCI_ARCH_X86
 #include "esp_wifi.h"
 #include "esp_system.h"
 #include "nvs_flash.h"
@@ -28,61 +56,37 @@
 
 #include "app_main_dipcoater.h"
 
-
-#endif
-
-#include "handlers.h"
 #include <unistd.h>
 
-#ifndef TECSCI_ARCH_X86
-#define sleep(x) vTaskDelay((x) * 1000 / portTICK_RATE_MS)
-#endif
-
-
-/*TODO
- *
- *
- *
- *
- *
- * */
-
-//Variable Global con la direccion del socket creado, sirve para enviar mensajes al sokcet desde los handlers
-extern int sock_global;
 
 
 
+/*=====[Macros de definicion de constantes privadas]=========================*/
 // Constante de dezplazamiento lineal   , expresadda en mm/micropasos         ->   una vuelta   1 paso  ==   0.00007851  mm     -->    (una vuelta) 51200   ==   4.02 mm
 #define  K_DEZPLAZAMIENTO_LINEAL   0.00007851   //  78.51E-6
 
 
+/*=====[Macros estilo funcion privadas]======================================*/
+#define sleep(x) vTaskDelay((x) * 1000 / portTICK_RATE_MS)
 
 
-//Funcion que limita los dezplazamientos fuera de la zona segura de trabajo    en TOP   5 mm en BOTTON algunos cm
-// LIMITES EN EL RECORRIDO
-
-uint8_t controlLimit(void){
-	int32_t lectura,lecturaXtarget;
-
-	Evalboards.ch1.readRegister(0, 0x21, &lectura);
-	printf("Posicion ACTUAL :%d\r\n", lectura);
-	Evalboards.ch1.readRegister(0, 0x2D, &lecturaXtarget);
-	printf("Posicion XTARGET :%d\r\n", lecturaXtarget);
+/*=====[Definiciones de tipos de datos privados]=============================*/
 
 
+/*=====[Definiciones de Variables globales publicas externas]================*/
+//Variable Global con la direccion del socket creado, sirve para enviar mensajes al sokcet desde los handlers
+extern int sock_global;
 
-		if (lectura  <  0x0000F8C6  ){
-				Evalboards.ch1.enableDriver(DRIVER_DISABLE);
-				ProcessCeroMachineCommand();
-				return 1;
-			}
-		else if ( lectura > 0x003E3186){
-				Evalboards.ch1.enableDriver(DRIVER_DISABLE);
-				ProcessCeroMachineCommand();
-				return 1;
-			}
-		else return 0;
-}
+
+/*=====[Definiciones de Variables globales publicas]=========================*/
+/*=====[Definiciones de Variables globales privadas]=========================*/
+/*=====[Prototipos de funciones privadas]====================================*/
+
+//Control del limite mecanico (recorrido) de la maquina, los valores aqui dependen del largo del eje Z
+static uint8_t controlLimit(void);
+//static void funPrivada(void);
+/*=====[Implementaciones de funciones publicas]==============================*/
+
 
 
 //Handler Functions
@@ -96,7 +100,7 @@ int HandlerCeroMachine(processCommandArgSpin_t *arg) {
 
 	Evalboards.ch1.enableDriver(DRIVER_ENABLE);
 
-// Activo flag para encender STALLGUARD
+	// Activo flag para encender STALLGUARD
 	Evalboards.ch1.writeRegister(0, 0x34, 0x00000400);
 	Evalboards.ch1.writeRegister(0, TMC5130_RAMPMODE, 0x00000000);
 
@@ -584,6 +588,45 @@ int HandlerDELTADIP() {
 	printf("Profundidad de dip cargada!\r\n");
 	return 0;
 }
+
+
+//Funcion que limita los dezplazamientos fuera de la zona segura de trabajo    en TOP   5 mm en BOTTON algunos cm
+// LIMITES EN EL RECORRIDO
+
+uint8_t controlLimit(void){
+	int32_t lectura,lecturaXtarget;
+
+	Evalboards.ch1.readRegister(0, 0x21, &lectura);
+	printf("Posicion ACTUAL :%d\r\n", lectura);
+	Evalboards.ch1.readRegister(0, 0x2D, &lecturaXtarget);
+	printf("Posicion XTARGET :%d\r\n", lecturaXtarget);
+
+
+
+		if (lectura  <  0x0000F8C6  ){
+				Evalboards.ch1.enableDriver(DRIVER_DISABLE);
+				ProcessCeroMachineCommand();
+				return 1;
+			}
+		else if ( lectura > 0x003E3186){
+				Evalboards.ch1.enableDriver(DRIVER_DISABLE);
+				ProcessCeroMachineCommand();
+				return 1;
+			}
+		else return 0;
+}
+
+
+int HandlerRESET() {
+
+	esp_restart();
+	return 0;
+}
+
+
+/** @} Final de la definición del modulo para doxygen */
+
+
 
 
 

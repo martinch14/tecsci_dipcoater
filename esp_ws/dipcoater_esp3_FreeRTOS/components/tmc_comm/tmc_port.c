@@ -1,10 +1,36 @@
-/*
- * tmc_port.c
- *
- *  Created on: Oct 7, 2019
- *      Author: seb
- */
+/**************************************************************************************************
+**  (c) Copyright 2019: Martin Abel Gambarotta <magambarotta@gmail.com>
+**  This file is part of DipCoater_Tecsci.
+**
+**  DipCoater_Tecsci is free software: you can redistribute it and/or modify
+**  it under the terms of the GNU General Public License as published by
+**  the Free Software Foundation, either version 3 of the License, or
+**  (at your option) any later version.
+**
+**  DipCoater_Tecsci is distributed in the hope that it will be useful,
+**  but WITHOUT ANY WARRANTY; without even the implied warranty of
+**  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+**  GNU General Public License for more details.
+**
+**  You should have received a copy of the GNU General Public License
+**  along with DipCoater_Tecsci.  If not, see <https://www.gnu.org/licenses/>.
+*************************************************************************************************/
 
+
+/** @file 	tmc_port.c
+ ** @brief 	Implementacion
+ **
+ **| REV | YYYY.MM.DD | Autor           | Descripción de los cambios                              |
+ **|-----|------------|-----------------|---------------------------------------------------------|
+ **|   1 | 2020.05.28 | magambarotta    | Version inicial 									      |
+ ** @addtogroup aplicacion
+ ** @{ */
+
+
+/*=====[Inclusion de su propia cabecera]=====================================*/
+#include "tmc_port.h"
+
+/*=====[Inclusiones de dependencias de funciones privadas]===================*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -13,11 +39,20 @@
 #include "driver/gpio.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "tmc_port.h"
 
+
+/*=====[Macros de definicion de constantes privadas]=========================*/
+/*=====[Macros estilo funcion privadas]======================================*/
+/*=====[Definiciones de tipos de datos privados]=============================*/
+/*=====[Definiciones de Variables globales publicas externas]================*/
 extern spi_device_handle_t  spi_dev;
+/*=====[Definiciones de Variables globales publicas]=========================*/
+/*=====[Definiciones de Variables globales privadas]=========================*/
+/*=====[Prototipos de funciones privadas]====================================*/
+//static void funPrivada(void);
+/*=====[Implementaciones de funciones publicas]==============================*/
 
-//extern uint8_t rxx[];
+
 
 bool_t tmc_gpio_config(int pin, int config) {
 #if 0

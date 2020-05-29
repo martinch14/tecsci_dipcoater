@@ -1,29 +1,56 @@
-/*
- * process.c
- *
- *  Created on: 12 sep. 2019
- *      Author: martin
- */
-#include <stdio.h>
+/**************************************************************************************************
+**  (c) Copyright 2019: Martin Abel Gambarotta <magambarotta@gmail.com>
+**  This file is part of DipCoater_Tecsci.
+**
+**  DipCoater_Tecsci is free software: you can redistribute it and/or modify
+**  it under the terms of the GNU General Public License as published by
+**  the Free Software Foundation, either version 3 of the License, or
+**  (at your option) any later version.
+**
+**  DipCoater_Tecsci is distributed in the hope that it will be useful,
+**  but WITHOUT ANY WARRANTY; without even the implied warranty of
+**  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+**  GNU General Public License for more details.
+**
+**  You should have received a copy of the GNU General Public License
+**  along with DipCoater_Tecsci.  If not, see <https://www.gnu.org/licenses/>.
+*************************************************************************************************/
+
+
+/** @file 	process.c
+ ** @brief 	Implementacion
+ **
+ **| REV | YYYY.MM.DD | Autor           | Descripción de los cambios                              |
+ **|-----|------------|-----------------|---------------------------------------------------------|
+ **|   1 | 2020.05.28 | magambarotta    | Version inicial 									      |
+ ** @addtogroup aplicacion
+ ** @{ */
+
+
+/*=====[Inclusion de su propia cabecera]=====================================*/
 #include "process.h"
+
+
+/*=====[Inclusiones de dependencias de funciones privadas]===================*/
+#include <stdio.h>
 #include "handlers.h"
-#include "mod_queue.h"
 #include "app_main_dipcoater.h"
+#include "freertos/queue.h"
 
 
-
+/*=====[Macros de definicion de constantes privadas]=========================*/
 #define MAX_ESTATIC_COMMAND 	8
 //#define MAX_DINAMIC_COMMAND 	32
 
-/**
- * @brief Function to initialize the Process
- * Function that receives a pointer to process, and initialize the structure
- * of the process.
- *
- * @param pointer to process
- * @return nothing
- */
 
+/*=====[Macros estilo funcion privadas]======================================*/
+/*=====[Definiciones de tipos de datos privados]=============================*/
+/*=====[Definiciones de Variables globales publicas externas]================*/
+/*=====[Definiciones de Variables globales publicas]=========================*/
+/*=====[Definiciones de Variables globales privadas]=========================*/
+/*=====[Prototipos de funciones privadas]====================================*/
+//static void funPrivada(void);
+/*=====[Implementaciones de funciones publicas]==============================*/
 
 //PROCESSES AVAILABLE
 
@@ -158,8 +185,8 @@ void ProcessLoadProgramCustom(process_t *process) {
 
 void ProcessSetProgramStandard() {
 	processCommand_t readed_Command;
-	modQueue_Read(&queueconsolareception, &readed_Command);
-	cmdProcessStandard[readed_Command.commandnumber].argument.value.val = readed_Command.argument.value.val;
+//	modQueue_Read(&queueconsolareception, &readed_Command);
+//	cmdProcessStandard[readed_Command.commandnumber].argument.value.val = readed_Command.argument.value.val;
 
 }
 
@@ -167,8 +194,8 @@ void ProcessSetProgramCustom() {
 
 	printf("\r\n");
 	processCommand_t readed_Command;
-	modQueue_Read(&queueconsolareception, &readed_Command);
-	cmdProcessCustom[readed_Command.commandnumber].argument = readed_Command.argument;
+//	modQueue_Read(&queueconsolareception, &readed_Command);
+//	cmdProcessCustom[readed_Command.commandnumber].argument = readed_Command.argument;
 
 }
 
@@ -179,7 +206,8 @@ void ProcessSetProgramCustom() {
 void ProcessCommand(){
 	processCommand_t readed_Command;
 
-	if (modQueue_Read(&queueconsolareception, &readed_Command)){
+	if (xQueueReceive(xQueueConsolaReception, &readed_Command,
+			(TickType_t) 10)){
 		switch (readed_Command.commandnumber){
 
 		case PROCESS_COMMAND_CERO_MACHINE:
@@ -236,6 +264,9 @@ void ProcessCommand(){
 
 		case PROCESS_COMMAND_CERO_SAMPLE:
 			ProcessCERO_SAMPLECommand();
+			break;
+		case PROCESS_COMMAND_RESET:
+			ProcessRESETCommand();
 			break;
 
 		default:
@@ -392,6 +423,17 @@ void ProcessRunCommand(){
 
 	HandlerRun();
 }
+
+
+void ProcessRESETCommand(){
+
+	HandlerRESET();
+
+}
+
+
+
+/** @} Final de la definición del modulo para doxygen */
 
 
 

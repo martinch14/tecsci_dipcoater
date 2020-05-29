@@ -1,9 +1,36 @@
-/*
- * dipcoater_main.c
- *
- *  Created on: 12 sep. 2019
- *      Author: martin
- */
+/**************************************************************************************************
+**  (c) Copyright 2019: Martin Abel Gambarotta <magambarotta@gmail.com>
+**  This file is part of DipCoater_Tecsci.
+**
+**  DipCoater_Tecsci is free software: you can redistribute it and/or modify
+**  it under the terms of the GNU General Public License as published by
+**  the Free Software Foundation, either version 3 of the License, or
+**  (at your option) any later version.
+**
+**  DipCoater_Tecsci is distributed in the hope that it will be useful,
+**  but WITHOUT ANY WARRANTY; without even the implied warranty of
+**  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+**  GNU General Public License for more details.
+**
+**  You should have received a copy of the GNU General Public License
+**  along with DipCoater_Tecsci.  If not, see <https://www.gnu.org/licenses/>.
+*************************************************************************************************/
+
+
+/** @file 	dipcoater_main.c
+ ** @brief 	Implementacion main principal
+ **
+ **| REV | YYYY.MM.DD | Autor           | Descripción de los cambios                              |
+ **|-----|------------|-----------------|---------------------------------------------------------|
+ **|   1 | 2020.05.28 | magambarotta    | Version inicial 									      |
+ ** @addtogroup aplicacion
+ ** @{ */
+
+
+/*=====[Inclusion de su propia cabecera]=====================================*/
+#include "include/app_main_dipcoater.h"
+
+/*=====[Inclusiones de dependencias de funciones privadas]===================*/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -41,30 +68,27 @@
 #include "TMC5130.h"
 #include "SysTick.h"
 
-//#include <esp_http_server.h>
-
 
 #include "http_server.h"
 #include "dns_server.h"
-#include "json.h"
+//#include "json.h"
 #include "wifi_manager.h"
-#include "include/app_main_dipcoater.h"
+
+
+#include <cJSON.h>
 
 
 /*TODO
  *
  * CAMBIOs
  *
- * pasar a queue de RTOS
- * agregar comentarios y licencias
- *
- *
- *
- *
- *
+ * x) pasar a queue de RTOS    OK
+ * x) agregar comentarios y licencias
+ * x) analizar software respirador trinamic y ver si al resetear borran todos los parametros de la configruacion inicial
  *
  * BUGS
  *
+ * x) ejecucion RUN desde consola sin programa cargado
  * x) perdida de pasos al tirar comandos individuales
  * x) stop cuanto se esta ejecutando el programa      COMANDO STOP CUANDO SE ESTA EJECUTANDO EL PROCESO -> (SE DEBERIA REINICIAR EL PROCESO)
  * ver pequeña diferencia en la posicion luego del STOP
@@ -73,14 +97,11 @@
  *
  * x) agregar validacion de todos los argumentos en CommandSETCOMMANDCUSTOMPROGRAMAPPHandler
  *
- *
- *
- *
+ * --------------------------------APP----------------------------------------
  * PARA AGREGAR APP
  * modulo bluetooth
  *
  * FALLA de APP
- *
  *
  * x) boton establecer ( sin movimiento anterior)
  * x) cuando vulevo de ajustes se desconecta
@@ -88,18 +109,25 @@
  * */
 
 
+
+/*=====[Macros de definición de constantes privadas]=========================*/
+
 //#define PORT CONFIG_EXAMPLE_PORT
 #define PORT 3333
 //#define CONFIG_EXAMPLE_IPV4
 //#define CONFIG_EXAMPLE_IPV4 192.168.100.110
 
 
+/*=====[Definiciones de variables globales privadas]=========================*/
+
+
 static const char *TAG_TASK_SOCKET = "task_socket";
 static const char *TAG_TASK_WIFI_MANAGER = "task_wifi_manager_main";
+
+
+
 flagRun_t entry = STOP;
 
-
-extern void TMC5130_init(void);
 //PROCESS STANDARD:
 static tinysh_cmd_t commandSETSTANDARDPROGRAM = 		{NULL,"SETSTANDARDPROGRAM", NULL, NULL, CommandSETSTANDARDPROGRAMHandler, NULL, NULL, NULL};
 static tinysh_cmd_t commandLOADPROGRAMSTANDARD = 		{NULL,"LOADPROGRAMSTANDARD", NULL, NULL, CommandLOADPROGRAMSTANDARDHandler, NULL, NULL, NULL};
@@ -136,15 +164,24 @@ static tinysh_cmd_t commandSTOP = 						{NULL,"STOP", NULL, NULL, CommandSTOPHan
 static tinysh_cmd_t commandREADDATA = 					{NULL,"READDATA", NULL, NULL, CommandREADDATAHandler, NULL, NULL, NULL};
 
 /*CONFIGURATION COMMANDS*/
-
+static tinysh_cmd_t commandCERO_SAMPLE = 					{NULL,"CERO_SAMPLE", NULL, NULL, CommandCERO_SAMPLEHandler, NULL, NULL, NULL};
+static tinysh_cmd_t commandDELTADIP = 					{NULL,"DELTADIP", NULL, NULL, CommandDELTADIPHandler, NULL, NULL, NULL};
 
 /* HABILITACION Y DESHABILITCAION GENERAL DEL DRIVER DEL MOTOR*/
 static tinysh_cmd_t commandENA_DRIVER = 					{NULL,"ENA_DRIVER", NULL, NULL, CommandENA_DRIVERHandler, NULL, NULL, NULL};
 static tinysh_cmd_t commandDIS_DRIVER = 					{NULL,"DIS_DRIVER", NULL, NULL, CommandDIS_DRIVERHandler, NULL, NULL, NULL};
 
+static tinysh_cmd_t commandRESET= 					{NULL,"RESET", NULL, NULL, CommandRESETHandler, NULL, NULL, NULL};
 
-static tinysh_cmd_t commandCERO_SAMPLE = 					{NULL,"CERO_SAMPLE", NULL, NULL, CommandCERO_SAMPLEHandler, NULL, NULL, NULL};
-static tinysh_cmd_t commandDELTADIP = 					{NULL,"DELTADIP", NULL, NULL, CommandDELTADIPHandler, NULL, NULL, NULL};
+
+
+
+/*=====[Definiciones de Variables globales publicas externas]================*/
+extern void TMC5130_init(void);
+
+
+
+
 
 
 
@@ -157,7 +194,7 @@ void xtaskprocess(void *pvParameter) {
 	vTaskDelay(1000 / portTICK_RATE_MS);
 	ProcessCeroMachineCommand();
 
-	while (1) {
+	while (TRUE) {
 
 		ProcessCommand();
 
@@ -179,20 +216,19 @@ void xtasktinysh(void *pvParameter) {
 
 	char c = 0;
 	tinysh_init();
-	//queue initialization
-	modQueue_Init(&queueconsolareception, bufferreception, 10, sizeof(processCommand_t));
-	modQueue_Init(&queueconsolatransmit,  buffertransmit, 10, sizeof(int));
+
+	/* Creo Cola de mensajes para los comandos recibidos por pantalla
+	 * los comandos pueden llegar por el puerto serie, con por el socket TCP
+	 * */
+	xQueueConsolaReception= xQueueCreate( 10, sizeof( processCommand_t) );
+
 
 	/*MOVEMENT COMMANDS*/
 	//command initialization
 	tinysh_add_command(&commandLOADPROGRAMSTANDARD);
 	tinysh_add_command(&commandLOADPROGRAMCUSTOM);
-
-//	tinysh_add_command(&commandLOADPROGRAMDINAMIC);
 	tinysh_add_command(&commandSETCOMMANDCUSTOMPROGRAM);
 	tinysh_add_command(&commandSETCOMMANDCUSTOMPROGRAMAPP);
-
-
 	tinysh_add_command(&commandSETSTANDARDPROGRAM);
 	tinysh_add_command(&commandSETALLCUSTOMPROGRAM);
 	tinysh_add_command(&commandRUN);
@@ -205,13 +241,12 @@ void xtasktinysh(void *pvParameter) {
 	tinysh_add_command(&commandDOWNSLOW);
 	tinysh_add_command(&commandSTOP);
 	tinysh_add_command(&commandREADDATA);
-
-
-	tinysh_add_command(&commandENA_DRIVER);
-	tinysh_add_command(&commandDIS_DRIVER);
-
 	tinysh_add_command(&commandCERO_SAMPLE);
 	tinysh_add_command(&commandDELTADIP);
+	tinysh_add_command(&commandENA_DRIVER);
+	tinysh_add_command(&commandDIS_DRIVER);
+	tinysh_add_command(&commandRESET);
+
 
 	while (1) {
 				c = getchar();
@@ -226,8 +261,10 @@ void xtasktinysh(void *pvParameter) {
 
 void xtaskmotor(void *pvParameter) {
 
-
+	/*Inicializacion del puerto SPI para la transmision de datos con el Circuito Integrado TMC5130*/
 	spi_dev = tmc_spi_init();
+
+	/*Inicializacion de funciones de la API Trinamic*/
 	tmcmotioncontroller_init();
 	TMC5130_init();
 
@@ -485,10 +522,7 @@ void app_main(void) {
 
 
 
-
-
-
-
+/** @} Final de la definición del modulo para doxygen */
 
 
 

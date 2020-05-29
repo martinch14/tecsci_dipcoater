@@ -1,16 +1,46 @@
-/*
- * process.h
- *
- *  Created on: 6 sep. 2019
- *      Author: martin
- */
+/**************************************************************************************************
+**  (c) Copyright 2019: Martin Abel Gambarotta <magambarotta@gmail.com>
+**  This file is part of DipCoater_Tecsci.
+**
+**  DipCoater_Tecsci is free software: you can redistribute it and/or modify
+**  it under the terms of the GNU General Public License as published by
+**  the Free Software Foundation, either version 3 of the License, or
+**  (at your option) any later version.
+**
+**  DipCoater_Tecsci is distributed in the hope that it will be useful,
+**  but WITHOUT ANY WARRANTY; without even the implied warranty of
+**  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+**  GNU General Public License for more details.
+**
+**  You should have received a copy of the GNU General Public License
+**  along with DipCoater_Tecsci.  If not, see <https://www.gnu.org/licenses/>.
+*************************************************************************************************/
+
+
+/** @file 	process.h
+ ** @brief 	Declaracion
+ **
+ **| REV | YYYY.MM.DD | Autor           | Descripción de los cambios                              |
+ **|-----|------------|-----------------|---------------------------------------------------------|
+ **|   1 | 2020.05.28 | magambarotta    | Version inicial 									      |
+ ** @addtogroup aplicacion
+ ** @{ */
+
+
+/*=====[Evitar inclusion multiple comienzo]==================================*/
 
 #ifndef COMPONENTS_API_INCLUDE_PROCESS_H_
 #define COMPONENTS_API_INCLUDE_PROCESS_H_
 
+
+/*=====[C++ comienzo]========================================================*/
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/*=====[Inclusiones de dependencias de funciones publicas]===================*/
 #include <stdint.h>
-
-
 
 
 
@@ -19,7 +49,7 @@
  *
  *
  *
- *						|Arreglo de comando  processCommand_t			|
+ *						|Arreglo de comandos del tipo  processCommand_t |
  *						|												|
  *						|-----------------------------------------------|
  *						|												|
@@ -35,10 +65,15 @@
  *
  */
 
-/*DEFINED VALUES*/
+/*=====[Macros de definicion de constantes publicas]=========================*/
 #define _FLAG_ERROR          	1<< 8
 
-/*DEFINED STRUCTS*/
+/*=====[Macros estilo funcion publicas]======================================*/
+//#define printInt(printer,number) printIntFormat((printer),(number),(DEC_FORMAT))
+
+
+
+/*=====[Definiciones de tipos de datos publicos]=============================*/
 
 typedef struct {
 	float values[4];
@@ -84,7 +119,8 @@ typedef enum {
 	PROCESS_COMMAND_ENA_DRIVER,
 	PROCESS_COMMAND_DIS_DRIVER,
 	PROCESS_COMMAND_CERO_SAMPLE,
-	PROCESS_COMMAND_DELTADIP
+	PROCESS_COMMAND_DELTADIP,
+	PROCESS_COMMAND_RESET
 
 
 } proccesCommandNumber_t;
@@ -148,7 +184,14 @@ typedef struct {
 } process_t;
 
 
-//FUNCTION DECLARATION
+/*=====[Prototipos de funciones publicas]====================================*/
+
+/*
+* @brief	funcion_thread_serial_educiaa  -> Esta funcion hace un polling al sobre el puerto Serial
+* 		conectado a la EDUCIAA y si llega un mensaje lo retransmite a traves de un FD hacia el TCP client
+* @param[]  Referencia a estructura del tipo pthread_t
+* @returns  0 Creacion correcta
+*/
 void ProcessInit(process_t *process);
 void ProcessRun(process_t *process);
 void ProcessLoadProgramStandard(process_t *process);
@@ -171,14 +214,27 @@ void ProcessDIS_DRIVERCommand();
 void ProcessCERO_SAMPLECommand();
 void ProcessDELTADIPCommand();
 
+void ProcessRESETCommand();
+
 
 void ProcessCommand();
 
+
+
+/*=====[Prototipos de funciones publicas futuro desarrollo]====================================*/
 //void ProcessLoadProgramDinamic(process_t *process);
 //void ProcessCleanDinamic();
 //int  ProcessDinamicLen();
 //void ProcessAddSetProgramDinamic();
 
+/*=====[C++ fin]=============================================================*/
 
+#ifdef __cplusplus
+}
+#endif
+
+/** @} Final de la definición del modulo para doxygen */
+
+/*=====[Evitar inclusion multiple fin]=======================================*/
 
 #endif /* COMPONENTS_API_INCLUDE_PROCESS_H_ */

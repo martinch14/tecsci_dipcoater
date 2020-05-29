@@ -1,43 +1,76 @@
-/*
- * command.c
- *
- *  Created on: 7 oct. 2019
- *  Author: martin
- */
+/**************************************************************************************************
+**  (c) Copyright 2019: Martin Abel Gambarotta <magambarotta@gmail.com>
+**  This file is part of DipCoater_Tecsci.
+**
+**  DipCoater_Tecsci is free software: you can redistribute it and/or modify
+**  it under the terms of the GNU General Public License as published by
+**  the Free Software Foundation, either version 3 of the License, or
+**  (at your option) any later version.
+**
+**  DipCoater_Tecsci is distributed in the hope that it will be useful,
+**  but WITHOUT ANY WARRANTY; without even the implied warranty of
+**  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+**  GNU General Public License for more details.
+**
+**  You should have received a copy of the GNU General Public License
+**  along with DipCoater_Tecsci.  If not, see <https://www.gnu.org/licenses/>.
+*************************************************************************************************/
 
 
-/*PROCESS STANDARD HANDLERS*/
+/** @file 	command.c
+ ** @brief 	Implementacion de funciones relacionadas con los comandos recibidos
+ **
+ **| REV | YYYY.MM.DD | Autor           | Descripción de los cambios                              |
+ **|-----|------------|-----------------|---------------------------------------------------------|
+ **|   1 | 2020.05.28 | magambarotta    | Version inicial 									      |
+ ** @addtogroup aplicacion
+ ** @{ */
 
-/*Handler to LOAD the standard process */
-#include <stdio.h>
 
-#include "process.h"
-#include "tinysh.h"
-#include "mod_queue.h"
-#include "app_main_dipcoater.h"
 
+/*=====[Inclusion de su propia cabecera]=====================================*/
 #include "command.h"
 
 
-extern process_t processDipCoating;
-extern flagRun_t entry;
+
+/*=====[Inclusiones de dependencias de funciones privadas]===================*/
+
+#include "process.h"
+#include <stdio.h>
+#include "tinysh.h"
+#include "app_main_dipcoater.h"
+#include "freertos/queue.h"
 
 
+
+
+
+/*=====[Macros de definicion de constantes privadas]=========================*/
 #define MAX_ESTATIC_COMMAND 	8
-
-
 // Constante de diferencia de velocidad debido a que no esta el clk de 16MHZ externo en nuestro diseño
 //#define K_VELOCIDAD  1.34
 #define K_VELOCIDAD  1
-
-
-
 // Constante de dezplazamiento lineal   , expresadda en mm/micropasos         ->   una vuelta   1 paso  ==   0.00007851  mm     -->    (una vuelta) 51200   ==   4.02 mm
 #define  K_DEZPLAZAMIENTO_LINEAL   0.00007851   //  78.51E-6
 
 
-/*PROCESS STANDARD HANDLERS*/
 
+/*=====[Macros estilo funcion privadas]======================================*/
+/*=====[Definiciones de tipos de datos privados]=============================*/
+
+/*=====[Definiciones de Variables globales publicas externas]================*/
+extern process_t processDipCoating;
+extern flagRun_t entry;
+
+
+
+/*=====[Definiciones de Variables globales publicas]=========================*/
+/*=====[Definiciones de Variables globales privadas]=========================*/
+/*=====[Prototipos de funciones privadas]====================================*/
+
+
+
+/*=====[Implementaciones de funciones publicas]==============================*/
 void CommandLOADPROGRAMSTANDARDHandler(int argc, char **argv){
 	printf("\r\n");
 	ProcessLoadProgramStandard(&processDipCoating);
@@ -51,7 +84,13 @@ void CommandSETSTANDARDPROGRAMHandler(int argc, char **argv) {
 	if (2 == argc) {
 		aux_process_comand.commandnumber = PROCESS_COMMAND_LOOP - 2;
 		aux_process_comand.argument.value.val = tinysh_get_arg_int(argc, argv,1);
-		modQueue_Write(&queueconsolareception, &aux_process_comand);
+		//modQueue_Write(&queueconsolareception, &aux_process_comand);
+		  if( xQueueSend( xQueueConsolaReception, &aux_process_comand, ( TickType_t ) 10 ) != pdPASS )
+		    {
+		        // Failed to post the message, even after 10 ticks.
+		    }
+
+
 		ProcessSetProgramStandard();
 
 	} else {
@@ -89,7 +128,11 @@ void CommandSETCOMMANDCUSTOMPROGRAMHandler(int argc, char **argv) {
 			aux_process_comand.argument.spin.displacement_z = tinysh_get_arg_int(argc, argv,4);
 		}
 
-		modQueue_Write(&queueconsolareception, &aux_process_comand);
+		//modQueue_Write(&queueconsolareception, &aux_process_comand);
+		  if( xQueueSend( xQueueConsolaReception, &aux_process_comand, ( TickType_t ) 10 ) != pdPASS )
+		    {
+		        // Failed to post the message, even after 10 ticks.
+		    }
 		ProcessSetProgramCustom();
 	}
 }
@@ -173,7 +216,11 @@ void CommandSETALLCUSTOMPROGRAMHandler(int argc, char **argv){
 			 printf("%d \t %d\r\n",i+k,aux_process_comand.argument.spin.acceleration);
 			 aux_process_comand.argument.spin.displacement_z=tinysh_get_arg_int(argc, argv, i+l);
 			 printf("%d \t %d\r\n",i+l,aux_process_comand.argument.spin.displacement_z);
-			 modQueue_Write(&queueconsolareception,&aux_process_comand);
+			 //modQueue_Write(&queueconsolareception,&aux_process_comand);
+			  if( xQueueSend( xQueueConsolaReception, &aux_process_comand, ( TickType_t ) 10 ) != pdPASS )
+			    {
+			        // Failed to post the message, even after 10 ticks.
+			    }
 			 ProcessSetProgramCustom();
 
 			 j+=2;
@@ -207,8 +254,14 @@ void CommandCERO_SAMPLEHandler(int argc, char **argv) {
 	}
 	else{
 		if (processDipCoating.config.status == 0){
-		modQueue_Write(&queueconsolareception, &aux_process_comand);
+		//modQueue_Write(&queueconsolareception, &aux_process_comand);
 		//ProcessCERO_SAMPLECommand();
+			  if( xQueueSend( xQueueConsolaReception, &aux_process_comand, ( TickType_t ) 10 ) != pdPASS )
+			    {
+			        // Failed to post the message, even after 10 ticks.
+			    }
+
+
 		}else printf("Ejecutando, comando descartado!\r\n");
 
 	}
@@ -228,7 +281,12 @@ void CommandDELTADIPHandler(int argc, char **argv) {
 		processDipCoating.config.displacement_delta_sample = deltadip  / 0.00007851;
 
 		//ProcessDELTADIPCommand();
-		modQueue_Write(&queueconsolareception, &aux_process_comand);
+		//modQueue_Write(&queueconsolareception, &aux_process_comand);
+		  if( xQueueSend( xQueueConsolaReception, &aux_process_comand, ( TickType_t ) 10 ) != pdPASS )
+		    {
+		        // Failed to post the message, even after 10 ticks.
+		    }
+
 
 	} else {
 		printf(
@@ -245,7 +303,11 @@ void CommandCEROMACHINEHandler(int argc, char **argv){
 	aux_process_comand.commandnumber= PROCESS_COMMAND_CERO_MACHINE;
 
 		if (processDipCoating.config.status == 0){
-			modQueue_Write(&queueconsolareception, &aux_process_comand);
+			//modQueue_Write(&queueconsolareception, &aux_process_comand);
+			  if( xQueueSend( xQueueConsolaReception, &aux_process_comand, ( TickType_t ) 10 ) != pdPASS )
+			    {
+			        // Failed to post the message, even after 10 ticks.
+			    }
 		}
 		else printf("Ejecutando, comando descartado!\r\n");
 
@@ -255,21 +317,24 @@ void CommandCEROMACHINEHandler(int argc, char **argv){
 
 /*Handler to RUn the LOADED process,
  * turn on the RUN flag to RUN*/
-void CommandRUNHandler(int argc, char **argv){
+void CommandRUNHandler(int argc, char **argv) {
 
 	printf("\r\n");
 	processCommand_t aux_process_comand;
-	aux_process_comand.commandnumber= PROCESS_COMMAND_RUN;
+	aux_process_comand.commandnumber = PROCESS_COMMAND_RUN;
 
-		if (processDipCoating.config.status == 0){
-			modQueue_Write(&queueconsolareception, &aux_process_comand);
-			entry=RUN;
-		}
-		else {
+	if (processDipCoating.config.status == 0  && processDipCoating.command != NULL) {
 
-			printf("Ejecutando, comando descartado!\r\n");
-			entry=STOP;
+		if (xQueueSend(xQueueConsolaReception, &aux_process_comand,
+				(TickType_t) 10) != pdPASS) {
+			// Failed to post the message, even after 10 ticks.
 		}
+		entry = RUN;
+	} else {
+
+		printf("Ejecutando  o programa no cargado , comando descartado!\r\n");
+		entry = STOP;
+	}
 }
 
 /*SINGLE MOVEMENT HANDLERS*/
@@ -280,8 +345,12 @@ void CommandUPFASTHandler(int argc, char **argv) {
 	processCommand_t aux_process_comand;
 	aux_process_comand.commandnumber= PROCESS_COMMAND_UPFAST;
 
-	if (processDipCoating.config.status == 0){
-		modQueue_Write(&queueconsolareception, &aux_process_comand);
+	if (processDipCoating.config.status == 0  ){
+
+		  if( xQueueSend( xQueueConsolaReception, &aux_process_comand, ( TickType_t ) 10 ) != pdPASS )
+		    {
+		        // Failed to post the message, even after 10 ticks.
+		    }
 	}
 	else printf("Ejecutando, comando descartado!\r\n");
 
@@ -293,7 +362,11 @@ void CommandUPHandler(int argc, char **argv) {
 	aux_process_comand.commandnumber= PROCESS_COMMAND_UP;
 
 	if (processDipCoating.config.status == 0){
-		modQueue_Write(&queueconsolareception, &aux_process_comand);
+		//modQueue_Write(&queueconsolareception, &aux_process_comand);
+		  if( xQueueSend( xQueueConsolaReception, &aux_process_comand, ( TickType_t ) 10 ) != pdPASS )
+		    {
+		        // Failed to post the message, even after 10 ticks.
+		    }
 	}
 	else printf("Ejecutando, comando descartado!\r\n");
 
@@ -306,7 +379,11 @@ void CommandUPSLOWHandler(int argc, char **argv) {
 	aux_process_comand.commandnumber= PROCESS_COMMAND_UPSLOW;
 
 	if (processDipCoating.config.status == 0){
-		modQueue_Write(&queueconsolareception, &aux_process_comand);
+		//modQueue_Write(&queueconsolareception, &aux_process_comand);
+		  if( xQueueSend( xQueueConsolaReception, &aux_process_comand, ( TickType_t ) 10 ) != pdPASS )
+		    {
+		        // Failed to post the message, even after 10 ticks.
+		    }
 	}
 	else printf("Ejecutando, comando descartado!\r\n");
 
@@ -325,7 +402,11 @@ void CommandDOWNFASTHandler(int argc, char **argv) {
 	aux_process_comand.commandnumber= PROCESS_COMMAND_DOWNFAST;
 
 	if (processDipCoating.config.status == 0){
-		modQueue_Write(&queueconsolareception, &aux_process_comand);
+		//modQueue_Write(&queueconsolareception, &aux_process_comand);
+		  if( xQueueSend( xQueueConsolaReception, &aux_process_comand, ( TickType_t ) 10 ) != pdPASS )
+		    {
+		        // Failed to post the message, even after 10 ticks.
+		    }
 	}
 	else printf("Ejecutando, comando descartado!\r\n");
 	//ProcessDownFastCommand();
@@ -336,7 +417,11 @@ void CommandDOWNHandler(int argc, char **argv) {
 	aux_process_comand.commandnumber= PROCESS_COMMAND_DOWN;
 
 	if (processDipCoating.config.status == 0){
-		modQueue_Write(&queueconsolareception, &aux_process_comand);
+		//modQueue_Write(&queueconsolareception, &aux_process_comand);
+		  if( xQueueSend( xQueueConsolaReception, &aux_process_comand, ( TickType_t ) 10 ) != pdPASS )
+		    {
+		        // Failed to post the message, even after 10 ticks.
+		    }
 	}
 	else printf("Ejecutando, comando descartado!\r\n");
 
@@ -349,7 +434,11 @@ void CommandDOWNSLOWHandler(int argc, char **argv) {
 
 
 	if (processDipCoating.config.status == 0){
-		modQueue_Write(&queueconsolareception, &aux_process_comand);
+		//modQueue_Write(&queueconsolareception, &aux_process_comand);
+		  if( xQueueSend( xQueueConsolaReception, &aux_process_comand, ( TickType_t ) 10 ) != pdPASS )
+		    {
+		        // Failed to post the message, even after 10 ticks.
+		    }
 	}
 	else printf("Ejecutando, comando descartado!\r\n");
 //	ProcessDownSlowCommand();
@@ -390,7 +479,11 @@ void CommandREADDATAHandler(int argc, char **argv) {
 	aux_process_comand.commandnumber= PROCESS_COMMAND_READDATA;
 
 	if (processDipCoating.config.status == 0){
-		modQueue_Write(&queueconsolareception, &aux_process_comand);
+		//modQueue_Write(&queueconsolareception, &aux_process_comand);
+		  if( xQueueSend( xQueueConsolaReception, &aux_process_comand, ( TickType_t ) 10 ) != pdPASS )
+		    {
+		        // Failed to post the message, even after 10 ticks.
+		    }
 	}
 	else printf("Ejecutando, comando descartado!\r\n");
 
@@ -404,7 +497,11 @@ void CommandENA_DRIVERHandler(int argc, char **argv) {
 	aux_process_comand.commandnumber= PROCESS_COMMAND_ENA_DRIVER;
 
 	if (processDipCoating.config.status == 0){
-		modQueue_Write(&queueconsolareception, &aux_process_comand);
+		//modQueue_Write(&queueconsolareception, &aux_process_comand);
+		  if( xQueueSend( xQueueConsolaReception, &aux_process_comand, ( TickType_t ) 10 ) != pdPASS )
+		    {
+		        // Failed to post the message, even after 10 ticks.
+		    }
 	}
 	else printf("Ejecutando, comando descartado!\r\n");
 
@@ -419,11 +516,38 @@ void CommandDIS_DRIVERHandler(int argc, char **argv) {
 	Evalboards.ch1.enableDriver(DRIVER_DISABLE);
 
 	if (processDipCoating.config.status == 0) {
-		modQueue_Write(&queueconsolareception, &aux_process_comand);
+		//modQueue_Write(&queueconsolareception, &aux_process_comand);
+		  if( xQueueSend( xQueueConsolaReception, &aux_process_comand, ( TickType_t ) 10 ) != pdPASS )
+		    {
+		        // Failed to post the message, even after 10 ticks.
+		    }
 	} else
 		printf("Ejecutando, comando descartado!\r\n");
 
 }
+
+void CommandRESETHandler(int argc, char **argv) {
+
+	processCommand_t aux_process_comand;
+	aux_process_comand.commandnumber = PROCESS_COMMAND_RESET;
+
+	Evalboards.ch1.enableDriver(DRIVER_DISABLE);
+
+	if (xQueueSend(xQueueConsolaReception, &aux_process_comand, (TickType_t) 10)
+			!= pdPASS) {
+		// Failed to post the message, even after 10 ticks.
+	}
+
+}
+
+
+
+/** @} Final de la definición del modulo para doxygen */
+
+
+
+
+/*Implementacion de funciones para futuros desarrollos*/
 
 
 /*ENVIROMENTAL CHAMBER HANDLERS*/
