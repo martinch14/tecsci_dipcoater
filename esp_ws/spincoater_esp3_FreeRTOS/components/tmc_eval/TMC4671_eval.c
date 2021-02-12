@@ -11,7 +11,8 @@
 #define DEFAULT_MOTOR  0
 #define TMC4671_MOTORS 1
 #define USE_LINEAR_RAMP
-#define VM_MIN 70 // [V/10]
+//#define VM_MIN 70 // [V/10]
+#define VM_MIN 30 // [V/10]
 #define VM_MAX 650 // [V/10]
 
 // SPI Channel selection
@@ -1471,13 +1472,20 @@ static uint32 userFunction(uint8_t type, uint8_t motor, int32 *value)
 
 static void enableDriver(DriverState state)
 {
-	if(state == DRIVER_USE_GLOBAL_ENABLE)
+	if (state == DRIVER_USE_GLOBAL_ENABLE)
 		state = Evalboards.driverEnable;
 
-	if(state == DRIVER_DISABLE)
+	if (state == DRIVER_DISABLE)
+
+	{
 		tmc_gpio_write(pins.DRV_ENN, OFF);
-	else if((state == DRIVER_ENABLE) && (Evalboards.driverEnable == DRIVER_ENABLE))
+		printf("OFF Gpio %d\r\n", pins.DRV_ENN);
+	} else if ((state == DRIVER_ENABLE)
+			&& (Evalboards.driverEnable == DRIVER_ENABLE)) {
 		tmc_gpio_write(pins.DRV_ENN, ON);
+		printf("ON Gpio %d\r\n", pins.DRV_ENN);
+	}
+
 }
 
 static void deInit(void)
@@ -1521,9 +1529,11 @@ static void checkErrors(tick_t tick)
 void TMC4671_init(void)
 {
 	// configure ENABLE-PIN for TMC4671
+
+
 	pins.DRV_ENN = PORT_GPIO_DRV_ENN;
-	tmc_gpio_config(pins.DRV_ENN, PORT_GPIO_CONFIG_OUTPUT);
-	enableDriver(DRIVER_USE_GLOBAL_ENABLE);
+//	tmc_gpio_config(pins.DRV_ENN, PORT_GPIO_CONFIG_OUTPUT);
+//	enableDriver(DRIVER_USE_GLOBAL_ENABLE);
 
 	TMC4671_config = Evalboards.ch1.config;
 
@@ -1554,38 +1564,39 @@ void TMC4671_init(void)
 
 	// init motor config
 
-	int motor;
-	for(motor = 0; motor < TMC4671_MOTORS; motor++)
-	{
-		motorConfig[motor].initWaitTime             = 1000;
-		motorConfig[motor].startVoltage             = 6000;
-		motorConfig[motor].initMode                 = 0;
-		motorConfig[motor].torqueMeasurementFactor  = 256;
-	}
 
-	// set default polarity for evaluation board's power stage on init
-	tmc4671_writeInt(DEFAULT_MOTOR, TMC4671_PWM_POLARITIES, 0x0);
-	tmc4671_writeInt(DEFAULT_MOTOR, TMC4671_PWM_SV_CHOP, 0x0);
-	tmc4671_writeInt(DEFAULT_MOTOR, TMC4671_PWM_BBM_H_BBM_L, 0x00001919);
-
-	tmc4671_writeInt(DEFAULT_MOTOR, TMC4671_dsADC_MCLK_B, 0x0);
-
-	// set default acceleration and max velocity
-	tmc4671_writeInt(DEFAULT_MOTOR, TMC4671_PID_ACCELERATION_LIMIT, 2000);
-	tmc4671_writeInt(DEFAULT_MOTOR, TMC4671_PID_VELOCITY_LIMIT, 4000);
-
-#ifdef USE_LINEAR_RAMP
-	// init ramp generator
-	for (motor = 0; motor < TMC4671_MOTORS; motor++)
-	{
-		tmc_linearRamp_init(&rampGenerator[motor]);
-		actualMotionMode[motor] = TMC4671_MOTION_MODE_STOPPED;
-		lastRampTargetPosition[motor] = 0;
-		lastRampTargetVelocity[motor] = 0;
-
-		// update ramp generator default values
-		rampGenerator[motor].maxVelocity = (u32)tmc4671_readInt(motor, TMC4671_PID_VELOCITY_LIMIT);
-		rampGenerator[motor].acceleration = (u32)tmc4671_readInt(motor, TMC4671_PID_ACCELERATION_LIMIT);
-	}
-#endif
+//	int motor;
+//	for(motor = 0; motor < TMC4671_MOTORS; motor++)
+//	{
+//		motorConfig[motor].initWaitTime             = 1000;
+//		motorConfig[motor].startVoltage             = 6000;
+//		motorConfig[motor].initMode                 = 0;
+//		motorConfig[motor].torqueMeasurementFactor  = 256;
+//	}
+//
+//	// set default polarity for evaluation board's power stage on init
+//	tmc4671_writeInt(DEFAULT_MOTOR, TMC4671_PWM_POLARITIES, 0x0);
+//	tmc4671_writeInt(DEFAULT_MOTOR, TMC4671_PWM_SV_CHOP, 0x0);
+//	tmc4671_writeInt(DEFAULT_MOTOR, TMC4671_PWM_BBM_H_BBM_L, 0x00001919);
+//
+//	tmc4671_writeInt(DEFAULT_MOTOR, TMC4671_dsADC_MCLK_B, 0x0);
+//
+//	// set default acceleration and max velocity
+//	tmc4671_writeInt(DEFAULT_MOTOR, TMC4671_PID_ACCELERATION_LIMIT, 2000);
+//	tmc4671_writeInt(DEFAULT_MOTOR, TMC4671_PID_VELOCITY_LIMIT, 4000);
+//
+//#ifdef USE_LINEAR_RAMP
+//	// init ramp generator
+//	for (motor = 0; motor < TMC4671_MOTORS; motor++)
+//	{
+//		tmc_linearRamp_init(&rampGenerator[motor]);
+//		actualMotionMode[motor] = TMC4671_MOTION_MODE_STOPPED;
+//		lastRampTargetPosition[motor] = 0;
+//		lastRampTargetVelocity[motor] = 0;
+//
+//		// update ramp generator default values
+//		rampGenerator[motor].maxVelocity = (u32)tmc4671_readInt(motor, TMC4671_PID_VELOCITY_LIMIT);
+//		rampGenerator[motor].acceleration = (u32)tmc4671_readInt(motor, TMC4671_PID_ACCELERATION_LIMIT);
+//	}
+//#endif
 }

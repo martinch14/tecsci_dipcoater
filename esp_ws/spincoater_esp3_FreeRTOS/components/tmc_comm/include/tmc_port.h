@@ -71,4 +71,7 @@ spi_device_handle_t 		tmc_spi_init			(void);
 uint8_t 	tmc_spi_readWrite		(uint8_t channel, uint8_t data, bool lastTransfer);
 void 		tmc_spi_readWriteArray	(uint8_t channel, uint8_t *tx,uint8_t *rx, size_t length);
 
+spi_device_handle_t 		tmc_spi_init_6100	(void);
+void tmc_spi_readWriteArray6100(void);
+
 #endif /* PORT_INCLUDE_TMC_PORT_H_ */

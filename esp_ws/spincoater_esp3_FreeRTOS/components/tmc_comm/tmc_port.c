@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include "driver/spi_master.h"
 #include "driver/gpio.h"
 #include "freertos/FreeRTOS.h"
@@ -16,6 +17,7 @@
 #include "tmc_port.h"
 
 extern spi_device_handle_t  spi_dev;
+extern spi_device_handle_t  spi_dev6100;
 
 //extern uint8_t rxx[];
 
@@ -58,9 +60,17 @@ bool_t tmc_gpio_write(int pin, bool_t value) {
 #if 0
 	return gpioWrite((gpioMap_t)pin, value);
 #else
-//	printf("tmc_gpio_write\n");
+
 	esp_err_t ret;
+
 	ret=gpio_set_level((gpio_num_t)pin, value);
+
+	if (true == value){
+	printf("Habilito: pin -> %d\r\n",pin);
+	}
+	else {
+		printf("Deshabilito pin -> %d\r\n",pin);
+	}
 
 	if(ret == ESP_OK){
 		return TRUE;
@@ -178,22 +188,25 @@ spi_device_handle_t tmc_spi_init()
 	esp_err_t ret;
 	spi_device_handle_t spi_dev_i;
 	spi_bus_config_t buscfg={
-			.miso_io_num=27,
+			//.miso_io_num=27,
 			.mosi_io_num=14,
 			.sclk_io_num=12,
-			.quadwp_io_num=-1,
-			.quadhd_io_num=-1,
+//			.quadwp_io_num=-1,
+//			.quadhd_io_num=-1,
 			//.max_transfer_sz=PARALLEL_LINES*320*2+8
 			//.max_transfer_sz=16376
 	};
 	spi_device_interface_config_t devcfg={
+			//.clock_speed_hz=50000,
 			.clock_speed_hz=100000,
 			//.clock_speed_hz=2000000,
 			//.clock_speed_hz=4000000,
 			.mode=3,                            //SPI mode 3
 			.spics_io_num=15,       			//CS pin
-			.queue_size=1                       //We want to be able to queue 7 transactions at a time
+			.queue_size=1,                   //We want to be able to queue 7 transactions at a time
 			//.pre_cb=lcd_spi_pre_transfer_callback,  //Specify pre-transfer callback to handle D/C line
+
+
 	};
 
 	//Initialize the SPI bus
@@ -206,3 +219,93 @@ return spi_dev_i;
 
 #endif
 }
+
+
+spi_device_handle_t tmc_spi_init_6100()
+{
+
+	printf("tmc_spi_init_6100\n");
+	esp_err_t ret;
+	spi_device_handle_t spi_dev_i;
+
+
+//	spi_bus_config_t buscfg={
+//			.miso_io_num=27,
+//			.mosi_io_num=14,
+//			.sclk_io_num=12,
+//			.quadwp_io_num=-1,
+//			.quadhd_io_num=-1,
+//			//.max_transfer_sz=PARALLEL_LINES*320*2+8
+//			//.max_transfer_sz=16376
+//	};
+
+	spi_device_interface_config_t devcfg={
+			//.clock_speed_hz=50000,
+			.clock_speed_hz=100000,
+			//.clock_speed_hz=2000000,
+			//.clock_speed_hz=4000000,
+			.mode=3,                            //SPI mode 3
+			.spics_io_num=2,       			//CS pin
+			.queue_size=1,                       //We want to be able to queue 7 transactions at a time
+			//.pre_cb=lcd_spi_pre_transfer_callback,  //Specify pre-transfer callback to handle D/C line
+
+
+	};
+
+
+
+	ret=spi_bus_add_device(HSPI_HOST, &devcfg, &spi_dev_i);
+	ESP_ERROR_CHECK(ret);
+return spi_dev_i;
+
+}
+
+void tmc_spi_readWriteArray6100()
+{
+
+	spi_transaction_t t = {};
+	spi_transaction_t t2 = {};
+	esp_err_t ret;
+//	size_t i;
+
+	//TMC6200_GCONF  0x00
+	//TMC6200_DRV_CONF       0x0A
+
+
+	uint8_t data[5] = { 0x00 | 0x80, 0x00, 0x00, 0x00, 0x00 };
+	uint8_t data2[5] = { 0x0A | 0x80, 0x00, 0x00, 0x00, 0x00 };
+	//LENGTH set
+	t.length = (5*8);  /*transaction length is in bits.*/
+
+	/*This is to enable the use of the static structure inside the spi_transaction_t (up to: 32 bits == 4 bytes)*/
+	//TX set
+//	if(length<=32){ /*If the data to be transferred is 32 bits or less, it can be stored in the transaction struct itself.*/
+//		 							/*For transmitted data, use the tx_data member for this and set the SPI_TRANS_USE_TXDATA*/
+//		t.flags=SPI_TRANS_USE_TXDATA; //flag to enable
+//		for(i=0;i<(length/8);i++){
+//			t.tx_data[i]=tx[i];
+//		}
+//	}
+//	else if (length>32) { //void *tx_buffer
+	t.tx_buffer = data;
+//	}
+	//TX set
+	//t.tx_buffer = tx;
+
+	//RX set
+	t.rx_buffer = data;
+
+	//	ret=spi_device_polling_transmit(spi_dev, &t);
+	ret=spi_device_transmit(spi_dev6100, &t);
+	ESP_ERROR_CHECK(ret);
+
+	t2.length = (5*8);  /*transaction length is in bits.*/
+	t2.tx_buffer = data2;
+	t2.rx_buffer = data2;
+
+	ret=spi_device_transmit(spi_dev6100, &t2);
+	ESP_ERROR_CHECK(ret);
+
+}
+
+

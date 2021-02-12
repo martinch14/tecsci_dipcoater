@@ -24,7 +24,7 @@
 #include "freertos/queue.h"
 
 
-spi_device_handle_t  spi_dev;
+spi_device_handle_t  spi_dev , spi_dev6100;
 
 
 

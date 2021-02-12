@@ -36,7 +36,7 @@ void tmc_linearRamp_computeRampVelocity(TMC_LinearRamp *linearRamp) {
 
 		// to ensure that small velocity changes at high set acceleration are also possible
 
-		// Utilizo un pre-factor de 100 y un velocity ramp handling de 10ms  - De esta manera de confirma la rampa a traves de cronometro
+		// Utilizo un pre-factor de 100 y un velocity ramp handling de 10ms  - De esta manera se confirma la rampa a traves de cronometro
 		// con un handling de 1ms por alguna razon se acelera mas rapido la cronometracion es erronae
 
 

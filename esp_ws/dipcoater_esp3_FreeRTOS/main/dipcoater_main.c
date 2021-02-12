@@ -66,7 +66,7 @@
 
 #include "TMCMotionController.h"
 #include "TMC5130.h"
-#include "SysTick.h"
+//#include "SysTick.h"
 
 
 #include "http_server.h"
@@ -76,7 +76,7 @@
 
 
 #include <cJSON.h>
-#include "../components/api/include/socket_tcp_server.h"
+#include "socket_tcp_server.h"
 
 
 /*TODO
